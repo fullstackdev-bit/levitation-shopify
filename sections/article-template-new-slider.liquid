@@ -1,0 +1,79 @@
+{%- assign item = section.settings -%}
+<div class="container-indent main_color nomargin" itemscope itemtype="http://schema.org/Article">
+  <div class="nomargin container-indent page-title-section-jk " style='max-height:none;min-height:none;height:40vh'>
+    <div class="nopaddings">   
+      <div class="tt-block-title">
+        <div>
+           <h2 class="tt-title">{{ article.title }}</h2>   
+        </div>   
+      </div>
+      
+    </div>
+  </div>
+  <div class="tt-post-content" style='margin-top:-40vh'>{{ article.content }}</div>
+  <div class="container container-fluid-custom-mobile-padding">
+    <div class="row justify-content-center">
+      <div class="col-xs-12 col-md-10 col-lg-8 col-md-auto">
+        <div class="tt-post-single" itemprop="articleBody">          
+          
+          {%- if article.tags.size > 0 and item.blog_show_tags -%}
+          <div class="post-meta">
+            <span class="item">Tag:</span>
+            <span{% if item.blog_tags_uppercase %} class="text-uppercase"{% endif %}>{%- for tag in article.tags -%}
+              {{ tag | link_to_tag: tag }}{% unless forloop.last %}, {% endunless %}
+            {%- endfor -%}</span>
+          </div>
+          {%- endif -%}
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%- if item.show_share_buttons -%}
+<div class="container-indent wrapper-social-icon nomargin">
+  <div class="container text-center">
+    {%- include 'addthis' -%}
+  </div>
+</div>
+{%- unless blog.comments_enabled? -%}<div class="clear-gap"></div>{%- endunless -%}
+{%- endif -%}
+
+
+{% schema %}
+  {
+    "name": "Posts",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "blog_show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "blog_show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "blog_show_tags",
+        "label": "Show tags",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "blog_tags_uppercase",
+        "label": "Tags uppercase",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_share_buttons",
+        "label": "Show social sharing buttons",
+        "default": true
+      }
+    ]
+  }
+{% endschema %}

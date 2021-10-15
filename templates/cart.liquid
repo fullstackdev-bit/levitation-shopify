@@ -1,0 +1,16 @@
+<div class="container-indent nomargin{% if cart.item_count > 0 %} hide{% endif %} tt-empty-cart-js">
+  <div class="tt-empty-cart">
+    <span class="tt-icon icon-f-39"></span>
+    <h1 class="tt-title">{{ 'cart.general.empty' | t }}</h1>
+    <p>{{ 'cart.general.empty_cart' | t }}</p>
+    <a href="/" class="btn ttbtnmainstyle">{{ 'cart.general.continue_shopping' | t }}</a>
+  </div>
+</div>
+
+{%- comment -%}
+  The contents of the cart.liquid template can be found in /sections/cart-template.liquid
+{%- endcomment -%}
+
+<div class="line-items-box-js {% if cart.item_count == 0 %} hide{% endif %}">
+{% section 'cart-template' %}
+</div>

@@ -1,0 +1,12 @@
+{%- assign min = 1 -%}
+{%- assign max = 5 -%}
+{%- assign diff = max | minus: min -%}
+{%- assign random_number = "now" | date: "%N" | modulo: diff | plus: min -%}
+<a href="/" class="tt-logo" itemprop="url">
+  {%- if headerlogo contains "title_" -%}<h2 class="tt-title">{{ headerlogo | split:"title_" | last }}</h2>
+  {%- else -%}<img style="max-width:240px;filter: invert(1);" src="https://cdn.shopify.com/s/files/1/1366/5653/files/logo{{random_number}}.png?v=1625168180"
+                   srcset=""
+                   alt="{{ headerlogoalt }}"
+                   class="tt-retina" itemprop="logo" style="top:{{ item.logo_margin_top }}px"/>
+  {%- endif -%}
+</a>

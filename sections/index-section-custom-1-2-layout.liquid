@@ -1,0 +1,145 @@
+{%- assign item = section.settings -%}
+<div class=" custom-1-2-layout container-indent{% unless item.topoffset %} nomargin{% endunless %}"{% if item.usebgcolor and item.usebgcolorfullwidth %} style="background: {{ item.bgco }}"{% endif %}>
+  <div{% unless item.fullwidth2 %} class="container{% if item.fullwidth %}-fluid-custom container-fluid-custom-mobile-padding{% endif %}"{% endunless %}{% if item.usebgcolor and item.usebgcolorfullwidth == false %} style="background: {{ item.bgco }}"{% endif %}>
+    <div class="row">
+      <div class="col-12 col-md-6 left-area">
+        {{ item.left_data }}
+      </div>
+      <div class="col-12 col-md-6 right-area">
+        <div class="sm-banner-container">                    
+            <img class="lazyload banner-img"
+                 src="{{ item.right_img_1 | img_url: 'master'}}"
+                 alt="{{ item.right_img_1.alt }}">                         
+          <div class="banner-content">{{ item.right_data_1 }}</div>
+        </div>
+        <div class="sm-banner-container">                   
+          <img class="lazyload banner-img"
+                 src="{{ item.right_img_2 | img_url: 'master'}}"
+                 alt="{{ item.right_img_2.alt }}">      
+                            
+          <div class="banner-content">{{ item.right_data_2 }}</div>
+        </div>
+        <div class="sm-banner-container">                
+          <img class="lazyload banner-img"
+                 src="{{ item.right_img_3 | img_url: 'master'}}"
+                 alt="{{ item.right_img_3.alt }}">          
+           
+          <div class="banner-content">{{ item.right_data_3 }}</div>
+        </div>
+        <div class="sm-banner-container">
+          <img class="lazyload banner-img"
+                 src="{{ item.right_img_4 | img_url: 'master'}}"
+                 alt="{{ item.right_img_4.alt }}">          
+                    
+          <div class="banner-content">{{ item.right_data_4 }}</div>
+        </div>
+      </div>
+      
+    </div>
+    
+   
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom 1/2 layout Html",
+  "class": "index-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "topoffset",
+      "label": "Top Offset",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "fullwidth",
+      "label": "Fullwidth Container",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "fullwidth2",
+      "label": "Fullwidth without container",
+      "default": false,
+    "info": "Work with option \"Fullwidth Container\""
+    },
+    {
+      "type": "textarea",
+      "id": "left_data",
+      "label": "Left Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_img_1",
+      "label": "Right img 1"
+    },
+    {
+      "type": "textarea",
+      "id": "right_data_1",
+      "label": "Right Data 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_img_2",
+      "label": "Right img 2"
+    },
+    {
+      "type": "textarea",
+      "id": "right_data_2",
+      "label": "Right Data 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_img_3",
+      "label": "Right img 3"
+    },
+    {
+      "type": "textarea",
+      "id": "right_data_3",
+      "label": "Right Data 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_img_4",
+      "label": "Right img 4"
+    },
+    {
+      "type": "textarea",
+      "id": "right_data_4",
+      "label": "Right Data 4"
+    },
+    {
+      "type": "header",
+      "content": "Background color"
+    },
+    {
+      "type": "checkbox",
+      "id": "usebgcolor",
+      "label": "Use background color",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "usebgcolorfullwidth",
+      "label": "Fullwidth background color",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "bgco",
+      "label": "Background color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom 1/2 layout Html",
+      "category": "Simple Section",
+      "settings": {
+      }
+    }
+  ]
+}
+{% endschema %}

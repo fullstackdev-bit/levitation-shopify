@@ -1,0 +1,62 @@
+{% comment %}
+<!--
+Copyright (c) 2021 Single, LLC - ALL RIGHTS RESERVED 
+
+NOTICE:  All information contained herein is, and remains the property of Single, LLC 
+and its suppliers, if any. The intellectual and technical concepts contained herein are 
+proprietary to Single, LLC and its suppliers and may be covered by U.S. and Foreign Patents, 
+patents in process, and are protected by trade secret or copyright law. Dissemination of this 
+information or reproduction of this material is strictly forbidden unless prior 
+written permission is obtained from Single, LLC.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+{% endcomment %}
+
+{% comment %}
+<!-- Single Default Styles - Can be edited in assets/single-v2.scss.liquid -->
+{% endcomment %}
+{{ 'single-v3.css' | asset_url | stylesheet_tag }}
+
+<div class="single-grid single-page-faq">
+    <div class="single-grid-item text-center">
+        <h1>{{ page.title }}</h1>
+    </div>
+    <div class="single-grid-item">
+        {{ page.content }}
+    </div>
+</div>
+
+<script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=0f3a83eb-4717-430c-a746-b1ce0c6d51ab"></script>
+<script type="text/javascript">
+    zESettings = {
+        webWidget: {
+            contactForm: {
+                ticketForms: [
+                    {
+                        id: 360006750173,
+                        fields: [
+                            {% if customer %}
+                            { id: 'email', prefill: {"*": "{{ customer.email }}" } }
+                            {% endif %}
+                        ]
+                    },
+                    {
+                        id: 360005736254,
+                        fields: [
+                            {% if customer %}
+                            { id: 'email', prefill: {"*": "{{ customer.email }}" } }
+                            {% endif %}
+                        ]
+                    }
+                ]
+            }
+        }
+    };
+</script>

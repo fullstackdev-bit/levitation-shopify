@@ -1,0 +1,366 @@
+{%- assign item = section.settings -%}
+{%- assign blog = blogs[item.blog] -%}
+{%- assign item_limit = item.limit | plus: 0 -%}
+
+{%- capture image_size -%}600x{%- endcapture -%}
+
+<div class="{% if item.top_offset == 'none' %}nomargin {% elsif item.top_offset == 'small' %}tt-offset-small {% endif %}container-indent {{ item.custom_classes }}">
+  <div class="container{% if item.fullwidth %}-fluid{% endif %}">
+    {%- if item.show_title -%}
+    <div class="tt-block-title{% if item.title_to_left %} text-left{% endif %}{% if item.boxed_title and item.fullwidth %} container{% endif %}">
+      <h2 class="tt-title">
+        {%- if item.use_title_as_link -%}<a href="{{ blog.url }}" class="title-hover-underline" title="{{ item.button_text }}">{{ item.text1 }}</a>
+        {%- else -%}{{ item.text1 }}
+        {%- endif -%}
+      </h2>
+      {% unless item.text2 == '' %}<div class="tt-description">{{ item.text2 }}</div>{% endunless %}
+      {% unless item.default_carousel %}{% unless item.text3 == '' %}<p>{{ item.text3 }}</p>{% endunless %}{% endunless %}
+    </div>{% endif %}
+    <div class='custom-html-blog-container'>
+      {%- case item.layout -%}
+        {%- when 'left_column_3_1' -%}
+        <div class="row flex-sm-row-reverse">
+          <div class="col-sm-12 col-md-7 col-lg-8 main-html">
+            {{ item.custom_html }}
+          </div>
+          <div class="col-sm-12 col-md-5 col-lg-4 leftColumn side-bloglist">
+            <div class="sidebar-header">Features</div>
+            <div class='sidebar-content'>
+            {%- unless blog.empty? -%}
+              
+            {% assign counterb = 0 %}
+            {% assign match_article = false %}
+            {% assign tag_filters = item.tag_filters | split: "," %}            
+            
+            {%- for article in blog.articles  -%}
+            {% if tag_filters.size == 0 and counterb < item_limit %}
+              {% assign counterb = counterb | plus: 1 %}
+              {% assign match_article = true %}  
+              <span>., </span>
+            {% elsif tag_filters.size > 0 and counterb < item_limit %}
+              {%- for tag_filter in tag_filters  -%}
+                {% if article.tags contains tag_filter and counterb < item_limit %}
+                   {% assign counterb = counterb | plus: 1 %}
+                   {% assign match_article = true %}
+                   {% break %}
+                {% else %}
+                   {% assign match_article = false %}
+                {% endif %}
+              {%- endfor -%}
+            {% else %}
+              {% assign match_article = false %}
+            {% endif %}
+            {% if match_article %}
+            <div class="blog-list-item">          
+                {%- if article.image != blank -%}
+                <div class="tt-img respimgsize">
+                  <a href="{{ article.url }}" target="_blank">
+                    <img class="lazyload"
+                         data-mainimage="{{ article.image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+                         alt="{{ article.image.alt | escape }}"/>
+                  </a>
+                </div>
+                {%- endif -%}
+
+                <div class="tt-title-description">
+                  <div class='blog-category'>
+                    <a href="{{ blog.url }}" class="title-hover-underline" title="{{ blog.title }}">{{ blog.title }}</a>
+                  </div>
+                  <div class="tt-title{% if settings.block_titles_uppercase %} text-uppercase{% endif %}">
+                    <a href="{{ article.url }}">{{ article.title }}</a>
+                  </div>
+                  <div class="tt-tag text-uppercase">
+                    <div class="tt-meta">
+                        {%- if section.settings.blog_show_author or section.settings.blog_show_date -%}
+                        <div class="tt-autor">BY: 
+                          {% if item.blog_show_author %}{{ article.author }}{% endif %}	                  
+                        </div>
+                        {%- endif -%}	                
+                      </div>
+                  {%- if article.tags.size > 0 and item.show_tags -%}
+                    {%- for tag in article.tags -%}
+                        {%- assign a_url = tag | handle -%}{%- assign a_url = blog.url | append: '/tagged/' | append: a_url  -%}
+                        {{ tag | link_to: a_url }}
+                    {%- endfor -%}
+                  {% endif %}
+                  </div>
+                  {%- if item.show_description -%}
+                  <p class='blog-short-description'>{% if article.excerpt.size > 0 %}
+                    {%- if section.settings.truncate_excerpt -%}{{ article.excerpt | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}
+                    {%- else -%}{{ article.excerpt }}
+                    {%- endif -%}
+                    {%- else -%}{{ article.content | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}{%- endif -%}
+                  </p>
+                  {%- endif -%}
+                  <a class='read-more' href="{{ article.url }}">Read More...</a>
+                </div>         
+            </div>
+            {% endif %}
+            {%- endfor -%}
+            <div class='features-footer'><a href="{{ blog.url }}">VIEW ALL FEATURES</a></div>
+            {%- else -%}
+            <span style="display: flex; justify-content: center;">This section doesn’t currently include any blog. Add blog to this section using the sidebar.</span>
+              {%- endunless -%}</div>
+          </div>
+        </div>
+        {%- when 'left_column_2_1' -%}
+        <div class="row flex-sm-row-reverse">
+          <div class="col-sm-12 col-md-6 col-lg-6 main-html">
+            {{ item.custom_html }}
+          </div>
+          <div class="col-sm-12 col-md-6 col-lg-6 side-bloglist">
+            <div class="sidebar-header">Features</div>
+            <div class='sidebar-content'>
+            {%- unless blog.empty? -%}
+
+            {% assign counterb = 0 %}
+            {% assign match_article = false %}
+            {% assign tag_filters = item.tag_filters | split: "," %}            
+            
+            {%- for article in blog.articles  -%}
+            {% if tag_filters.size == 0 and counterb < item_limit %}
+              {% assign counterb = counterb | plus: 1 %}
+              {% assign match_article = true %}
+            {% elsif tag_filters.size != 0 and counterb < item_limit %}
+              {%- for tag_filter in tag_filters  -%}
+                {% if article.tags contains tag_filter and counterb < item_limit %}
+                   {% assign counterb = counterb | plus: 1 %}
+                   {% assign match_article = true %}
+                   {% break %}
+                {% else %}
+                   {% assign match_article = false %}
+                {% endif %}
+              {%- endfor -%}
+            {% else %}
+              {% assign match_article = false %}
+            {% endif %}
+            {% if match_article %}
+            <div class="blog-list-item">          
+                {%- if article.image != blank -%}
+                <div class="tt-img respimgsize">
+                  <a href="{{ article.url }}" target="_blank">
+                    <img class="lazyload"
+                         data-mainimage="{{ article.image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+                         alt="{{ article.image.alt | escape }}"/>
+                  </a>
+                </div>
+                {%- endif -%}
+
+                <div class="tt-title-description">
+                  <div class='blog-category'>
+                    <a href="{{ blog.url }}" class="title-hover-underline" title="{{ blog.title }}">{{ blog.title }}</a>
+                  </div>
+                  <div class="tt-title{% if settings.block_titles_uppercase %} text-uppercase{% endif %}">
+                    <a href="{{ article.url }}">{{ article.title }}</a>
+                  </div>
+                  <div class="tt-tag text-uppercase">
+                    <div class="tt-meta">
+                        {%- if section.settings.blog_show_author or section.settings.blog_show_date -%}
+                        <div class="tt-autor">BY: 
+                          {% if item.blog_show_author %}{{ article.author }}{% endif %}	                  
+                        </div>
+                        {%- endif -%}	                
+                      </div>
+                  {%- if article.tags.size > 0 and item.show_tags -%}
+                    {%- for tag in article.tags -%}
+                        {%- assign a_url = tag | handle -%}{%- assign a_url = blog.url | append: '/tagged/' | append: a_url  -%}
+                        {{ tag | link_to: a_url }}
+                    {%- endfor -%}
+                  {% endif %}
+                  </div>
+                  {%- if item.show_description -%}
+                  <p class='blog-short-description'>{% if article.excerpt.size > 0 %}
+                    {%- if section.settings.truncate_excerpt -%}{{ article.excerpt | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}
+                    {%- else -%}{{ article.excerpt }}
+                    {%- endif -%}
+                    {%- else -%}{{ article.content | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}{%- endif -%}
+                  </p>
+                  {%- endif -%}
+                  <a class='read-more' href="{{ article.url }}">Read More...</a>
+                </div>         
+            </div>
+            {% endif %}
+            {%- endfor -%}
+            <div class='features-footer'><a href="{{ blog.url }}">VIEW ALL FEATURES</a></div>
+            {%- else -%}
+            <span style="display: flex; justify-content: center;">This section doesn’t currently include any blog. Add blog to this section using the sidebar.</span>
+              {%- endunless -%}</div>
+          </div>
+        </div>
+
+        {%- when 'right_column_3_1' -%}
+        <div class="row">
+          <div class="col-sm-12 col-md-7 col-lg-8 main-html">
+            {{ item.custom_html }}
+          </div>
+          <div class="col-sm-12 col-md-5 col-lg-4 rightColumn side-bloglist">
+            <div class="sidebar-header">Features</div>
+            <div class='sidebar-content'>
+            {%- unless blog.empty? -%}
+
+            {% assign counterb = 0 %}
+            {% assign match_article = false %}
+            {% assign tag_filters = item.tag_filters | split: "," %}            
+            
+            {%- for article in blog.articles  -%}
+            {% if tag_filters.size == 0 and counterb < item_limit %}
+              {% assign counterb = counterb | plus: 1 %}
+              {% assign match_article = true %}
+            {% elsif tag_filters.size != 0 and counterb < item_limit %}
+              {%- for tag_filter in tag_filters  -%}
+                {% if article.tags contains tag_filter and counterb < item_limit %}
+                   {% assign counterb = counterb | plus: 1 %}
+                   {% assign match_article = true %}
+                   {% break %}
+                {% else %}
+                   {% assign match_article = false %}
+                {% endif %}
+              {%- endfor -%}
+            {% else %}
+              {% assign match_article = false %}
+            {% endif %}
+            {% if match_article %}
+            <div class="blog-list-item">          
+                {%- if article.image != blank -%}
+                <div class="tt-img respimgsize">
+                  <a href="{{ article.url }}" target="_blank">
+                    <img class="lazyload"
+                         data-mainimage="{{ article.image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+                         alt="{{ article.image.alt | escape }}"/>
+                  </a>
+                </div>
+                {%- endif -%}
+
+                <div class="tt-title-description">
+                  <div class='blog-category'>
+                    <a href="{{ blog.url }}" class="title-hover-underline" title="{{ blog.title }}">{{ blog.title }}</a>
+                  </div>
+                  <div class="tt-title{% if settings.block_titles_uppercase %} text-uppercase{% endif %}">
+                    <a href="{{ article.url }}">{{ article.title }}</a>
+                  </div>
+                  <div class="tt-tag text-uppercase">
+                    <div class="tt-meta">
+                        {%- if section.settings.blog_show_author or section.settings.blog_show_date -%}
+                        <div class="tt-autor">BY: 
+                          {% if item.blog_show_author %}{{ article.author }}{% endif %}	                  
+                        </div>
+                        {%- endif -%}	                
+                      </div>
+                  {%- if article.tags.size > 0 and item.show_tags -%}
+                    {%- for tag in article.tags -%}
+                        {%- assign a_url = tag | handle -%}{%- assign a_url = blog.url | append: '/tagged/' | append: a_url  -%}
+                        {{ tag | link_to: a_url }}
+                    {%- endfor -%}
+                  {% endif %}
+                  </div>
+                  {%- if item.show_description -%}
+                  <p class='blog-short-description'>{% if article.excerpt.size > 0 %}
+                    {%- if section.settings.truncate_excerpt -%}{{ article.excerpt | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}
+                    {%- else -%}{{ article.excerpt }}
+                    {%- endif -%}
+                    {%- else -%}{{ article.content | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}{%- endif -%}
+                  </p>
+                  {%- endif -%}
+                  <a class='read-more' href="{{ article.url }}">Read More...</a>
+                </div>         
+            </div>
+            {% endif %}
+            {%- endfor -%}
+            <div class='features-footer'><a href="{{ blog.url }}">VIEW ALL FEATURES</a></div>
+            {%- else -%}
+            <span style="display: flex; justify-content: center;">This section doesn’t currently include any blog. Add blog to this section using the sidebar.</span>
+              {%- endunless -%}</div>
+          </div>
+        </div>
+        {%- when 'right_column_2_1' -%}
+        <div class="row">
+          <div class="col-sm-12 col-md-6 col-lg-6 main-html">
+            {{ item.custom_html }}
+          </div>
+          <div class="col-sm-12 col-md-6 col-lg-6 side-bloglist">
+            <div class="sidebar-header">Features</div>
+            <div class='sidebar-content'>
+            {%- unless blog.empty? -%}
+
+            {% assign counterb = 0 %}
+            {% assign match_article = false %}
+            {% assign tag_filters = item.tag_filters | split: "," %}            
+            
+            {%- for article in blog.articles  -%}
+            {% if tag_filters.size == 0 and counterb < item_limit %}
+              {% assign counterb = counterb | plus: 1 %}
+              {% assign match_article = true %}
+              <span>., </span>
+            {% elsif tag_filters.size != 0 and counterb < item_limit %}
+              {%- for tag_filter in tag_filters  -%}
+                {% if article.tags contains tag_filter and counterb < item_limit %}
+                   {% assign counterb = counterb | plus: 1 %}
+                   {% assign match_article = true %}
+                   {% break %}
+                {% else %}
+                   {% assign match_article = false %}
+                {% endif %}
+              {%- endfor -%}
+            {% else %}
+              {% assign match_article = false %}
+            {% endif %}
+            {% if match_article %}
+            <div class="blog-list-item">          
+                {%- if article.image != blank -%}
+                <div class="tt-img respimgsize">
+                  <a href="{{ article.url }}" target="_blank">
+                    <img class="lazyload"
+                         data-mainimage="{{ article.image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+                         alt="{{ article.image.alt | escape }}"/>
+                  </a>
+                </div>
+                {%- endif -%}
+
+                <div class="tt-title-description">
+                  <div class='blog-category'>
+                    <a href="{{ blog.url }}" class="title-hover-underline" title="{{ blog.title }}">{{ blog.title }}</a>
+                  </div>
+                  <div class="tt-title{% if settings.block_titles_uppercase %} text-uppercase{% endif %}">
+                    <a href="{{ article.url }}">{{ article.title }}</a>
+                  </div>
+                  <div class="tt-tag text-uppercase">
+                    <div class="tt-meta">
+                        {%- if section.settings.blog_show_author or section.settings.blog_show_date -%}
+                        <div class="tt-autor">BY: 
+                          {% if item.blog_show_author %}{{ article.author }}{% endif %}	                  
+                        </div>
+                        {%- endif -%}	                
+                      </div>
+                  {%- if article.tags.size > 0 and item.show_tags -%}
+                    {%- for tag in article.tags -%}
+                        {%- assign a_url = tag | handle -%}{%- assign a_url = blog.url | append: '/tagged/' | append: a_url  -%}
+                        {{ tag | link_to: a_url }}
+                    {%- endfor -%}
+                  {% endif %}
+                  </div>
+                  {%- if item.show_description -%}
+                  <p class='blog-short-description'>{% if article.excerpt.size > 0 %}
+                    {%- if section.settings.truncate_excerpt -%}{{ article.excerpt | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}
+                    {%- else -%}{{ article.excerpt }}
+                    {%- endif -%}
+                    {%- else -%}{{ article.content | strip_html | truncatewords: section.settings.truncate, section.settings.truncate_last_symbols }}{%- endif -%}
+                  </p>
+                  {%- endif -%}
+                  <a class='read-more' href="{{ article.url }}">Read More...</a>
+                </div>         
+            </div>
+            {% endif %}
+            {%- endfor -%}
+            <div class='features-footer'><a href="{{ blog.url }}">VIEW ALL FEATURES</a></div>
+            {%- else -%}
+            <span style="display: flex; justify-content: center;">This section doesn’t currently include any blog. Add blog to this section using the sidebar.</span>
+              {%- endunless -%}</div>
+          </div>
+        </div>
+
+    {%- endcase -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}{"name":"Custom Html and Blog list","class":"index-section","settings":[{"type":"select","id":"top_offset","label":"Top Offset","default":"normal","options":[{"value":"none","label":"None"},{"value":"small","label":"Small"},{"value":"normal","label":"Normal"}]},{"type":"select","id":"layout","label":"Design","default":"right_column_3_1","info":"For screen size > 1024","options":[{"value":"left_column_3_1","label":"with Left 1\/3 Blog "},{"value":"left_column_2_1","label":"with Left 1\/2 Blog "},{"value":"right_column_3_1","label":"with Right 1\/3 Blog"},{"value":"right_column_2_1","label":"with Right 1\/2 Blog"}]},{"type":"textarea","id":"custom_classes","label":"Custom css classes","info":"For the custom styles. Add your styles in the theme.css.liquid"},{"type":"checkbox","id":"fullwidth","label":"Fullwidth size","default":false},{"type":"checkbox","id":"show_title","label":"Show Title Block","default":true},{"type":"checkbox","id":"title_to_left","label":"Title to left","default":false},{"type":"checkbox","id":"boxed_title","label":"Boxed title when fullwidth","default":false},{"type":"textarea","id":"text1","label":"Title","default":"LATES FROM BLOG"},{"type":"textarea","id":"text2","label":"Small description","default":"Latest and most interesting news","info":"Empty field = hide field"},{"type":"textarea","id":"text3","label":"Big description","info":"Empty field = hide field"},{"type":"header","content":"Use title as link"},{"type":"checkbox","id":"use_title_as_link","label":"Use title as a blog link","default":true},{"type":"text","id":"button_text","label":"Hover text","default":"SHOW ALL"},{"type":"header","content":"Custom Html settings"},{"type":"textarea","id":"custom_html","label":"Custom Html"},{"type":"header","content":"Blog settings"},{"id":"blog","type":"blog","label":"Blog"},{"type":"text","id":"tag_filters","label":"The Tags list for filter","info":" please use ',' for multi tags. Ex: tag1,tag2,Tag2"},{"type":"text","id":"limit","label":"Items Length. Integer","default":"3"},{"type":"checkbox","id":"show_tags","label":"Show tags","default":true},{"type":"checkbox","id":"blog_show_author","label":"Show author","default":true},{"type":"checkbox","id":"blog_show_date","label":"Show date","default":true},{"type":"checkbox","id":"show_comment","label":"Show comment","default":true},{"type":"paragraph","content":"_____"},{"type":"checkbox","id":"show_description","label":"Show description","default":true},{"type":"paragraph","content":"Works only for the  \"Content\" field. Field \"Excerpt\" will show full."},{"type":"checkbox","id":"truncate_excerpt","label":"Truncate Excerpt","default":false},{"type":"text","id":"truncate","label":"Show Words","default":"10","info":"Integer"},{"type":"text","id":"truncate_last_symbols","label":"Last Symbols","default":"..."}],"default":{}}{% endschema %}

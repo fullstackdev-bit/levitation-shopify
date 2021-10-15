@@ -1,0 +1,156 @@
+{% comment %}
+<!--
+Copyright (c) 2020 Single, LLC - ALL RIGHTS RESERVED
+
+NOTICE:  All information contained herein is, and remains the property of Single, LLC
+and its suppliers, if any. The intellectual and technical concepts contained herein are
+proprietary to Single, LLC and its suppliers and may be covered by U.S. and Foreign Patents,
+patents in process, and are protected by trade secret or copyright law. Dissemination of this
+information or reproduction of this material is strictly forbidden unless prior
+written permission is obtained from Single, LLC.
+-->
+{% endcomment %}
+
+{% comment %}
+<!-- Single Default Styles - Can be edited in assets/single.css -->
+{% endcomment %}
+{{ 'single-v2.scss.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+<!-- jQuery -->
+{% endcomment %}
+{{ '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js' | script_tag }}
+
+{% comment %}
+<!-- Stream Logic -->
+{% endcomment %}
+{% assign page_handle = page.handle %}
+{% assign livestream_id  = pages[page_handle].metafields.single_livestream['livestream_id'] %}
+{% assign livestream_host = pages[page_handle].metafields.single_livestream['livestream_host'] %}
+{% assign single_host = pages[page_handle].metafields.single_livestream['single_host'] %}
+{% assign support_link = pages[page_handle].metafields.single_livestream['support_link'] %}
+{% assign faq_link = pages[page_handle].metafields.single_livestream['faq_link'] %}
+{% assign token = pages[page_handle].metafields.single_livestream['bypass_token'] %}
+{% assign chat_enabled = pages[page_handle].metafields.single_livestream['chat_enabled'] %}
+{% assign collection_handle = pages[page_handle].metafields.single_livestream['collection_handle'] %}
+{% assign customer_tag = pages[page_handle].metafields.single_livestream['customer_tag'] %}
+{% assign product_row_count = "3" %}
+{% assign global_tag = "has-ticket" %}
+
+{% if request.path contains token %}
+  {% assign bypass_token_used = true %}
+{% endif %}
+
+{% if request.host contains 'shopifypreview.com' %}
+  {% assign shopify_preview_host = true %}
+{% endif %}
+
+{% comment %}
+<!-- Login Logic -->
+{% endcomment %}
+{% unless customer or bypass_token_used or shopify_preview_host %}
+  {% if template contains 'customers' %}
+    {% assign send_to_login = false %}
+  {% else %}
+    {% assign send_to_login = true %}
+  {% endif %}
+{% endunless %}
+{% if send_to_login and request.path != "/challenge" %}
+  {% capture login_section %}{% section 'single-login' %}{% endcapture %}
+  {{ login_section | replace: 'FAQ_LINK', faq_link }}
+{% else %}
+  {% if customer.tags contains customer_tag or customer.tags contains global_tag or bypass_token_used or shopify_preview_host %}
+    {% assign has_ticket = true %}
+  {% endif %}
+  {% for order in customer.orders %}
+    {% if has_ticket %}
+      {% break %}
+    {% endif %}
+    {% unless order.cancelled or order.financial_status == "refunded" %}
+      {% for line_item in order.line_items %}
+        {% if line_item.variant.metafields.single_livestream["livestream_id"] contains livestream_id %}
+          {% assign has_ticket = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+    {% endunless %}
+  {% endfor %}
+  {% if customer.tags contains "no-ticket" %}
+    {% assign has_ticket = false %}
+  {% endif %}
+  {% if has_ticket %}
+    {% comment %}
+      <!-- Fans With Tickets -->
+    {% endcomment %}
+    <div class="single-livestream {{ page.handle }}">
+      <div id="single-livestream-player"
+           class="single-grid-item single-livestream-player {% if chat_enabled == 'false' %}chat-disabled{% endif %}">
+        <center><iframe src="https://player.vimeo.com/video/523999910" width="900" height="450" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; gyroscope; accelerometer" allowfullscreen></iframe></center>
+      </div>
+      <div class="single-grid-item single-body-content">
+        {{ page.content }}
+      </div>
+      {% if collection_handle %}
+        <div class="single-grid-item single-collection">
+            {% for product in collections[collection_handle].products %}
+              <div class="single-collection-product row-count-{{ product_row_count }}">
+                <a href="{{ product.url }}"
+                   target="_blank">
+                  <img class="single-collection-product-img"
+                       src="{{ product.featured_image | img_url: '640x640' }}"
+                       alt="{{ product.featured_image.alt }}" />
+                  <h4 class="single-collection-product-title">{{ product.title }}</h4>
+                  <p class="single-collection-product-price"
+                     id="single-product-price-{{product.id}}">{{ product.variants.first.price | money }}</p>
+                </a>
+                <form action="/cart/add"
+                      method="post"
+                      enctype="multipart/form-data"
+                      id="product_form_{{product.id}}">
+                  {% if product.variants.size > 1 %}
+                    <select name="id"
+                            class="single-variant-select"
+                            id="single-variant-select-{{product.id}}"
+                            onchange="setPrice(this.options[this.selectedIndex]);">
+                      {% for variant in product.variants %}
+                        {% if variant.available == true %}
+                          <option value="{{variant.id}}"
+                                  data-price="{{variant.price | money }}"
+                                  data-product-id="{{product.id}}">{{ variant.title }}</option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  {% else %}
+                    <input type="hidden"
+                           name="id"
+                           value="{{ product.variants.first.id }}" />
+                  {% endif %}
+                  <input type="submit"
+                         name="add"
+                         id="add"
+                         value="Add to Cart"
+                         class="button">
+                </form>
+              </div>
+            {%- endfor -%}
+        </div>
+      {% endif %}
+    </div>
+    {% assign livestream = true %}
+    {% include 'single-ajaxify-album' with livestream, livestream_id, single_host %}
+    <script>
+        window.SINGLE_LIVESTREAM = true;
+        /* Open Links Externally */
+        $("a").attr("target", "_blank");
+        /* Update Variant Price */
+        setPrice = function (selectedItem) {
+            const price = selectedItem.attributes['data-price'].value;
+            const productId = selectedItem.attributes['data-product-id'].value
+            document.getElementById("single-product-price-" + productId).innerHTML = price;
+        };
+    </script>
+  {% else %}
+    {% capture no_ticket %}{% section 'single-no-ticket' %}{% endcapture %}
+    {{ no_ticket | replace: 'FAQ_LINK', faq_link }}
+  {% endif %}
+{% endif %}
