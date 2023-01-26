@@ -33,7 +33,14 @@
       <li>{{ tag | link_to_tag: tag }}</li>
       {%- endfor -%}
     </ul>
-
+    
+    {%- when 'collection' -%}
+    <div class="tt-aside-info related_product">
+      {%- for product in b_s.collection.products limit: b_s.limit -%}
+      {%- include "product-grid-item" -%}
+      {%- endfor -%}
+    </div>
+    
     {%- when 'recent_post' -%}
     {%- assign name_collection = b_s.sidebar_recent_blog_name -%}{%- assign length = b_s.sidebar_recent_blog_count | plus: 0 -%}
     {%- if name_collection == blank -%}{%- assign name_collection = "all" -%}{%- endif -%}{%- assign selected_blog = blogs[name_collection] -%}

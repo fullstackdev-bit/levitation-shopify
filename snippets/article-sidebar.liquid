@@ -1,0 +1,102 @@
+{%if article.content contains "divider-sidebar-content" %}
+<div class="tt-block-aside">
+  <h3 class="tt-aside-title"></h3>
+  <div class="tt-aside-content">  
+      {{ article.content | split: '<div class="divider-sidebar-content"></div>' | last}}  
+  </div>
+</div>
+{% endif %}
+{%- for block in section.blocks -%}
+{%- assign b_s = block.settings -%}
+
+<div class="tt-block-aside">
+  <h3 class="tt-aside-title">{{ b_s.title }}</h3>
+  <div class="tt-aside-content">
+
+    {%- case block.type -%}    
+    {%- when 'about' -%}
+    <div class="tt-aside-info">
+      {%- if b_s.image != blank -%}
+      <a href="#" class="tt-aside-img">
+        <img src="{{ b_s.image | img_url: '300x' }}" alt="{{ b_s.image.alt }}">
+      </a>
+      {%- endif -%}
+      <p>{{ b_s.content }}</p>
+      {%- if b_s.show_button -%}
+      <a href="{{ b_s.banner_link }}" class="btn-link btn-top">{{ b_s.button }}</a>
+      {%- endif -%}
+    </div>
+    
+    {%- when 'collection' -%}
+    <div class="tt-aside-info article_related_product">
+      {%- assign related_product_length = b_s.limit | plus: 0 -%}
+      {% assign counter = 0 %}
+      {% assign skip_items = 'ddddddddd' | split: '.....' %}
+      {% for tag in article.tags %}          
+          {% for product in b_s.collection.products %}  
+            {% if product.tags contains tag and counter < related_product_length %}
+              {% unless skip_items contains product.handle %}
+                {% assign counter = counter | plus: 1 %}
+                {% assign temp = product.handle | split: '.....' %}
+                {% assign skip_items = skip_items | concat: temp %}
+                {%- include "product-grid-item" -%}
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %} 
+      {% if counter == 0 %} 
+      {% for product in collections.all.products limit: 8 %}             
+        {%- include "product-grid-item" -%}              
+      {% endfor %}
+      {% endif %}
+    </div> 
+    
+    {%- when 'newsletter' -%}
+    <div class="tt-aside-subscribe-box">
+      <p>
+        {{ b_s.content }}
+      </p>
+      
+      {%- if settings.use_mailchimp_form -%}
+      {%- if settings.mailchimp_form_action != "" -%}
+      <form action="{{ settings.mailchimp_form_action }}" method="post" name="mc-embedded-subscribe-form" target="_blank" class="form-default">
+        <div class="form-group">
+          <input type="email" name="EMAIL" class="form-control" placeholder="{{ b_s.form_text }}">
+        </div>
+        <button type="submit" class="btn">{{ b_s.button }}</button>
+      </form>
+      {%- endif -%}
+      {%- else -%}
+      {%- form 'customer' -%}
+      {{ form.errors | default_errors }}
+      {%- if form.posted_successfully? -%}
+
+      {%- endif -%}
+      <div class="form-group">
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input type="email"
+               name="contact[email]"
+               class="form-control"
+               value="{% if customer %}{{ customer.email }}{% endif %}"
+               placeholder="{{ b_s.form_text }}"
+               autocorrect="off"
+               autocapitalize="off">
+        <button type="submit" class="btn" name="commit">{{ b_s.button }}</button>
+      </div>
+      {%- endform -%}
+      {%- endif -%}
+
+    </div>
+    
+    {%- when 'custom_html' -%}
+    <div>
+      {{ b_s.content }}      
+    </div>
+    {%- else -%}
+    
+
+    {%- endcase -%}
+  </div>
+</div>
+
+{%- endfor -%}

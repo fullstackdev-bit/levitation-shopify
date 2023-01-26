@@ -1,0 +1,18 @@
+{% if key_product_ids.size > 0 or key_product_listings.size > 0 %}
+  <div class="single-grid-item key-products">
+    <div class="single-col col-4_4 text-center">
+      {% section 'single-gated-need-access' %}
+    </div>
+    {% for key_product in key_product_ids %}
+      <div class="single-col col-2_4">
+        {% assign product_parts = key_product | split: '|' %}
+        {% render 'single-product-card', product_input: product_parts[0], required_amount: product_parts[1] %}
+      </div>
+    {% endfor %}
+    {% for product_listing in key_product_listings %}
+      <div class="single-col col-2_4">
+        {% render 'single-listing-card', product_listing: product_listing %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

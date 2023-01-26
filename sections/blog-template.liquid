@@ -1,6 +1,16 @@
+<div class="blog-cat-submenue padding-middle"><div class="container">
+   <ul class="advanced-filters">    
+     <li class="all advanced-filter12 active-filter"> All NEWS & EVENTS </li>     
+     <li class="advanced-filter12 "  data-group="news-and-events" data-handle="/tagged/festival-news"> FESTIVAL NEWS </li>                
+     <li class="advanced-filter12"  data-group="news-and-events" data-handle="/tagged/new-in-the-store"> NEW IN THE STORE </li>  
+     <li class="advanced-filter12"  data-group="news-and-events" data-handle="/tagged/record-label"> RECORD LABEL </li>  
+     <li class="advanced-filter12"  data-group="news-and-events" data-handle="/tagged/events"> EVENTS </li>  
+     <li class="advanced-filter12"  data-group="news-and-events" data-handle="/tagged/mixtapes"> MIXTAPES </li>  
+   </ul>
+  </div></div>
 {%- assign item = section.settings -%}
 {%- paginate blog.articles by item.blog_list -%}
-<div class="container-indent">
+<div class="container-indent blog-template-zo">
   <div class="container container-fluid-custom-mobile-padding">
     <h1 class="tt-title-subpages noborder">{%- unless current_tags -%}{{ blog.title }}{%- else -%}{{ blog.title }}&nbsp;{{ 'blogs.article.title_result' | t }}&nbsp;{{ current_tags.first | replace: '-', ' ' }}{%- endunless -%}</h1>
       
@@ -38,11 +48,16 @@
     {%- endif -%}
     
     {%- when 'masonry_grid_3' -%}
-    <div class="tt-blog-masonry">
-      <div class="tt-blog-init tt-grid-col-3 tt-layout-01-post tt-add-item">
-        {%- for article in blog.articles -%}
-        {%- include 'blog-masonry-item' -%}
-        {%- endfor -%}
+    <div class="row masonry_grid_3">
+      <div class="tt-blog-masonry col-sm-12 col-md-8 col-lg-9">
+        <div class="tt-blog-init tt-grid-col-3 tt-layout-01-post tt-add-item">
+          {%- for article in blog.articles -%}
+          {%- include 'blog-masonry-item' -%}
+          {%- endfor -%}
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-4 col-lg-3 rightColumn">
+          {%- include 'blog-sidebar' -%}
       </div>
     </div>
     {%- if paginate.pages > 1 -%}
@@ -338,6 +353,29 @@
             "type": "textarea",
             "id": "content",
             "label": "HTML"
+          }
+        ]
+      },
+      {
+        "type": "collection",
+        "name": "Products",
+        "settings": [          
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Related Products"
+          },
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          },
+          {
+            "type": "text",
+            "id": "limit",
+            "label": "Items Length. Integer",
+            "default": "8"
           }
         ]
       },

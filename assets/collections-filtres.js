@@ -21,9 +21,11 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       this.initSidebar();
       this.initToolbar();
       this.initShowMore();
+      this.initPriceFilterEvent();
     },
     initSidebar: function() {
       obj.initFiltresEvent();
+      obj.initShopifyFiltresEvent();
       obj.initFiltresRemoveEvent();
     },
     initToolbar: function() {
@@ -91,6 +93,51 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
         dataType: "html"
       })
     },
+    initPriceFilterEvent: function() {
+      if (e(".ttpricefilter-js").length > 0) {
+        e(window).unbind('pricechangestate');
+        e(window).on('pricechangestate', function(event, $obj){
+          var input1 = $obj.find('input').first(),
+          	  input2 = $obj.find('input').last(),
+              val1 = input1.attr('data-value'),
+              val2 = input2.attr('data-value'),
+              param1 = input1.attr('name'),
+              param2 = input2.attr('name'),
+              url = location.pathname,
+              ls = location.search.replace('?', '');
+          
+          if(ls !=''){
+            ls = ls.replace('?', '')
+            if(ls.indexOf('filter.v.price.gte') > -1){
+              var _ls = ls.match(/filter.v.price.gte=([^&#]*)/)[0];
+              ls = ls.replace('&'+_ls, '').replace(_ls, '');
+            }
+            if(ls.indexOf('filter.v.price.lte') > -1){
+              var _ls = ls.match(/filter.v.price.lte=([^&#]*)/)[0];
+              ls = ls.replace('&'+_ls, '').replace(_ls, '');
+            }
+          }
+          
+          if(ls !=''){
+            url = location.pathname + '?' + ls + '&' + param1 + '=' + val1 + '&' + param2 + '=' + val2;
+          }
+          else{
+			url = location.pathname + '?' + param1 + '=' + val1 + '&' + param2 + '=' + val2;
+          }
+
+          obj.ajaxClick(url);
+        });
+      };
+    },
+    initShopifyFiltresEvent: function() {
+      if (e(".shopifyfiltres-js").length > 0) {
+        e('.shopifyfiltres-js:not(.clear-filters) a').unbind().click(function(event) {
+          event.preventDefault();
+          var url = e(this).attr('href');
+          obj.ajaxClick(url);
+        });
+      };
+    },
     initFiltresEvent: function() {
       if (e(".filtres-js").length > 0) {
         e('.filtres-js:not(.clear-filters) a').unbind().click(function(event) {
@@ -102,7 +149,7 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
 
           var constraint = queryParams.constraint;
           queryParams.constraint = constraint ? constraint+'+'+tag : tag;
-          
+         
           obj.ajaxClick(obj.getAjaxLink(queryParams));
         });
       };
@@ -111,24 +158,34 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       if (e(".filtres-remove-js").length > 0) {
         e('.filtres-remove-js a').unbind().click(function(event) {
           event.preventDefault();
+          var $_this = e(this),
+              path = location.pathname,
+              hrefpath = $_this.attr('href').split('?').shift();
+          
           delete queryParams.page;
-          
-          
-          
-          var $_this = e(this);
+
           if($_this.hasClass('clear_all')) {
             delete queryParams.constraint;
+            obj.ajaxClick($_this.attr('href'));
           }
           else {
-            var href = $_this.attr('href');
-            var path = location.pathname;
+            /*var href = $_this.attr('href');
+            
             var page = obj.getUrlSubcategory('/collections/', path);
             var tag = href.split('/collections/'+page).pop().split('/').pop().split('?view=').shift().split('&view=').shift().split('?sort_by=').shift().split('&sort_by=').shift();
             tag != '' ? queryParams.constraint = tag : delete queryParams.constraint;
-
-            queryParams.page = 'clearlink||' + $_this.attr('href');
+            */
+            if($(this).hasClass('forremoverealfiltres')){
+              queryParams.page = 'clearlink||' + $_this.attr('href'); 
+            }else{
+              var tag = $_this.attr('href').split('/').pop().split('?').shift();
+              queryParams.constraint = tag;
+              
+              path == hrefpath && delete queryParams.constraint;
+            }
+            obj.ajaxClick(obj.getAjaxLink(queryParams));
           }
-          obj.ajaxClick(obj.getAjaxLink(queryParams));
+          
         });
       };
     },
@@ -162,6 +219,8 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
           delete queryParams.page;
           obj.ajaxClick(obj.getAjaxLink(queryParams));
         });
+        var view = location.search.match(/view=([^&#]*)/);
+        view && e(".show-qty").val(view[1]).change();
       }
     },
     initPaginationEvent: function() {
@@ -191,7 +250,43 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       else{
         var page = obj.getUrlSubcategory('/collections/', location.pathname);
         var pathname = '/collections/' + page;
-        value = obj.getDecodedUrl(value);      
+        value = obj.getDecodedUrl(value);
+
+        var ls = location.search;
+        if(ls !=''){
+          ls = ls.replace('?', '')
+          if(ls.indexOf('constraint') > -1){
+            var _ls = ls.match(/constraint=([^&#]*)/)[0];
+            ls = ls.replace('&'+_ls, '').replace(_ls, '');
+          }
+          if(ls.indexOf('view') > -1){
+            _ls = ls.match(/view=([^&#]*)/)[0];
+            ls = ls.replace('&'+_ls, '').replace(_ls, '');
+          }
+          if(ls.indexOf('sort_by') > -1){
+            _ls = ls.match(/sort_by=([^&#]*)/)[0];
+            ls = ls.replace('&'+_ls, '').replace(_ls, '');
+          }
+
+            var arr = [];
+            var i = 0;
+            if(value.indexOf('constraint') > -1){
+              arr[i] = value.match(/constraint=([^&#]*)/)[0];
+              i += 1;
+            }
+            if(value.indexOf('sort_by') > -1){
+              arr[i] = value.match(/sort_by=([^&#]*)/)[0];
+              i += 1;
+            }
+            if(value.indexOf('view') > -1){
+              arr[i] = value.match(/view=([^&#]*)/)[0]
+            }
+            value = arr.join('&');
+
+          var val = value + (ls.charAt(0) != '&' && ls != '' ? '&' : '') + (value == '' ? ls.substr(1) : ls);
+          return pathname + (val != "" ? "?" : '') + val;
+        }
+
         return value != "" ? pathname + "?" + value : pathname;
       }
     },
@@ -200,8 +295,8 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       obj.ajaxClickHandlerState = true;
       History.pushState({
         param: Shopify.queryParams
-      }, document.title, url);
-      obj.getCollectionContent(url);
+      }, document.title, url.replace('ajax', ''));
+      obj.getCollectionContent(url.replace('ajax', ''));
     },
     getCollectionContent: function(url) {
       var view = url.match(/view=([^&#]*)/);
@@ -210,7 +305,7 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       }
       else {
         view = view[0];
-        url = url.replace(view, view+'ajax');
+        url = view.indexOf('ajax') > -1 ?url:url.replace(view, view+'ajax');
       }
 
       var params = {
@@ -241,6 +336,19 @@ typeof JSON!="object"&&(JSON={}),function(){"use strict";function f(e){return e<
       e(current_class).empty();
       content.appendTo(current_class);
 
+      !e(data).find('.price_range_active').length && e('.ttpricefilter-js').length && e(window).trigger('resetscrollwidget');
+      
+      current_class = ".shopifyfiltres-js";
+      e(current_class).each(function(index) {
+      	var $_this = e(this);
+        var $_parent_group = $_this.closest('.tt-collapse');
+        
+        content = e(data).find(current_class+':eq('+index+')');
+        $_this.replaceWith(content);
+        content = e(data).find(current_class+':eq('+index+')').closest('.tt-collapse');
+        content.hasClass('hide') ? $_parent_group.addClass('hide') : $_parent_group.removeClass('hide');
+      });
+      
       current_class = ".filtres-js";
       e(current_class).each(function(index) {
       	var $_this = e(this);

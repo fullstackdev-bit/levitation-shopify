@@ -1,0 +1,102 @@
+{% comment %}
+<!--
+Copyright (c) 2022 Single Media, Inc - ALL RIGHTS RESERVED
+
+NOTICE:  All information contained herein is, and remains the property of Single Media, Inc
+and its suppliers, if any. The intellectual and technical concepts contained herein are
+proprietary to Single Media, Inc and its suppliers and may be covered by U.S. and Foreign Patents,
+patents in process, and are protected by trade secret or copyright law. Dissemination of this
+information or reproduction of this material is strictly forbidden unless prior
+written permission is obtained from Single Media, Inc.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+{% endcomment %}
+
+{% comment %}
+<!-- Single Default Styles - Can be edited in assets/single.css -->
+{% endcomment %}
+{{ 'single-base.css' | asset_url | stylesheet_tag }}
+{{ '//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js' | script_tag }}
+
+{% assign page_handle = page.handle %}
+{% assign product_name = pages[page_handle].metafields.single_nft['product_name'] %}
+{% assign product_handle = pages[page_handle].metafields.single_nft['product_handle'] %}
+{% assign product_supply = pages[page_handle].metafields.single_nft['product_supply'] %}
+{% assign artwork = pages[page_handle].metafields.single_nft['artwork'] %}
+{% assign family = pages[page_handle].metafields.single_nft['family'] %}
+{% assign release_date = pages[page_handle].metafields.single_nft['release_date'] %}
+{% assign product = all_products[product_handle] %}
+
+<div class="single-grid {{ theme.name | handleize }}"
+     itemscope
+     itemtype="http://schema.org/Product">
+    <div class="single-grid-item">
+        <!-- Product Metatags -->
+        <meta itemprop="url" content="{{ shop.url }}{{ page.url }}">
+        <meta itemprop="image" content="{{ artwork }}">
+        <meta property="og:title" content="{{ product_name }}"/>
+        <meta property="og:image" content="{{ artwork }}"/>
+        <meta property="og:url" content="{{ shop.url }}{{ page.url }}"/>
+        <!-- Left Column-->
+        <div class="single-col single-col-l single-col-4">
+            <div class="single-album-art">
+                <img src="{{ artwork }}"
+                     alt="">
+            </div>
+        </div>
+        <!--End Left Column-->
+        <!--Right Column-->
+        <div class="single-col single-col-r single-col-8">
+            <div class="single-nft-countdown-data">
+                <div class="single-nft-title">
+                    <h1 itemprop="name">{{ product_name }}</h1>
+                    <p><i>{{ family }}</i></p>
+                </div>
+                <p>Available in:</p>
+                <h2 id="single_nft_countdown">
+                    <div id="single_nft_timer"></div>
+                </h2>
+                <p>Total supply:</p>
+                <h2>{{ product_supply }}</h2>
+            </div>
+            <div class="single-nft-page-content">
+                {{ page.content }}
+            </div>
+        </div>
+        <!-- End Right Column -->
+    </div>
+    <!-- End Inner Wrap -->
+</div>
+
+<script>
+    function forwardToProductPage() {
+        jQuery.getJSON('/products/{{ product_handle }}.js', function(product) {
+            window.location.href = "{{ shop.url }}/products/{{ product_handle }}"
+        });
+    }
+    const loadTime = new Date().getTime();
+    const countDownDate = new Date("{{ release_date }}").getTime();
+    const interval = setInterval(function () {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+        if (distance < -5000) {
+            forwardToProductPage();
+        } else if (distance < 0) {
+            // Do nothing...redirect will happen momentarily
+        } else {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("single_nft_timer").innerHTML = days + "d " + hours + "h "
+                + minutes + "m " + seconds + "s ";
+        }
+    }, 1000);
+</script>

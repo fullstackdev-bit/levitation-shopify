@@ -89,7 +89,7 @@
 
   {%- if item.show_review -%}
   <div class="tt-review">
-    <div class="rating" data-tooltip="{{ 'general.tooltip_texts.view_review' | t }}">
+    <div class="rating" data-tooltip="{{ 'general.tooltip_texts.view_review' | t }}"{%- if settings.selectedreviewaapp == 'alireviewapp' -%} data-ali="shopify-ali-review-widget"{%- endif -%}>
       {%- if settings.selectedreviewaapp == 'alireviewapp' -%}
       <div product-id="{{ product.id }}" class="alr-display-review-badge"></div>
       {%- else %}
@@ -244,8 +244,8 @@
   <div class="tt-wrapper">
     <div class="tt-add-info">
       <ul>
-        {%- if item.show_product_vendor -%}<li><span>{{ "products.product.vendor" | t }}</span> <a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}/{{ product.vendor | handle }}">{{ product.vendor }}</a></li>{%- endif -%}
-        {%- if item.show_product_type and product.type != '' -%}<li><span>{{ "products.product.type" | t }}</span> <a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}/{{ product.type | handle }}">{{ product.type }}</a></li>{%- endif -%}
+        {%- if item.show_product_vendor -%}<li><span>{{ "products.product.vendor" | t }}</span> <a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.vendor={{ product.vendor | downcase | excape | replace: ' ','+' }}">{{ product.vendor }}</a></li>{%- endif -%}
+        {%- if item.show_product_type and product.type != '' -%}<li><span>{{ "products.product.type" | t }}</span> <a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.product_type={{ product.type | downcase | excape | replace: ' ','+' }}">{{ product.type }}</a></li>{%- endif -%}
         {%- if item.show_product_barcode -%}<li{% if product.selected_or_first_available_variant.barcode == '' or product.selected_or_first_available_variant.barcode == empty? %} class="hide"{% endif %}><span>{{ "products.product.barcode" | t }}</span> <span class="barcode">{{ product.selected_or_first_available_variant.barcode }}</span></li>{%- endif -%}
         {%- if item.show_product_tags -%}
         {%- assign collection = collections.all -%}
@@ -257,6 +257,15 @@
     </div>
   </div>
   {%- endif -%}
+  
+  <div class="product-call-out">
+    <p>
+    <b>HOLIDAY 2023 SHIPPING</b> - orders made after DEC 7 are NOT GUARANTEED to arrive before Dec 24th! 
+    <br>
+    <b>EXCHANGE ONLY RETURN POLICY</b> - for all pre-orders, full details <a href="https://levitation.fm/pages/shipping-faqs">HERE</a>.
+    <br>
+    <b>PRE-ORDER SHIPPING</b> - please review estimated delivery dates before ordering. </p>
+  </div>
 
   {% if item.full_width_description == "default" %}{% include "product_page_tabs" %}{% endif %}
 
@@ -293,7 +302,7 @@
     var cur_opt = str != '' ? JSON.parse(str) : '';
     var full_opt = cur_opt != '' ? $.extend( texture_obj, cur_opt ) : texture_obj;
     _selectedByDefault = {% if item.use_select_button %}!(location.search == ''){% else %}true{% endif %};
-    var group1 = new SwatchesConstructor(json_data, {contentParent: '.tt-swatches-container-js', enableHistoryState: sw_history, callback: productPageVariant, externalImagesObject: full_opt, externalColors: colors_value, colorWithBorder: color_with_border, productHandle:'{{ product.handle }}', designOption1:'{{ item.designoption1 }}', designOption2:'{{ item.designoption2 }}', designOption3:'{{ item.designoption3 }}', selectedByDefault: _selectedByDefault, show_unavailable_options: show_unavailable_options });
+    var group1 = new SwatchesConstructor(json_data, {firstavailablevariantid:'{{ product.selected_or_first_available_variant.id }}', contentParent: '.tt-swatches-container-js', enableHistoryState: sw_history, callback: productPageVariant, externalImagesObject: full_opt, externalColors: colors_value, colorWithBorder: color_with_border, productHandle:'{{ product.handle }}', designOption1:'{{ item.designoption1 }}', designOption2:'{{ item.designoption2 }}', designOption3:'{{ item.designoption3 }}', selectedByDefault: _selectedByDefault, show_unavailable_options: show_unavailable_options });
 
     $('body').on('change', '.tt-fixed-product-wrapper select', function(e){
         group1.initSwatches($(this).val());
@@ -346,6 +355,8 @@
       if(g.hasClass('withfiltres') && g.attr('data-cur') != filter){
         g.attr('data-cur', filter);
         g.slick('slickUnfilter').slick('slickFilter',filter);
+        g.find('li.slick-active').removeClass('slick-active');
+        g.find('li.slick-current').addClass('slick-active').find('a').addClass('zoomGalleryActive');
       }
       g.slick('slickGoTo', num, true);
     }

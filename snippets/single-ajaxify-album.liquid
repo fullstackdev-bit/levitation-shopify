@@ -1,6 +1,6 @@
 {% comment %}
 <!--
-Copyright (c) 2021 Single, LLC - ALL RIGHTS RESERVED
+Copyright (c) 2022 Single, LLC - ALL RIGHTS RESERVED
 
 NOTICE:  All information contained herein is, and remains the property of Single, LLC
 and its suppliers, if any. The intellectual and technical concepts contained herein are
@@ -19,7 +19,7 @@ SOFTWARE.
 -->
 {% endcomment %}
 <script>
-  window.onload = function () {
+  $(window).on("load", function() {
     Shopify.AjaxifyCart = (function ($) {
 
       const Config = {
@@ -389,5 +389,5 @@ SOFTWARE.
 
     Shopify.AjaxifyCart.init();
 
-  }
+  });
 </script>

@@ -19,8 +19,6 @@ SOFTWARE.
 -->
 {% endcomment %}
 
-{% assign ticket_promo = true %}
-
 <div class="single-grid-item single-access-denied">
   <h1>{{ 'single.no_ticket.title' | t}}</h1>
   <p>{{ 'single.no_ticket.subtext_1' | t}}</p>
@@ -40,10 +38,7 @@ SOFTWARE.
   });
 </script>
 
-{% if ticket_promo %}
-  {% include 'single-ticket-promo' %}
-{% endif %}
-
+{% render 'single-ticket-promo' %}
 
 {% schema %}
   {

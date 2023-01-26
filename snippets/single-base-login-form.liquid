@@ -1,0 +1,106 @@
+{% comment %}
+  <!--
+  Copyright (c) 2022 Single Media, Inc - ALL RIGHTS RESERVED
+
+  NOTICE:  All information contained herein is, and remains the property of Single Media, Inc
+  and its suppliers, if any. The intellectual and technical concepts contained herein are
+  proprietary to Single Media, Inc and its suppliers and may be covered by U.S. and Foreign Patents,
+  patents in process, and are protected by trade secret or copyright law. Dissemination of this
+  information or reproduction of this material is strictly forbidden unless prior
+  written permission is obtained from Single Media, Inc.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+  -->
+{% endcomment %}
+
+<style>
+  .single-login {
+    padding: 0 15px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .single-login h1 {
+    margin-top: 0;
+    padding-top: 0;
+  }
+  .single-login form {
+    width: 100%;
+    max-width: 700px;
+    padding: 15px;
+    box-sizing: border-box;
+    margin: 0 auto;
+  }
+  .single-login .field {
+    margin-bottom: 1em;
+  }
+  .single-login .recover-links .divider {
+    opacity: 0.5;
+  }
+  .single-login .recover-links a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<section class="single-login customer">
+  <div id="form-login" class="single-form">
+    <h2 id="LoginHeading" class="text-center">{{ 'single.login.title' | t }}</h2>
+    <p>{{ 'single.login.subtext' | t }}</p>
+    {% form 'customer_login' %}
+      {{ form_errors | default_errors }}
+      <input type="hidden" name="return_to" value="PAGE_URL">
+      <div class="email field">
+        <input type="email" name="customer[email]" placeholder="Email">
+        <label for="email">{{ 'single.login.email' | t }}</label>
+      </div>
+      <div class="password field">
+        <input type="password" name="customer[password]" placeholder="Password">
+        <label for="password">{{ 'single.login.password' | t }}</label>
+      </div>
+      <div class="submit">
+        <input type="submit" value="{{ 'single.login.sign_in' | t }}" class="btn button">
+      </div>
+    {% endform %}
+    <div class="recover-links">
+      <span>
+        <a href="#" onclick="resetToggle()" id="RecoverPassword">{{ 'single.login.forgot_password' | t }}</a>
+      </span>
+      <span class="divider"> • </span>
+      <span>{{ 'single.login.create_account' | t | customer_register_link }}</span>
+    </div>
+  </div>
+  <!-- END #form-login -->
+  <div id="form-recover" class="single-form hidden">
+    <h2 id="LoginHeading" class="text-center">{{ 'single.recover_password.title' | t }}</h2>
+    <p>{{ 'single.recover_password.subtext' | t }}</p>
+    {% form 'recover_customer_password' %}
+      {{ form_errors | default_errors }}
+      <input type="hidden" name="return_to" value="{{ page.url }}">
+      <div class="email field">
+        <input type="email" name="email" placeholder="Email">
+        <label for="email">{{ 'single.login.email' | t }}</label>
+      </div>
+      <div class="submit">
+        <input type="submit" value="{{ 'single.recover_password.submit' | t }}" class="btn button">
+      </div>
+    {% endform %}
+    <div class="recover-links">
+      <span>
+        <a href="#" onclick="resetToggle()" id="RecoverPassword">{{ 'single.recover_password.cancel' | t }}</a>
+      </span>
+    </div>
+  </div>
+  <!-- END #form-recover -->
+
+  {% if include_faq %}
+    <h4>{{ 'single.login.help_header' | t }}</h4>
+    <p>
+      <a href="FAQ_LINK" target="_blank">{{ 'single.login.faq' | t }}</a>
+    </p>
+  {% endif %}
+</section>

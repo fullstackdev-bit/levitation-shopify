@@ -1,4 +1,4 @@
-{% if item.show_collection_title %}
+{% if item.show_collection_title and collection.image == blank %}
 <h1 class="tt-title{% if settings.toolbarsettings == 'hidetoolbaroptionslogoincenter' %} text-center{% endif %}">
   {{ collection.title }}{% if item.show_collection_products_count %} <span class="tt-title-total listing-total-js">({{ paginate.items }})</span>{% endif %}
 </h1>
@@ -29,8 +29,8 @@
   {% if qty == "true" %}
   <select class="show-qty">
     <option>{{ pagination_limit_const }}</option>
-    <option {% if current_pagination_limit == 16 %}selected{% endif %}>16</option>
-    <option {% if current_pagination_limit == 32 %}selected{% endif %}>32</option>
+    <option {% if current_pagination_limit == 16 %}selected{% endif %} value="16">16</option>
+    <option {% if current_pagination_limit == 32 %}selected{% endif %} value="32">32</option>
     <option {% if current_pagination_limit == 50 %}selected{% endif %} value="all">{{ 'collections.toolbar.all' | t }}</option>
   </select>
   {% endif %}

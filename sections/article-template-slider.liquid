@@ -7,19 +7,8 @@
 <div class="container-indent main_color nomargin" itemscope itemtype="http://schema.org/Article">
   <div class="container container-fluid-custom-mobile-padding">
     <div class="row justify-content-center">
-      <div class="col-xs-12 col-md-10 col-lg-8 col-md-auto">
-        <div class="tt-post-single" itemprop="articleBody">
-          <h1 class="tt-title">{{ article.title }}</h1>
-          {%- if item.blog_show_author or item.blog_show_date -%}
-          <div class="tt-autor">
-            {% if item.blog_show_author %}{{ 'blogs.article.by_author' | t }} <span>{{ article.author }}</span> {% endif %}{% if item.blog_show_date %}{{ 'blogs.article.posted_in' | t }} {{ article.published_at | date: '%B' }} {{ article.published_at | date: '%d, %Y' }}{% endif %}
-          </div>
-          {%- endif -%}
-          {%- unless article.image == blank -%}
-          <div class="tt-featured-post-img">
-            <img src="{{ article.image.src | img_url: 'master' }}" alt="{{ article.image.alt }}">
-          </div>
-          {%- endunless -%}  
+      <div class="col-xs-12 {% if item.sidebar %} col-md-8 {% else %} col-md-10 {% endif %} col-lg-9 col-md-auto">
+        <div class="tt-post-single" itemprop="articleBody">          
           <div class="tt-post-content">
             
              {{ articleContent | last}}
@@ -37,6 +26,11 @@
           
         </div>
       </div>
+      {% if item.sidebar %}
+      <div class="col-xs-12 col-md-4 col-lg-3 col-md-auto rightColumn">
+        {%- include 'article-sidebar' -%}
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -46,6 +40,33 @@
     {%- include 'addthis' -%}
   </div>
 </div>
+
+
+{%- if item.show_related_article -%}
+{%- assign related_length = item.article_limit | plus: 0 -%}
+<div class='relatedArticles container'>
+  <h2>Related Articles</h2>
+   <div class="tt-blog-masonry">
+      <div class="tt-blog-init tt-grid-col-2 tt-layout-01-post tt-add-item">
+        {% assign counter = 0 %}
+        {% assign skip_articles = article.handle | split: '.....' %}
+        {% for tag in article.tags %}          
+          {% for related_article in blog.articles %}  
+            {% if related_article.tags contains tag and counter < related_length %}
+              {% unless skip_articles contains related_article.handle %}
+                {% assign counter = counter | plus: 1 %}
+                {% assign temp = related_article.handle | split: '.....' %}
+                {% assign skip_articles = skip_articles | concat: temp %}
+                {%- include 'blog-related-masonry-item' article: related_article -%}
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+     </div>
+  </div>
+</div>
+{%- endif -%}
+
 {%- unless blog.comments_enabled? -%}<div class="clear-gap"></div>{%- endunless -%}
 {%- endif -%}
 
@@ -83,7 +104,140 @@
         "id": "show_share_buttons",
         "label": "Show social sharing buttons",
         "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "sidebar",
+        "label": "Add Sidebar",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_related_article",
+        "label": "Show Related Article",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "article_limit",
+        "label": "Related Article Length. Integer",
+        "default": "5"
       }
-    ]
+    ],
+    "blocks": [      
+      {
+        "type": "about",
+        "name": "About",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "ABOUT"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image",
+            "info": "240x240px"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "HTML",
+            "default": "Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
+          },
+          {
+            "type": "url",
+            "id": "banner_link",
+            "label": "Link",
+            "info": "Optional"
+          },
+          {
+            "type": "checkbox",
+            "id": "show_button",
+            "label": "Show button",
+            "default": true
+          },
+          {
+            "type": "text",
+            "id": "button",
+            "label": "Button Name",
+            "default": "READ MORE"
+          }
+        ]
+      },
+      {
+        "type": "custom_html",
+        "name": "Custom Html",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "TITLE"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "HTML"
+          }
+        ]
+      },
+      {
+        "type": "collection",
+        "name": "Products",
+        "settings": [          
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Related Products"
+          },
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          },
+          {
+            "type": "text",
+            "id": "limit",
+            "label": "Items Length. Integer",
+            "default": "8"
+          }
+        ]
+      },
+      {
+        "type": "newsletter",
+		"limit": 1,
+        "name": "Newsletter",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "NEWSLETTER SIGNUP"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "Text",
+			"default": "Subscribe to our email and be the first to know about our special offers! In addition, we will give you a 15% discount on the next order after registration."
+          },
+          {
+            "type": "textarea",
+            "id": "form_text",
+            "label": "Form text",
+			"default": "Enter your e-mail"
+          },
+          {
+            "type": "textarea",
+            "id": "button",
+            "label": "Button text",
+			"default": "GET!"
+          }
+        ]
+      }
+	]
   }
 {% endschema %}

@@ -7,8 +7,15 @@
 	{%- assign sale_on = true -%}
 {%- endif -%}
 
+{%- assign pr_variant = product.selected_or_first_available_variant -%}
+
 {%- comment -%} Main Image URL. {%- endcomment -%}
 {%- assign main_url_image = product.featured_image -%}
+{%- if template contains 'collection' or settings.use_featured_image == false -%}
+{%- if product.variants[0].id != pr_variant.id and pr_variant.image != blank -%}
+{%- assign main_url_image = pr_variant.featured_image -%}
+{%- endif -%}{%- endif -%}
+
 {%- assign hover_url_image = "" -%}
 {%- if product.images[1] -%}{%- if product.images[1].src contains "hover" or product_meta.hover == 'true' or settings.use_imagehover -%}
 	{%- assign hover_url_image = product.images[1].src -%}
@@ -22,12 +29,6 @@ date_difference = 60 * 60 * 24 * day counter, this is new product period in seco
   {%- assign date_published = product.published_at | date: "%s" -%}
   {%- assign date_difference = date_now | minus: date_published -%}
   {%- assign date_limit = 86400 | times: settings.new_product_period -%}
-
-  {%- if settings.show_unavailable_variants -%}
-  {%- assign pr_variant = product.variants | first -%}
-  {%- else -%}
-  {%- assign pr_variant = product.selected_or_first_available_variant -%}
-  {%- endif -%}
 
 {%- assign pid = product.id | append:"" -%}
 {%- assign wl = customer.metafields.wishlist -%}

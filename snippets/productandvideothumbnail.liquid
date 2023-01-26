@@ -53,7 +53,7 @@
       <form action="/cart/add" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" value="{{ sel_or_first_av_var.id }}">
         <button class="tt-btn-addtocart {% if settings.ajax_addtocart %} addtocart-item-js{% endif %}{% unless sel_or_first_av_var.available %} disable{% endunless %}"
-                {%- if settings.show_addtocart_popup_related -%}{%- unless product.metafields.description.related_collection == blank -%}data-relatedcollection="{{ _pr.metafields.description.related_collection }}"{%- endunless -%}{%- endif -%}
+                {%- if settings.show_addtocart_popup_related -%}{%- unless _pr.metafields.description.related_collection == blank -%}data-relatedcollection="{{ _pr.metafields.description.related_collection }}"{%- endunless -%}{%- endif -%}
                 >
           {% unless sel_or_first_av_var.available %}
           {{ 'products.general.unavailable_html' | t }}
@@ -77,9 +77,9 @@
     {% if showwishlist == "true" or showcompare == "true" %}
     <div class="tt-wk-buttons-box">
     {%- if showwishlist == "true" -%}
-    <a href="{{ product.url | within: collection }}"
-       data-productid="{{ product.id }}"
-       data-producth="{{ product.handle }}"
+    <a href="{{ _pr.url | within: collection }}"
+       data-productid="{{ _pr.id }}"
+       data-producth="{{ _pr.handle }}"
        data-add="{{ "wishlist.buttons_text.tooltip_add" | t }}"
        data-remove="{{ "wishlist.buttons_text.tooltip_remove" | t }}"
        data-tooltip="{% if customer.id == blank %}{{ "wishlist.buttons_text.tooltip_login" | t }}{% else %}{% if wl_text %}{{ "wishlist.buttons_text.tooltip_remove" | t }}{% else %}{{ "wishlist.buttons_text.tooltip_add" | t }}{% endif %}{% endif %}"
@@ -93,7 +93,8 @@
     {%- endif -%}
 
     {%- if showcompare == "true" -%}
-    <a href="{{ product.url | within: collection }}"
+      {%- assign pr_variant = _pr.selected_or_first_available_variant -%}
+    <a href="{{ _pr.url | within: collection }}"
        class="wk-app-btn tt-btn-compare compare-js"
        data-action="wk-add"
        data-add="{{ "compare.buttons_text.tooltip_add" | t }}"

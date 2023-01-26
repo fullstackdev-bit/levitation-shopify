@@ -1,3 +1,6 @@
+<link rel="preload" href="{{ 'price_range_widget.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<script src="{{ 'price_range_widget.js' | asset_url }}" defer="defer"></script>
+
 <div class="col-md-4 col-lg-3 col-xl-3 leftColumn{% if item_sidebar == "rightColumn" %} rightColumn{% endif %} aside{% if item_sidebar contains "hidden_closed" %} desctop-no-sidebar{% endif %}">
   <div class="tt-btn-col-close">
     <a href="#">{{ 'collections.sidebar.back' | t }}</a>
@@ -11,6 +14,12 @@
       </div>
     </div>
   </div>
+  
+  {%- assign titlestouppercase = settings.titlestouppercase -%}
+  {%- assign closedtabs = settings.closedtabs | strip_newlines | strip | append: ',' | downcase -%}
+  {%- assign title_new_name = settings.title_new_name | strip_newlines | strip | append: ',' -%}
+  {%- assign _otypeco = settings.otypeco | strip_newlines | strip | append: ',' | downcase -%}
+  {%- assign _otypebtn = settings.otypebtn | strip_newlines | strip | append: ',' | downcase -%}
 
   {%- capture imagefromshema -%}{%- include 'get_swatch_textures' -%}{%- endcapture -%}
   {%- if settings.show_collectionstab -%}{%- include "collection-sidebar-collections" -%}{%- endif -%}
@@ -18,6 +27,11 @@
   {%- include "collection-sidebar-filter-shopping" -%}
   
   {%- comment -%}Filters{%- endcomment -%}
+  
+  {%- for filter in collection.filters -%}
+  {%- include "collection-sidebar-filter-x2" -%}
+  {%- endfor -%}
+  
 
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:1 -%}{%- endcapture -%}{{ value | strip }}
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:2 -%}{%- endcapture -%}{{ value | strip }}
@@ -32,5 +46,5 @@
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:10 -%}{%- endcapture -%}{{ value | strip }}
   
   {%- if settings.show_collectionsbanner -%}{%- include "collection-sidebar-banner" -%}{%- endif -%}
-  
+
 </div>

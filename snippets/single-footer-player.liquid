@@ -1,0 +1,207 @@
+<style>
+  body {
+    padding-bottom: 90px;
+  }
+
+  .single-footer-player {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: black;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1em;
+    line-height: 1;
+    font-size: 16px;
+    gap: 1em;
+    z-index: 2;
+  }
+
+  .col {
+    display: inline-flex;
+    gap: 1em;
+    align-items: center;
+  }
+
+  .col-1_4 {
+    width: 25%;
+  }
+
+  .col-2_4 {
+    width: 75%;
+  }
+
+  .justify-end {
+    justify-content: flex-end;
+  }
+
+  .thumbnail {
+    line-height: 1;
+  }
+
+  .thumbnail img {
+    border-radius: 4px;
+    height: 60px;
+    width: 60px;
+  }
+
+  .track-info {
+    display: inline-flex;
+    flex-direction: column;
+  }
+
+  .track-title {
+    font-weight: bolder;
+    margin-bottom: .25em;
+  }
+
+  .track-artist {
+    font-size: .75em;
+    opacity: .75;
+  }
+
+  .small {
+    font-size: .75em;
+  }
+
+  .track-meta {
+    margin-top: .75em;
+  }
+
+  .divider,
+  .remaining {
+    opacity: .5;
+    font-size: .75em
+  }
+
+  .track-waveform {
+    flex-grow: 1;
+  }
+
+  .player-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: .25em;
+    font-size: 24px;
+  }
+
+  .play {
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  .player-controls .prev,
+  .player-controls .next,
+  .single-track-add-to-cart {
+    cursor: pointer;
+  }
+
+  @media screen and (max-width: 750px) {
+    body {
+      padding-bottom: 150px;
+    }
+
+    .single-footer-player {
+      flex-direction: column;
+    }
+
+    #main_info {
+      display: flex;
+      width: 100%;
+      flex-basis: 100%;
+    }
+
+    #waveform {
+      display: none;
+    }
+
+    .col-2_4 {
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .track-details,
+    .track-purchase {
+      flex-basis: 30%;
+    }
+
+    .player-controls {
+      flex-grow: 1;
+      justify-content: center;
+      gap: .5em;
+    }
+
+    .track-info {
+      font-size: .8em;
+    }
+
+    .thumbnail img {
+      height: 30px;
+      width: 30px;
+    }
+
+  }
+</style>
+
+<div class="single-footer-player">
+  <div class="col col-1_4"
+       id="main_info">
+    <div class="thumbnail">
+      <img src="{{ product.featured_image.src | img_url: '120x120' }}" />
+    </div>
+    <div class="track-info">
+      <span class="track-title">Track Title</span>
+      <span class="track-artist">Artist Name</span>
+    </div>
+  </div>
+
+  <div class="col col-2_4">
+
+    <div id="waveform"
+         class="track-waveform">
+    </div>
+
+    <div class="track-details small">
+      <div class="track-time">
+        <span class="elapsed">00:00</span>
+        <span class="divider">/ </span>
+        <span class="remaining">00:00</span>
+      </div>
+      <div class="track-meta"
+           style="display:none;">
+        <span class="track-tuning">C#</span>
+        <span style="opacity: .25;">•</span>
+        <span class="track-bpm">126bpm</span>
+      </div>
+    </div>
+
+    <div class="player-controls">
+      <span class="prev material-icons">
+        skip_previous
+      </span>
+      <span class="play material-icons"
+            id="playPause">
+        <span id="play">play_circle_outline</span>
+        <span id="pause"
+              style="display: none;">pause_circle_outline</span>
+      </span>
+      <span class="next material-icons">
+        skip_next
+      </span>
+    </div>
+
+    <div class="track-purchase">
+      <div class="single-track-add-to-cart single-footer-add-to-cart">
+        <div class="single-track-btn">
+          <i class="material-icons">add_shopping_cart</i>
+          <span>$0.99</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

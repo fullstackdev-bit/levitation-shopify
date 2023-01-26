@@ -78,12 +78,15 @@
                 data-var_id="{{ variant.id }}"
                 data-price="{{ variant.price }}"
                 data-buttonname="{% if variant.inventory_management == 'shopify' and variant.inventory_policy == 'continue' and variant.inventory_quantity <= 0 %}{{ "products.general.preorder_html" | t | replace: '"', '&quot;' }}{% else %}{{ 'products.general.add_to_cart_html' | t | replace: '"', '&quot;' }}{% endif %}"
-                data-compprice="{{ variant.compare_at_price }}">
+                data-compprice="{{ variant.compare_at_price }}"
+                {% if pr_variant.option1 == variant.option1 %}selected{% endif %}
+                >
           {{ tag }}
         </option>
 
         {%- endunless -%}
 
+        {%- assign _handle = pr_variant.options[option1] | strip | replace: ' ', '' -%}
         {%- if active_color_name == '' -%}{%- assign active_color_name = _handle -%}{%- endif -%}
 
         {%- endfor -%}
@@ -119,7 +122,7 @@
 
 	  {%- assign _tag = ',' | append: _tag | append: ':' -%}
 	  {%- capture curcol -%}{%- if colors contains _tag -%}{{ colors | split: _tag | last | split: ',' | first | strip }}{%- else -%}{%- endif -%}{%- endcapture -%}
-      <li{% if variant.id == pr_variant.id %} class="active"{% endif %}
+      <li{% if variant.option1 == pr_variant.option1 %} class="active"{% endif %}
           data-availability="{{ check_opt_ava }}"
           data-variant_availability="{{ variant.available }}"
           data-tag="{{ _handle | replace: '"', '' }}"
@@ -135,9 +138,10 @@
         {%- endif -%}
 	  </li>
 	  {%- endunless -%}
-	  
+
+      {%- assign _handle = pr_variant.options[option1] | strip | replace: ' ', '' -%}
 	  {%- if active_color_name == '' -%}{%- assign active_color_name = _handle -%}{%- endif -%}
-	  
+
 	  {%- endfor -%}
 	</ul>
   	{% endif %}
@@ -176,7 +180,7 @@
 	  {%- assign _tag = ',' | append: _tag | append: ':' -%}
 	  {%- capture curcol -%}{%- if colors contains _tag -%}{{ colors | split: _tag | last | split: ',' | first | strip }}{%- else -%}{%- endif -%}{%- endcapture -%}
 	  <li data-current-option="{{ color | replace: '"', '' }}-js"
-          {% if variant.id == pr_variant.id %} class="active"{% endif %}
+          {% if variant.option1 == pr_variant.option1 and variant.option2 == pr_variant.option2 %} class="active"{% endif %}
           {% if option1 > -1 and color != active_color_name %} style="display: none;"{% endif %}
           data-availability="{{ check_opt_ava }}"
           data-variant_availability="{{ variant.available }}"
@@ -193,7 +197,12 @@
 		{%- endif -%}
 	  </li>
 	  
-	  {%- if active_option1_name == '' -%}{%- assign active_option1_name = _handle -%}{%- endif -%}
+	  {%- if option1 > -1 -%}
+		{%- assign color = pr_variant.options[option1] | replace: ' ', '' -%}
+	  {%- endif -%}
+      {%- assign tag = pr_variant.options[option2] | strip -%}
+      {%- assign _handle = color | append: tag | replace: ' ', '' -%}
+      {%- if active_option1_name == '' -%}{%- assign active_option1_name = _handle -%}{%- endif -%}
 
 	  {%- endfor -%}
 	</ul>
@@ -226,7 +235,7 @@
 	  {%- assign _tag = ',' | append: _tag | append: ':' -%}
 	  {%- capture curcol -%}{%- if colors contains _tag -%}{{ colors | split: _tag | last | split: ',' | first | strip }}{%- else -%}{%- endif -%}{%- endcapture -%}
 	  <li data-current-option="{{ _handle | replace: '"', '' }}-js"
-          {% if variant.id == pr_variant.id %} class="active"{% endif %}
+          {% if variant.option1 == pr_variant.option1 and variant.option2 == pr_variant.option2 and variant.option3 == pr_variant.option3 %} class="active"{% endif %}
           {% if active_option1_name != _handle %} style="display: none;"{% endif %}
           data-availability="{{ variant.available }}"
           data-variant_availability="{{ variant.available }}"

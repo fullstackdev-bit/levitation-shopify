@@ -1,0 +1,54 @@
+<section class="single-login">
+  <div id="form-login" class="single-form">
+    <h2 id="LoginHeading" class="text-center">{{ 'single.login.title' | t }}</h2>
+    <p>{{ 'single.login.subtext' | t }}</p>
+    {% form 'customer_login' %}
+      {{ form_errors | default_errors }}
+      <input type="hidden" name="return_to" value="PAGE_URL">
+      <div class="email">
+        <label for="email">{{ 'single.login.email' | t }}</label>
+        <input type="email" name="customer[email]">
+      </div>
+      <div class="password">
+        <label for="password">{{ 'single.login.password' | t }}</label>
+        <input type="password" name="customer[password]">
+      </div>
+      <div class="submit">
+        <input type="submit" value="{{ 'single.login.sign_in' | t }}" class="btn button">
+      </div>
+    {% endform %}
+    <div class="recover-links">
+      <span>
+        <a href="#" onclick="resetToggle()" id="RecoverPassword">{{ 'single.login.forgot_password' | t }}</a>
+      </span>
+      <span class="divider"> • </span>
+      <span>{{ 'single.login.create_account' | t | customer_register_link }}</span>
+    </div>
+  </div><!-- END #form-login -->
+  <div id="form-recover" class="single-form hidden">
+    <h2 id="LoginHeading" class="text-center">{{ 'single.recover_password.title' | t }}</h2>
+    <p>{{ 'single.recover_password.subtext' | t }}</p>
+    {% form 'recover_customer_password' %}
+      {{ form_errors | default_errors }}
+      <input type="hidden" name="return_to" value="{{ page.url }}">
+      <div class="email">
+        <label for="email">{{ 'single.login.email' | t }}</label>
+        <input type="email" name="email">
+      </div>
+      <div class="submit">
+        <input type="submit" value="{{ 'single.recover_password.submit' | t }}" class="btn button">
+      </div>
+    {% endform %}
+    <div class="recover-links">
+      <span>
+        <a href="#" onclick="resetToggle()" id="RecoverPassword">{{ 'single.recover_password.cancel' | t }}</a>
+      </span>
+    </div>
+
+  </div><!-- END #form-recover -->
+
+  {% if include_faq %}
+    <h4>{{ 'single.login.help_header' | t }}</h4>
+    <p><a href="FAQ_LINK" target="_blank">{{ 'single.login.faq' | t }}</a></p>
+  {% endif %}
+</section>

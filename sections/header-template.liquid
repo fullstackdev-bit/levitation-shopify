@@ -146,7 +146,14 @@
       <div class="tt-header-row ">
         {%- if item.showsucklogodesktop -%}
         <div class="tt-stuck-parent-logo{% if item.logo_bar =="allinlinelogocenter" %} allinlinelogocenter{% endif %}">
-          {%- include "header_logo" -%}
+          <a href="/" class="tt-logo" itemprop="url">
+            {%- if headerlogo contains "title_" -%}<h2 class="tt-title">{{ headerlogo | split:"title_" | last }}</h2>
+            {%- else -%}<img src="{{ sheaderlogo }}"
+                             srcset="{{ sheaderlogo }} 1x, {{ sheaderlogoretina }} 2x"
+                             alt="{{ headerlogoalt }}"
+                             class="tt-retina" itemprop="logo"/>
+            {%- endif -%}
+          </a>
         </div>
         {%- endif -%}
         <div class="tt-stuck-parent-menu"></div>
@@ -165,20 +172,16 @@
       </div>
     </div>
     {%- if item.showsucklogomobile and settings.use_header_inline == false -%}
-    {%- assign min = 1 -%}
-    {%- assign max = 5 -%}
-    {%- assign diff = max | minus: min -%}
-    {%- assign random_number = "now" | date: "%N" | modulo: diff | plus: min -%}
     <div class="tt-mobile-header">
       <div class="container-fluid tt-top-line">
         <div class="row">
           <div class="tt-logo-container">
             <a class="tt-logo tt-logo-alignment" href="/">
               {%- if headerlogomobile contains "title_" -%}<h2>{{ headerlogomobile | split:"title_" | last }}</h2>
-              {%- else -%}<img style="max-width:200px;filter: invert(1);" src="https://cdn.shopify.com/s/files/1/1366/5653/files/logo{{random_number}}.png?v=1625168180"
-                   srcset=""
-                           alt="{{ headerlogomobilealt }}"
-                           class="tt-retina">
+              {%- else -%}<img src="{{ sheaderlogomobile }}"
+                               srcset="{{ sheaderlogomobile }} 1x, {{ sheaderlogomobileretina }} 2x"
+                               alt="{{ headerlogomobilealt }}"
+                               class="tt-retina">
               {%- endif -%}
             </a>
           </div>

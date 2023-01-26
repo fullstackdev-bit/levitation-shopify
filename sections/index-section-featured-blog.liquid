@@ -3,7 +3,6 @@
 {%- assign grid = item.items | plus: 0 -%}
 {%- assign item_limit = item.limit | plus: 0 -%}
 
-
 {%- capture image_size -%}600x{%- endcapture -%}
 
 <div class="{% if item.top_offset == 'none' %}nomargin {% elsif item.top_offset == 'small' %}tt-offset-small {% endif %} container-indent featured-blog-section-jk {{ item.custom_classes }}">

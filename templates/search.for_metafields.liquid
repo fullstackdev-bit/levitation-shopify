@@ -144,9 +144,8 @@
           <textarea name="group"
                     data-desc="Use with documentation"
                     placeholder="Show images only by selected variant"
-                    class="form-control{% if product.metafields.productgallery.group != blank %} optwithvalue{% endif %}">{% if product.productgallery.description.group != blank %}{{ product_meta.group }}{% endif %}</textarea>
+                    class="form-control{% if product.metafields.productgallery.group != blank %} optwithvalue{% endif %}">{% if product.productgallery.description.group != blank %}{{ product.metafields.productgallery.group }}{% endif %}</textarea>
         </div>
-
 
         <div class="custom_tabs">
           {% for field in product_meta %}

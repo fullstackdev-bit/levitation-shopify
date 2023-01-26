@@ -3,7 +3,7 @@
   <div class="tt-page404" style="background: {{ item.bg_color }};">
     {% if item.image != blank %}<img src="{{ item.image | img_url: '1024x' }}" alt="{{ item.image.alt }}">{% endif %}
     <h1 class="tt-title" style="color: {{ item.t1_color }};">{{ 'general.404.title' | t }}</h1>
-    <p style="color: {{ item.t2_color }};margin-top:20px">This is a 404 error.<br/>But we have lots of good stuff below that you might be looking for. <br/>Or you can visit the homepage:</p>
+    <p style="color: {{ item.t2_color }};">{{ 'general.404.subtext' | t }}</p>
     <a href="/" class="btn btn-white ttbtnmainstyle" style="color:{{ item.cbtntext }}; background:{{ item.cbtnbg }};" data-c="{{ item.cbtntext }}" data-ac="{{ item.acbtntext }}" data-bgc="{{ item.cbtnbg }}" data-abgc="{{ item.acbtnbg }}" data-hovercolors>{{ 'general.404.button' | t }}</a>
   </div>
 </div>

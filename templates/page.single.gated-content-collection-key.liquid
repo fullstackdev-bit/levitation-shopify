@@ -1,0 +1,114 @@
+{% comment %}
+  <!--
+  Copyright (c) 2022 Single, LLC - ALL RIGHTS RESERVED
+
+  NOTICE:  All information contained herein is, and remains the property of Single, LLC
+  and its suppliers, if any. The intellectual and technical concepts contained herein are
+  proprietary to Single, LLC and its suppliers and may be covered by U.S. and Foreign Patents,
+  patents in process, and are protected by trade secret or copyright law. Dissemination of this
+  information or reproduction of this material is strictly forbidden unless prior
+  written permission is obtained from Single, LLC.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+  -->
+{% endcomment %}
+
+{% comment %}
+  <!-- Single App Default Styles -->
+{% endcomment %}
+{{ 'single-base.css' | asset_url | stylesheet_tag }}
+{{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
+
+<div class="single-grid" style="margin-bottom: 5em;">
+  {% render 'single-multi-login', login_details: login_types, page_url: page_url %}
+
+  {% if user_keys %}
+    <div class="single-grid-item">
+      <div class="single-col col-4_4">
+        <h2>Your Collection</h2>
+      </div>
+      {% for user_key in user_keys %}
+        <div class="single-col col-2_4">
+          {% assign user_key_parts = user_key | split: '|' %}
+          {% render 'single-key-card', key_name: user_key_parts[0], key_image_url: user_key_parts[1] %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if key_product_id %}
+    <div class="single-grid-item">
+      <div class="single-col col-4_4">
+        <h2>Required for Access</h2>
+      </div>
+      <div class="single-col col-2_4">
+        {% render 'single-product-card', product_input: key_product_id %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% unless product_ids.size > 0 or product_hidden_count or video_ids.size > 0 or video_hidden_count %}
+    <div class="single-grid-item">
+      <div class="single-col col-4_4 text-center" style="margin: 5em 0;">
+        <h2>No exclusive items for this token at this time.</h2>
+      </div>
+    </div>
+  {% endunless %}
+
+  {% if product_ids.size > 0 or product_hidden_count %}
+    <div class="single-grid-item">
+      <div class="single-col col-4_4">
+        <h2>Exclusive Products</h2>
+      </div>
+      {% for product_input in product_ids %}
+        <div class="single-col col-2_4">
+          {% render 'single-product-card', product_input: product_input %}
+        </div>
+      {% endfor %}
+      {% if product_hidden_count %}
+        <div class="single-col col-2_4">
+          {% render 'single-lock-card',
+            count: product_hidden_count,
+            denial_reason: product_denial_reason,
+            key_acquisition_url: product_key_acquisition_url,
+            login_types: login_types
+          %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if video_ids.size > 0 or video_hidden_count %}
+    <div class="single-grid-item">
+      <div class="single-col col-4_4">
+        <h2>Exclusive Videos</h2>
+      </div>
+      {% for video_input in video_ids %}
+        <div class="single-col col-1_4">
+          {% render 'single-video-card',
+            video_input: video_input,
+            show_title: true,
+            show_date: true,
+            show_badge: false
+          %}
+        </div>
+      {% endfor %}
+      {% if video_hidden_count %}
+        <div class="single-col col-1_4">
+          {% render 'single-lock-card',
+            count: video_hidden_count,
+            denial_reason: video_denial_reason,
+            key_acquisition_url: video_key_acquisition_url,
+            login_types: login_types
+          %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

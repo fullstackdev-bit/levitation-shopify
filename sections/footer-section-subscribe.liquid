@@ -1,7 +1,6 @@
 {%- assign item = section.settings -%}
 
 <div class="{% if template == 'index' %}{{ item.top_offset }}{% else %}{{ item.top_offset_normal }}{% endif %} subsection{{ section.id }} for-footer-blocks">
-  
   {% if item.usebgcolor and item.useboxedbgcolor == false %}<div class="subsectionbg"{% if item.showbgimage_bg %} style="background-image: url({{ item.image_bg | img_url: '2048x' }});"{% endif %}>{% endif %}
   <div class="container{% if item.fullwidth %}-fluid-custom-mobile-padding container-fluid-custom{% endif %}">
     <div class="row justify-content-center{% if item.usebgcolor and item.useboxedbgcolor %} subsectionbg{% endif %}"{% if item.usebgcolor and item.useboxedbgcolor and item.showbgimage_bg %} style="background-image: url({{ item.image_bg | img_url: '2048x' }});"{% endif %}>

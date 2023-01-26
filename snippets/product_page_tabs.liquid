@@ -20,18 +20,14 @@
     </div>
 	{%- endif -%}
   {%- when 'tab_review' -%}
+	{%- unless settings.selectedreviewaapp == 'alireviewapp' -%}
 	<div id="tab_review" class="tt-item{% if b_i.open_tab_by_default %} active{% endif %}">
       <div class="tt-collapse-title">{{ b_i.title }}</div>
       <div class="tt-collapse-content">
-        {%- if settings.selectedreviewaapp == 'alireviewapp' -%}
-        {%- unless item.showalireviewinrow -%}
-        <div id="shopify-ali-review" product-id="{{ product.id }}"> {{ shop.metafields.review_collector.review_code }}</div>
-        {%- endunless -%}
-        {%- else %}
         <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
-        {%- endif -%}
       </div>
     </div>
+	{%- endunless -%}
 {%- endcase -%}
 {%- endfor -%}
 {%- endcapture -%}

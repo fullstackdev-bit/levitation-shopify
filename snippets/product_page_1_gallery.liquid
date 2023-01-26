@@ -45,9 +45,8 @@
              data-zoom-image="{{ main_url_image | product_img_url: '2048x2048' }}"
              alt="{{ main_url_image.alt | escape }}" />
       </div>
-      <div class="mediaholder active"{% if product.featured_media.media_type == 'image' %} style="display: none;"{% endif %}>
+      <div class="mediaholder"{% if product.featured_media.media_type == 'image' %} style="display: none;"{% endif %}>
         {% include 'media' %}
-<!--         <div class='popup-back'></div><div class='video-pop-close'><button title="Close (Esc)" type="button" class="mfp-close">×</button></div> -->
       </div>
     </div>
    

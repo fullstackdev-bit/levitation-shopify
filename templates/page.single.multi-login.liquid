@@ -1,0 +1,5 @@
+{{ 'single-base.css' | asset_url | stylesheet_tag }}
+{{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
+
+{% render 'single-multi-login', login_details: login_details, page_url: page_url %}
+{% render 'single-key-products', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}

@@ -22,7 +22,6 @@ SOFTWARE.
 *:focus {
   outline: 0;
 }
-
 /** Mixins **/
 /** Layout **/
 .single-grid {
@@ -32,19 +31,16 @@ SOFTWARE.
   padding-bottom: 30px;
   box-sizing: border-box;
 }
-
 .single-grid-item {
   margin: 0 auto 2em;
   max-width: 1092px;
 }
-
 .single-grid:after,
 .single-grid-item:after {
   clear: both;
   content: "";
   display: block;
 }
-
 .single-col {
   float: left;
   box-sizing: border-box;
@@ -71,27 +67,22 @@ SOFTWARE.
 .single-col.single-col-12 {
   width: 100%;
 }
-
 .single-align-center {
   margin: 0 auto;
   align-self: center;
 }
-
 .hidden {
   display: none !important;
 }
-
 /** Text **/
 a {
   color: inherit;
   text-decoration: none;
   cursor: pointer;
 }
-
 .text-center {
   text-align: center;
 }
-
 /** Album Pages **/
 .single-album-art {
   margin-bottom: 26px;
@@ -107,14 +98,12 @@ a {
     padding: 0;
   }
 }
-
 .single-album-release-date {
   font-weight: bold;
   font-size: 0.9em;
   margin-bottom: 15px;
   display: block;
 }
-
 .single-album-description {
   font-size: 0.9em;
 }
@@ -136,7 +125,6 @@ a {
     padding: 0;
   }
 }
-
 .single-share-menu {
   margin-bottom: 2em;
 }
@@ -144,7 +132,6 @@ a {
   display: inline-block;
   margin-right: 0.25em;
 }
-
 .single-col-r {
   padding-left: 30px;
 }
@@ -155,7 +142,6 @@ a {
     padding: 0;
   }
 }
-
 .single-album-header {
   box-sizing: border-box;
 }
@@ -180,7 +166,6 @@ a {
     padding-left: 0;
   }
 }
-
 .single-album-price {
   margin-bottom: 1.5em;
   display: block;
@@ -198,39 +183,32 @@ a {
 .single-album-price span i {
   display: block;
 }
-
 .single-album-track-play {
   cursor: pointer;
   opacity: 0.5;
 }
-
 .single-field-label {
   font-size: 0.75em;
   margin-bottom: 0.25em;
   font-weight: bold;
 }
-
 .single-select-field,
 .single-album-add-to-cart .btn {
   display: block;
   width: 100%;
   margin-bottom: 10px;
 }
-
 .single-presale-note {
   font-size: 0.9em;
   margin-bottom: 15px;
 }
-
 .single-ajaxified-cart-feedback i {
   vertical-align: middle;
   font-size: 1em;
 }
-
 .single-hidden {
   display: none !important;
 }
-
 .single-tracklist {
   clear: both;
   margin-bottom: 2em;
@@ -348,7 +326,6 @@ a {
   line-height: 1;
   vertical-align: middle;
 }
-
 /** Livestream Pages **/
 .single-login {
   padding: 60px 15px;
@@ -389,7 +366,6 @@ a {
 .single-login .recover-links a:hover {
   text-decoration: underline;
 }
-
 .single-access-denied {
   text-align: center;
   padding: 60px 30px;
@@ -398,30 +374,43 @@ a {
 .single-access-denied .btn {
   margin: 15px auto 30px;
 }
-
-.single-livestream {
-  padding: 15px;
-  box-sizing: border-box;
+/* Player */
+.single-livestream .single-livestream-player {
+  position: relative;
+  max-width: 100%;
+  padding: 45% 0 0;
+  background-color: #101010;
 }
-@media screen and (max-width: 670px) {
-  .single-livestream {
-    padding: 0;
+.single-livestream .single-livestream-player.chat-disabled {
+  padding-top: 56.25%;
+}
+/* LG */
+@media screen and (max-width: 1200px) {
+  .single-livestream .single-livestream-player {
+    padding-top: 42.2%;
   }
 }
-.single-livestream .single-livestream-player {
-  max-width: 1440px;
+/* MD & SM */
+@media screen and (max-width: 960px) {
+  .single-livestream .single-livestream-player {
+    padding-top: calc(56.25% + 407px);
+  }
+  .single-livestream .single-livestream-player.chat-disabled {
+    padding-top: calc(56.25% + 43px);
+  }
 }
-
-.single-livestream .single-livestream-player.chat-disabled {
-  max-width: 1322px;
-  margin: 0 auto;
-}
-
-.single-livestream .single-livestream-player #single-player {
-  border-radius: 8px;
+/* iframe */
+.single-livestream #single-player {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  position: absolute;
+  top: 0;
+  text-transform: none;
+  line-height: 1.5;
 }
-
+/* Merch Table */
 .single-collection {
   display: flex;
   justify-content: center;
@@ -462,7 +451,20 @@ a {
     width: 100% !important;
   }
 }
-
+/** NFT Countdown Page **/
+.single-nft-countdown-data h1,
+.single-nft-countdown-data p {
+  margin-bottom: 0;
+}
+.single-nft-countdown-data h2 {
+  margin-top: 0;
+}
+.single-nft-title {
+  margin-bottom: 4em;
+}
+.single-nft-title p {
+  margin-top: 0;
+}
 /** FAQ Page **/
 .single-page-faq {
   padding-top: 40px;
@@ -476,7 +478,42 @@ a {
 .single-page-faq a {
   text-decoration: underline;
 }
-
+/** Single Cards **/
+.single-card-title {
+  padding-left: 15px;
+  text-decoration: underline;
+  text-decoration-thickness: 5%;
+}
+.single-card {
+  display: inline-block;
+  width: 500px;
+  height: 225px;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  padding: 5px;
+  cursor: pointer;
+}
+.single-card:hover {
+  background-color: lightgray;
+  transition: background 0.5s;
+}
+.single-card-image {
+  padding: 5px;
+}
+.single-card-image > img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+}
+.single-card-info {
+  width: 275px;
+}
+.single-card-description {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
 /** Animations **/
 .animated {
   -webkit-animation-duration: 0.25s;
@@ -484,12 +521,10 @@ a {
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
 }
-
 .pulse {
   -webkit-animation-name: pulse;
   animation-name: pulse;
 }
-
 @-webkit-keyframes pulse {
   from {
     -webkit-transform: scale3d(1, 1, 1);
@@ -542,9 +577,6 @@ a {
 .single-grid.jumpstart {
   padding: 150px 0;
 }
-
 .template-page .main-content {
   padding-top: 0;
 }
-
-/*# sourceMappingURL=single-v3.css.map */

@@ -1,3 +1,18 @@
+{%- comment -%}
+  The contents of the cart.liquid template can be found in /sections/cart-template.liquid
+{%- endcomment -%}
+
+<div class="container-indent nomargin{% if cart.item_count > 0 %} hide{% endif %} tt-empty-cart-js">
+  <div class="tt-empty-cart">
+    <span class="tt-icon icon-f-39"></span>
+    <h1 class="tt-title">{{ 'cart.general.empty' | t }}</h1>
+    <p>{{ 'cart.general.empty_cart' | t }}</p>
+    <a href="/" class="btn ttbtnmainstyle">{{ 'cart.general.continue_shopping' | t }}</a>
+  </div>
+</div>
+
+<div class="line-items-box-js {% if cart.item_count == 0 %} hide{% endif %}">
+
 {%- if cart.item_count > 0 -%}
 {%- assign item = section.settings -%}
 {% case item.cart_design %}{% when 'design2' %}{% include "cartpage-design2" %}{% else %}{% include "cartpage-design1" %}{% endcase %}
@@ -302,6 +317,8 @@
 
 {%- endif -%}
 
+</div>
+  
 {% schema %}
   {
     "name": "Cart page",

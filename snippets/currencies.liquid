@@ -43,6 +43,7 @@
       var v = $('.single-currency-box').find('.active').html();
       $('.single-currency-box').find('button').find('.tt-text').html(v);
     }
+    $(window).trigger('setnewcurrencyinprogress');
     
     buttons.click(function(e) {
       e.preventDefault();
@@ -58,6 +59,7 @@
       }
 
       cur != Currency.currentCurrency && Currency.convertAll(Currency.currentCurrency, cur);
+      $(window).trigger('setnewcurrencyinprogress');
     });
     
     $('body').on('refreshCurrency', function() {

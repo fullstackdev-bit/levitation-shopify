@@ -1,8 +1,39 @@
+{%- comment -%}
+  Comments will not appear right after they are submitted, either to be checked for spam
+  or to await moderation. When a comment is submitted, the browser is redirected to a page
+  that includes the new comment id in its URL.
+    Example: http://shopname.myshopify.com/blogs/news/2022072-my-post?comment=3721372
+{%- endcomment -%}
+
+{%- assign new_comment = false -%}
+{%- if comment and comment.created_at -%}
+  {%- assign new_comment = true -%}
+  {%- assign new_comment_id = comment.id -%}
+{%- endif -%}
+
+{%- if new_comment -%}
+  {%- assign duplicate_comment = false -%}
+  {%- for comment in article.comments -%}
+    {%- if comment.id == new_comment_id -%}
+      {%- assign duplicate_comment = true -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if duplicate_comment -%}
+    {%- assign number_of_comments = article.comments_count -%}
+  {%- else -%}
+    {%- assign number_of_comments = article.comments_count | plus: 1 -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign number_of_comments = article.comments_count -%}
+{%- endif -%}
+
 {%- assign item = section.settings -%}
 <div class="container-indent main_color" itemscope itemtype="http://schema.org/Article">
   <div class="container container-fluid-custom-mobile-padding">
     <div class="row justify-content-center">
-      <div class="col-xs-12 col-md-10 col-lg-8 col-md-auto">
+      <div class="col-xs-12 {% if item.sidebar %} col-md-8 {% else %} col-md-10 {% endif %} col-lg-9 col-md-auto">
         <div class="tt-post-single" itemprop="articleBody">
           <h1 class="tt-title">{{ article.title }}</h1>
           {%- if item.blog_show_author or item.blog_show_date -%}
@@ -14,7 +45,7 @@
           <div class="tt-featured-post-img">
             <img src="{{ article.image.src | img_url: 'master' }}" alt="{{ article.image.alt }}">
           </div>
-          {%- endunless -%}  
+          {%- endunless -%}
           <div class="tt-post-content">
             
             {{ article.content }}
@@ -32,6 +63,11 @@
           
         </div>
       </div>
+      {% if item.sidebar %}
+      <div class="col-xs-12 col-md-4 col-lg-3 col-md-auto rightColumn">
+        {%- include 'article-sidebar' -%}
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -45,9 +81,119 @@
 {%- endif -%}
 
 
+{%- if item.show_related_article -%}
+{%- assign related_length = item.article_limit | plus: 0 -%}
+<div class='relatedArticles container'>
+  <h2>Related Articles</h2>
+   <div class="tt-blog-masonry">
+      <div class="tt-blog-init tt-grid-col-2 tt-layout-01-post tt-add-item">
+        {% assign counter = 0 %}
+        {% assign skip_articles = article.handle | split: '.....' %}
+        {% for tag in article.tags %}          
+          {% for related_article in blog.articles %}  
+            {% if related_article.tags contains tag and counter < related_length %}
+              {% unless skip_articles contains related_article.handle %}
+                {% assign counter = counter | plus: 1 %}
+                {% assign temp = related_article.handle | split: '.....' %}
+                {% assign skip_articles = skip_articles | concat: temp %}
+                {%- include 'blog-related-masonry-item' article: related_article -%}
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+     </div>
+  </div>
+</div>
+{%- endif -%}
+
+{%- if blog.comments_enabled? -%}
+{%- if number_of_comments > 0 -%}
+<div class="container-indent">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xs-12 col-md-10 col-lg-8 col-md-auto">
+        <h6 class="tt-title-border" id="comments">{{ 'blogs.comments.comments_with_count' | t: count: number_of_comments }}</h6>
+        
+        {%- paginate article.comments by 100 -%}
+
+        {%- comment -%}
+        #comments is required, it is used as an anchor link by Shopify.
+        {%- endcomment -%}
+        {%- if new_comment -%}
+        <p class="tt-base-color">
+          {%- if blog.moderated? -%}
+          {{ 'blogs.comments.success_moderated' | t }}
+          {%- else -%}
+          {{ 'blogs.comments.success' | t }}
+          {%- endif -%}
+        </p>
+        {%- endif -%}
+
+        <div class="tt-comments-layout">
+          {%- comment -%}
+          If a comment was just submitted with no blank field, show it.
+          {%- endcomment -%}
+          {%- if new_comment -%}
+            {%- include 'blog-comment' -%}
+          {%- endif -%}
+
+          {%- for comment in article.comments -%}
+          {%- unless comment.id == new_comment_id -%}
+            {%- include 'blog-comment' -%}
+          {%- endunless -%}
+          {%- endfor -%}
+        </div>
+
+        {%- endpaginate -%}
+      </div>
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+<div class="container-indent">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xs-12 col-md-10 col-lg-8 col-md-auto">
+        <div class="form-single-post contact-form form-default">
+          <h6 class="tt-title-border" id="addcomment">{{ 'blogs.comments.title' | t }}</h6>
+          {%- form 'new_comment', article -%}
+          	{{ form.errors | default_errors }}
+          
+            <div class="form-group">
+              <label for="inputName" class="control-label">{{ 'blogs.comments.name' | t }}</label>
+              <input type="text" name="comment[author]" class="form-control" id="inputName" placeholder="{{ 'blogs.fields.name' | t }}">
+            </div>
+            <div class="form-group">
+              <label for="inputEmail" class="control-label">{{ 'blogs.comments.email' | t }}</label>
+              <input type="email" name="comment[email]" class="form-control" id="inputEmail" placeholder="{{ 'blogs.fields.email' | t }}">
+            </div>
+            <div class="form-group">
+              <label for="textarea" class="control-label">{{ 'blogs.comments.message' | t }}</label>
+              <textarea class="form-control" name="comment[body]" id="textarea" placeholder="{{ 'blogs.fields.message' | t }}" rows="8"></textarea>
+            </div>
+          
+            {%- if blog.moderated? -%}
+              <p class="fine-print">{{ 'blogs.comments.moderated' | t }}</p><br>
+            {%- endif -%}
+          
+            <div class="form-group">
+              <button type="submit" class="btn ttbtnmainstyle">{{ 'blogs.comments.post' | t }}</button>
+            </div>
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- endif -%}
+
+
 {% schema %}
   {
     "name": "Posts",
+    "class": "shopify-section-article-template",
     "settings": [
       {
         "type": "checkbox",
@@ -78,7 +224,141 @@
         "id": "show_share_buttons",
         "label": "Show social sharing buttons",
         "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "sidebar",
+        "label": "Add Sidebar",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_related_article",
+        "label": "Show Related Article",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "article_limit",
+        "label": "Related Article Length. Integer",
+        "default": "5"
       }
-    ]
+
+    ],
+    "blocks": [      
+      {
+        "type": "about",
+        "name": "About",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "ABOUT"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image",
+            "info": "240x240px"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "HTML",
+            "default": "Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
+          },
+          {
+            "type": "url",
+            "id": "banner_link",
+            "label": "Link",
+            "info": "Optional"
+          },
+          {
+            "type": "checkbox",
+            "id": "show_button",
+            "label": "Show button",
+            "default": true
+          },
+          {
+            "type": "text",
+            "id": "button",
+            "label": "Button Name",
+            "default": "READ MORE"
+          }
+        ]
+      },
+      {
+        "type": "custom_html",
+        "name": "Custom Html",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "TITLE"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "HTML"
+          }
+        ]
+      },
+      {
+        "type": "collection",
+        "name": "Products",
+        "settings": [          
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Related Products"
+          },
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          },
+          {
+            "type": "text",
+            "id": "limit",
+            "label": "Items Length. Integer",
+            "default": "8"
+          }
+        ]
+      },
+      {
+        "type": "newsletter",
+		"limit": 1,
+        "name": "Newsletter",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "NEWSLETTER SIGNUP"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "Text",
+			"default": "Subscribe to our email and be the first to know about our special offers! In addition, we will give you a 15% discount on the next order after registration."
+          },
+          {
+            "type": "textarea",
+            "id": "form_text",
+            "label": "Form text",
+			"default": "Enter your e-mail"
+          },
+          {
+            "type": "textarea",
+            "id": "button",
+            "label": "Button text",
+			"default": "GET!"
+          }
+        ]
+      }
+	]
   }
 {% endschema %}

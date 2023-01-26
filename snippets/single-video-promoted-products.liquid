@@ -1,0 +1,83 @@
+{% comment %}
+  <!--
+  Copyright (c) 2022 Single Media, Inc - ALL RIGHTS RESERVED
+
+  NOTICE:  All information contained herein is, and remains the property of Single Media, Inc
+  and its suppliers, if any. The intellectual and technical concepts contained herein are
+  proprietary to Single Media, Inc and its suppliers and may be covered by U.S. and Foreign Patents,
+  patents in process, and are protected by trade secret or copyright law. Dissemination of this
+  information or reproduction of this material is strictly forbidden unless prior
+  written permission is obtained from Single Media, Inc.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+  -->
+{% endcomment %}
+
+<div class="single-grid-item single-collection">
+  {% for product in collections[collection_handle].products %}
+    <div class="single-collection-product single-col col-1_4">
+      <a class="single-collection-product-link" href="{{ product.url }}" target="_blank">
+        <div class="single-collection-product-img-wrap">
+          <img class="single-collection-product-img" src="{{ product.featured_image | img_url: '640x640' }}" alt="{{ product.featured_image.alt }}" loading="lazy"/>
+        </div>
+        <h3 class="single-collection-product-title card__heading h5">{{ product.title }}</h4>
+      </a>
+      {% unless product.variants.size > 1 %}
+        <p class="single-collection-product-price" id="single-product-price-{{product.id}}">{{ product.variants.first.price | money }}</p>
+      {% endunless %}
+      <form class="single-collection-product-form" action="/cart/add" method="post" enctype="multipart/form-data" id="product_form_{{product.id}}">
+        <input type="hidden" name="properties[__livestream_id__{{ video_id }}]" value=""/>
+        {% if product.variants.size > 1 %}
+          <div class="select single-select-wrap single-variant-select">
+            <select name="id" class="single-select select__select" id="single-variant-select-{{product.id}}" onchange="setPrice(this.options[this.selectedIndex]);">
+              {% for variant in product.variants %}
+                {% if variant.available == true %}
+                  <option value="{{variant.id}}" data-price="{{variant.price | money }}" data-product-id="{{product.id}}">{{ variant.title }} - {{variant.price | money }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            {% render 'single-icon-caret' %}
+          </div>
+        {% else %}
+          <input type="hidden" name="id" id="single-variant-select-{{product.id}}" value="{{ product.variants.first.id }}"/>
+        {% endif %}
+        {% if product.selling_plan_groups %}
+          <input type="hidden" id="selling-plan-{{ product.id }}" name="selling_plan"/>
+          <script type="text/javascript">
+            const product {{ product.id }} = {{ product | json }};
+            const variantSelect {{ product.id }} = document.getElementById('single-variant-select-   {{ product.id }}');
+            const spSelect {{ product.id }} = document.getElementById('selling-plan-   {{ product.id }}');
+            variantSelect {{ product.id }}.addEventListener('change', populateSellingPlan {{ product.id }});
+            $(document).ready(populateSellingPlan {{ product.id }});
+
+            function populateSellingPlan {{ product.id }}
+            () {
+              const variant = product {{ product.id }}.variants.find(v => v.id.toString() === variantSelect {{ product.id }}.value);
+              if (!! variant && !! variant.selling_plan_allocations && variant.selling_plan_allocations.length > 0) {
+                spSelect {{ product.id }}.value = variant.selling_plan_allocations[0].selling_plan_id;
+              }
+            }
+
+            /* Update Variant Price */
+            setPrice = function(selectedItem) {
+              const price = selectedItem.attributes['data-price'].value;
+              const productId = selectedItem
+                .attributes['data-product-id']
+                .value
+                document
+                .getElementById("single-product-price-" + productId)
+                .innerHTML = price;
+            };
+          </script>
+        {% endif %}
+        <input type="submit" name="add" id="add" value="{% render 'single-add-to-cart' %}" class="single-collection-add-to-cart button">
+      </form>
+    </div>
+  {%- endfor -%}
+</div>

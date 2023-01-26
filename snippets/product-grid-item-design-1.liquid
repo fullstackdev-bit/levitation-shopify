@@ -3,13 +3,11 @@
 <div class="respimgsize tt-product product-parent">
   <div class="tt-image-box">
     <a href="{{ product.url | within: collection }}">
-      {%- assign main_url_image = main_url_image | product_img_url: url_images_size -%}
-      {%- if settings.use_cached_images %}{%- assign main_url_image = main_url_image | split: '?' | first -%}{%- endif -%}
       <span class="tt-img">
         <img class="lazyload"
-             data-mainimageratio = '{{ product.featured_image.aspect_ratio }}'
-             data-mainimage="{{ product.featured_image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
-             alt="{{ product.featured_image.alt | escape }}"/>
+             data-mainimageratio = '{{ main_url_image.aspect_ratio }}'
+             data-mainimage="{{ main_url_image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+             alt="{{ main_url_image.alt | escape }}"/>
       </span>
       {%- if hover_url_image != '' -%}
       {%- assign hover_url_image = hover_url_image | product_img_url: url_images_size -%}
@@ -30,6 +28,7 @@
        data-toggle="modal"
        data-target="#ModalquickView"
        class="tt-btn-quickview"
+       data-firstavavariantid="{{ pr_variant.id }}"
        data-value="{{ product.url | within: collection | split: "?" | first }}"
        data-quantity="{% for variant in product.variants %}{% if variant.inventory_policy == "continue" %}{{ variant.id }}-continue{{ variant.inventory_quantity }};{% else %}{{ variant.id }}-{{ variant.inventory_quantity }};{% endif %}{% endfor %}"{% if settings.first_variant_column_is_image and settings.use_in_the_small_products %}
        data-optionimages='{% include 'get_product_images_from_first_column' %}'{% endif %}
@@ -42,13 +41,16 @@
 
     {%- endunless -%}
     <a class="tt-img-parent" href="{{ product.url | within: collection }}">
-      {%- assign main_url_image = main_url_image | product_img_url: url_images_size -%}
-      {%- if settings.use_cached_images %}{%- assign main_url_image = main_url_image | split: '?' | first -%}{%- endif -%}
-      <span class="tt-img">        
+      <span class="tt-img">
+        {%- if template == "collection.ajax" -%}
+        <img src="{{ main_url_image | product_img_url: '600x' }}"
+             alt="{{ main_url_image.alt | escape }}"/>
+        {%- else -%}
         <img class="lazyload"
-             data-mainimageratio = '{{ product.featured_image.aspect_ratio }}'
-             data-mainimage="{{ product.featured_image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
-             alt="{{ product.featured_image.alt | escape }}"/>
+             data-mainimageratio = '{{ main_url_image.aspect_ratio }}'
+             data-mainimage="{{ main_url_image | product_img_url: '100x100' | replace: '100x100', 'respimgsize' }}"
+             alt="{{ main_url_image.alt | escape }}"/>
+        {%- endif -%}
       </span>
       {%- if hover_url_image != '' -%}
         {%- assign hover_url_image = hover_url_image | product_img_url: url_images_size -%}
@@ -92,10 +94,10 @@
 
       {%- if settings.show_product_vendor or settings.show_product_type -%}
       <ul class="tt-add-info">
-        {%- if settings.show_product_vendor -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}/{{ product.vendor | handle }}"
+        {%- if settings.show_product_vendor -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.vendor={{ product.vendor | downcase | excape | replace: ' ','+' }}"
                                                       class="text-uppercase"
                                                       >{{ product.vendor }}</a></li>{%- endif -%}
-        {%- if settings.show_product_type -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}/{{ product.type | handle }}"
+        {%- if settings.show_product_type -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.product_type={{ product.type | downcase | excape | replace: ' ','+' }}"
                                                     class="text-uppercase"
                                                     >{{ product.type }}</a></li>{%- endif -%}
       </ul>
@@ -176,6 +178,7 @@
            data-toggle="modal"
            data-target="#ModalquickView"
            class="tt-btn-quickview"
+           data-firstavavariantid="{{ pr_variant.id }}"
            data-value="{{ product.url | within: collection | split: "?" | first }}"
            data-quantity="{% for variant in product.variants %}{% if variant.inventory_policy == "continue" %}{{ variant.id }}-continue{{ variant.inventory_quantity }};{% else %}{{ variant.id }}-{{ variant.inventory_quantity }};{% endif %}{% endfor %}"{% if settings.first_variant_column_is_image and settings.use_in_the_small_products %}
            data-optionimages='{% include 'get_product_images_from_first_column' %}'{% endif %}

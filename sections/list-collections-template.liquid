@@ -17,8 +17,8 @@
 {%- endif -%}{%- unless forloop.last -%}{%- assign clearfix = clearfix | append: ',' -%}{%- endunless -%}
 {%- endfor -%}{%- assign clearfix = clearfix | append: '<div class="clearfix hidden-xs hidden-sm"></div>' | append: ',' -%}{%- endfor -%}{%- assign array = array | split: '|' -%}{%- assign clearfix = clearfix | split: ',' -%}
 
-<div class="container-indent">
-  <div class="container">
+<div class="{% if item.top_offset == 'none' %}nomargin {% elsif item.top_offset == 'small' %}tt-offset-small {% endif %}container-indent">
+  <div class="container{% if item.fullwidth %}-fluid{% endif %}">
     {%- if item.show_title_m -%}
     <div class="tt-block-title{% if item.title_to_left %} text-left{% endif %}{% if item.boxed_title and item.fullwidth %} container{% endif %}">
       <h2 class="tt-title">{{ item.text1 }}</h2>
@@ -91,6 +91,32 @@
   {
     "name": "Collections list page",
     "settings": [
+      {
+        "type": "select",
+        "id": "top_offset",
+        "label": "Top Offset",
+        "default": "normal",
+        "options": [
+          {
+            "value": "none",
+            "label": "None"
+          },
+          {
+            "value": "small",
+            "label": "Small"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "fullwidth",
+        "label": "Fullwidth size",
+        "default": false
+      },
       {
         "type": "radio",
         "id": "item_grid",

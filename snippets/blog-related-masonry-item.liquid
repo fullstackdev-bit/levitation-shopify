@@ -1,0 +1,14 @@
+{%- if article.comments.size > 0 -%}{%- assign comment_url = article.url | append: '#comments' -%}{%- else -%}{%- assign comment_url = article.url | append: '#addcomment' -%}{%- endif -%}
+<div class="element-item">
+  <div class="tt-post">
+    {%- unless article.image == blank -%}
+    <div class="tt-post-img">
+      <a href="{{ article.url }}"><img src="{{ article.image.src | img_url: '1024x1024' }}" alt="{{ article.image.alt }}"></a>
+    </div>
+    {%- endunless -%}  
+    <div class="tt-post-content">
+      <div class="tt-background"></div>      
+      <h2 class="tt-title"><a href="{{ article.url }}">{{ article.title }}</a></h2>      
+    </div>
+  </div>
+</div>

@@ -1,5 +1,60 @@
 {%- assign count = 0 -%}
-{%- capture data -%}{%- for i in (1..10) -%}
+{%- capture data -%}
+
+
+{%- assign ftitles = '%%%' -%}
+{%- for filter in collection.filters -%}
+{%- assign fl = filter.label | append: '_' -%}
+{%- if title_new_name contains fl -%}{%- assign fl = title_new_name | split: fl | last | split: ',' | first | strip -%}
+{%- else -%}{%- assign fl = filter.label -%}
+{%- endif -%}
+{%- assign ftitles = ftitles | append: fl | append: ',' -%}
+{%- assign fav = '' -%}
+
+{%- for filter_value in filter.active_values -%}
+{%- assign fav = fav | append: filter_value.label | append: ',' -%}
+{%- endfor -%}
+{%- assign ftitles = ftitles | append: fav | append: '%%%' -%}
+{%- endfor -%}
+
+
+{%- for filter in collection.filters -%}
+{%- for filter_value in filter.active_values -%}
+
+{%- if forloop.first -%}
+{%- assign fav = ',' | append: filter_value.label | append: ',' -%}
+<li{% if titlestouppercase %} class="text-uppercase"{% endif %}>{{ ftitles | split: fav | first | split: '%%%' | last | split: ',' | first }}:</li>
+{%- endif -%}
+
+<li class="padding-left-10">
+  {%- assign tooltip_remove_str = 'general.tooltip_texts.filter_remove' | t: filter_name: filter_value.label -%}
+  <a href="{{ filter_value.url_to_remove }}" class="forremoverealfiltres" data-tooltip="{{tooltip_remove_str}}" data-tposition="right" data-findtag="span">
+    <span>{{ filter_value.label | escape }}</span>
+  </a>
+</li>
+{%- endfor -%}
+
+{% if filter.type == "price_range" %}
+{%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+{%- assign fav = ',' | append: filter_value.label | append: ',' -%}
+<li{% if titlestouppercase %} class="text-uppercase"{% endif %}>
+  {%- assign flla = filter.label | append: '_' -%}
+  {%- if title_new_name contains flla -%}{{title_new_name | split:flla | last | split:',' | first}}{%- else -%}{{filter.label}}{%- endif -%}:
+</li>
+<li class="padding-left-10 price_range_active">
+  <a href="{{ filter.url_to_remove }}" class="forremoverealfiltres" data-tooltip="{{'general.tooltip_texts.filter_remove' | t: filter_name: ''}}" data-tposition="right" data-findtag="span">
+    <span>{%- if filter.min_value.value -%}{{ filter.min_value.value | money }}{%- else -%}{{ 0 | money }}{%- endif -%}-{%- if filter.max_value.value -%}{{ filter.max_value.value | money }}{%- else -%}{{ filter.range_max | money }}{%- endif -%}</span>
+  </a>
+</li>
+{%- endif -%}
+{% endif %}
+
+
+{%- endfor -%}
+
+
+
+{%- for i in (1..10) -%}
 {%- assign group_data = 'filtergroup' | append: i -%}
 {%- assign group_key = 'show_' | append: group_data -%}
 {%- assign group_title = 'title_' | append: group_data -%}
@@ -71,7 +126,7 @@
 {%- assign data = _data | append: data -%}
 
 <div class="tt-collapse open{% if data == '' %} hide{% endif %}">
-  <h3 class="tt-collapse-title">{{ 'collections.sidebar.filtres_title' | t }}</h3>
+  <h3 class="tt-collapse-title{% if titlestouppercase %} text-uppercase{% endif %}">{{ 'collections.sidebar.filtres_title' | t }}</h3>
   <div class="tt-collapse-content filtres-remove-js">
     <ul class="tt-filter-list filtres-js clear-filters">{{ data }}</ul>
     <a href="/collections/{{ collection.handle }}" class="btn-link-02 filtres-remove-js clear_all">{{ 'collections.sidebar.clear_all' | t }}</a>
