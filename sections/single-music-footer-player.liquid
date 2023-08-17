@@ -84,21 +84,17 @@
       <span class="next material-icons"> skip_next </span>
     </div>
 
-    <div class="track-purchase">
-      <div class="single-track-add-to-cart single-footer-add-to-cart">
-        <div
-          class="single-track-btn"
-          style="background-color:{{ section.settings.btn_bg }}; color:{{ section.settings.btn_text }};"
-        >
-          <i class="material-icons">add_shopping_cart</i>
-          <span></span>
-        </div>
+    {% unless shop.metafields.single_inc.whitelabel_enabled.value == true %}
+      <div class="powered-by-logo">
+        <a href="https://single.xyz" target="_blank" rel="noopener">
+          <img src="{{ 'single-logo-only.svg' | asset_url }}" loading="lazy" height="30" width="30" />
+        </a>
       </div>
-    </div>
+    {% endunless %}
   </div>
 </div>
 
-<script src="https://unpkg.com/wavesurfer.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@6.6.3"></script>
 <script>
   var ignoreSilenceModeProcessed = false;
   function ignoreSilenceMode() {
@@ -213,15 +209,6 @@
                   self.addTrackToCart(variantId, trackId);
               });
           });
-
-          //add to cart watcher
-          document.querySelector('.single-footer-add-to-cart').addEventListener('click', function() {
-            {% if product.metafields.album.track_count == 1 %}
-              self.addAlbumToCart(self.currentTrackData.trackId);
-            {% else %}
-              self.addTrackToCart(self.currentTrackData.variantId, self.currentTrackData.trackId);
-            {% endif %}
-          });
       },
 
       addWavesurferListeners: function addWavesurferListeners() {
@@ -301,23 +288,6 @@
               this.currentTrack = index;
               this.currentTrackData = this.links[this.currentTrack].dataset;
 
-            {% if product.metafields.album.track_count == 1 %}
-              var atcButtonIcon = document.querySelector('.single-footer-player .single-track-add-to-cart .single-track-btn')
-              atcButtonIcon.innerHTML = '<i class="material-icons single-add-track-to-cart-icon-'
-                  + this.currentTrackData.trackId
-                  + '">add_shopping_cart</i><span>'
-                  + '{{ product.variants[0].price | money_with_currency }}'
-                  + '</span>';
-            {% else %}
-              var atcButtonIcon = document.querySelector('.single-footer-player .single-track-add-to-cart .single-track-btn')
-              atcButtonIcon.innerHTML = '<i class="material-icons single-add-track-to-cart-icon-'
-                  + this.currentTrackData.trackId
-                  + '">add_shopping_cart</i><span>'
-                  + this.currentTrackData.price
-                  + '</span>';
-
-              document.querySelector('.single-footer-add-to-cart span').innerHTML = this.currentTrackData.price;
-            {% endif %}
               this.links[this.currentTrack].classList.add('active');
 
               document.querySelector('.track-title').innerHTML = this.currentTrackData.title;

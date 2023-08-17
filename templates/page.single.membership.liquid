@@ -336,12 +336,12 @@ SOFTWARE.
      }
   
 	@media screen and (max-width: 768px) {
-          .single-card-grid .single-fan-subscription {
+        .single-card-grid .single-fan-subscription {
 		  border: 2px solid black;
 		  border-radius: 4px;
 		  background: #ececec;
-            padding: 5px;
-            margin-bottom: 10px;
+          padding: 15px;
+          margin-bottom: 10px;
 		}
 
 	 	.single-card-grid .single-fan-subscription.tiers-open .single-card-info .single-card-title-wrapper {
@@ -549,12 +549,48 @@ SOFTWARE.
          width: 250px;
     }
 
+    /* Cancel Styles */
+    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled {
+      margin: 15px 0 30px 0;
+      background: var(--gradient-base-background-2);
+      padding: 15px;
+      border-radius: 4px;
+    }
+
+    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled h3 {
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+  
+    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled p {
+      margin: 0;
+    }
+
+    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group {
+      display: flex;
+    }
+
+    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group .btn {
+      margin-right: 15px;
+    }
+
+    @media screen and (max-width: 550px) {
+      #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group {
+        flex-direction: column;
+      }
+
+      #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group .btn {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+    }
 	
     @media screen and (max-width: 768px) {
 		#single-fan-subscription-mgmt .single-fan-subscription {
              border: 2px solid black;
              border-radius: 4px;
              background: #ececec;
+             padding: 15px;
         }
         
       	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info {
@@ -571,9 +607,18 @@ SOFTWARE.
       	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper h2 {
              margin: 0;
         }
-        
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper .single-card-image {
-             display: none;
+        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper > .single-card-image {
+          display: none;
+        }
+
+        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-image {
+            max-width: fit-content;
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text {
+          flex: auto;
         }
         
       	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info {
@@ -609,6 +654,7 @@ SOFTWARE.
         flex-direction: column;
       }
     }
+
 </style>
 
 <div class="single-gated-page page-width fan-sub-mgmt-wrapper">

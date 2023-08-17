@@ -19,191 +19,30 @@
   -->
 {% endcomment %}
 
-{% comment %}
-  <!-- Single Default Styles - Can be edited in assets/single-v3.scss.liquid -->
-{% endcomment %}
-{{ 'single-base.css' | asset_url | stylesheet_tag }}
-{{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
+{% render 'single-product-block', access_response: access_response, login_types: login_types,
+        product: product, featured_image: featured_image, show_title: show_title, description_position: description_position,
+        show_images: show_images, show_add_to_cart: show_add_to_cart, show_buy_it_now: show_buy_it_now,
+        title_size: title_size, price_size: price_size, image_width: image_width, product_width: product_width %}
 
-{% comment %}
-  <!-- jQuery -->
-{% endcomment %}
-{{ '//ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js' | script_tag }}
+{% render 'single-grant-access',
+        login_types: login_types,
+        product_ids: product_ids,
+        product_hidden_count: product_hidden_count,
+        video_ids: video_ids,
+        video_hidden_count: video_hidden_count,
+        title: 'Grants access to the following:',
+        title_size: 'h2',
+        row_title_size: 'h2',
+        product_title: 'Exclusive Products',
+        video_title: 'Exclusive Videos',
+        video_show_title: 'true',
+        video_show_artist: 'true',
+        video_show_date: 'true',
+        product_show_title: 'true',
+        product_show_description: 'true',
+        product_show_badge: 'true',
+        column_count: '4',
+        video_column_width: '1',
+        product_column_width: '2' %}
 
-{% assign product = shop.metafields.single_gated_content[gated_product_id].value %}
-{% assign featured_image = product.images.first.src | image_url: 'grande' %}
-
-<script>
-  window.SINGLE_PRODUCT_DATA = {{ product | json }};
-</script>
-
-<style>
-  .single-product-add-to-cart-btns .single-login-button {
-    width: 100%;
-  }
-
-  .single-image-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .single-image-row > img {
-    width: 15%;
-    cursor: pointer;
-  }
-</style>
-
-<div class="single-grid single-product" itemscope itemtype="http://schema.org/Product">
-  <div class="single-grid-item">
-    <!-- Product Metatags -->
-    <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
-    <meta itemprop="image" content="{{ featured_image }}">
-    <meta property="og:title" content="{{ product.title }}">
-    <meta property="og:image" content="{{ featured_image }}">
-    <meta property="og:url" content="{{ shop.url }}{{ product.url }}">
-
-    <!-- Left Column -->
-    <div class="single-col col-2_4">
-      {% for image in product.images %}
-        <div class="single-product-image {% unless forloop.first %}hidden{% endunless %}" id="product-image-{{ forloop.index0 }}">
-          <img src="{{ image.src }}">
-        </div>
-      {% endfor %}
-      {% if product.images.size > 1 %}
-        <div class="single-image-row">
-          {% for image in product.images %}
-            <img src="{{ image.src }}" onclick="showImage({{ forloop.index0 }});">
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <!-- End Left Column -->
-
-    <!-- Right Column -->
-    <div class="single-col col-2_4">
-      <!-- Begin Single Header -->
-      <div class="single-product-header">
-        <h1 class="single-product-title" itemprop="name">
-          <span>{{ product.title }}</span>
-        </h1>
-        <meta itemprop="priceCurrency" content="{{ shop.currency }}">
-        {% render 'single-nft-progress-bar', product: product %}
-        <!-- Add to Cart -->
-        <single-product-form options="{{ product.options | map: 'name' | join: ',' }}">
-          <h3 class="single-product-price">{{ product.variants[0].price | money_with_currency }}</h3>
-          {% if product.variants.size > 1 %}
-            <div class="single-product-options">
-              {% for option in product.options %}
-                {% assign option_loop = forloop %}
-                <fieldset class="js product-form__input" id="fieldset-{{ option.name | handleize }}">
-                  <legend class="form__label">{{ option.name }}</legend>
-                  {% for value in option.values %}
-                    <input
-                            class="single-product-option-input"
-                            type="radio"
-                            id="{{ product.id }}-{{ option_loop.index0 }}-{{ forloop.index0 }}"
-                            name="{{ option.name }}"
-                            value="{{ value }}"
-                            {% if forloop.first %}
-                              checked
-                            {% endif %}
-                    >
-                    <label
-                            class="single-product-option-label"
-                            for="{{ product.id }}-{{ option_loop.index0 }}-{{ forloop.index0 }}"
-                    >
-                      {{- value -}}
-                    </label>
-                  {% endfor %}
-                </fieldset>
-              {% endfor %}
-            </div>
-          {% else %}
-            {% assign variant = product.variants.first %}
-            <div class="single-product-variant-title">
-              {% unless variant.title == 'Default Title' %}{{ variant.title }} - {% endunless -%}
-              {{- variant.price | money }}
-            </div>
-            <input name="id" value="{{ variant.id }}" type="hidden">
-          {% endif %}
-          <div class="single-product-add-to-cart-btns">
-            {% if product.available != true %}
-              <button class="btn button button--full-width button--secondary" disabled>
-                {{ 'products.product.sold_out' | t }}
-              </button>
-            {% elsif access_response == 'REQUEST_LOGIN' %}
-              {% render 'single-login-buttons', login_types: login_types %}
-            {% elsif access_response == 'ACCESS_DENIED' %}
-              <button class="btn button button--full-width button--secondary" disabled>
-                You do not have access to purchase this product.
-              </button>
-            {% elsif product.available %}
-              <button type="submit" name="add" id="AddToCart" class="btn button button--full-width button--secondary">
-                <span id="AddToCartText">
-                  {% render 'single-add-to-cart' %}
-                </span>
-              </button>
-              <button type="submit" name="add" id="BuyNow" class="btn button button--full-width button--primary">
-                <span id="BuyNowText">Buy it now</span>
-              </button>
-            {% endif %}
-            <div class="single-gate-logout hidden" hidden>
-              <button class="btn btn-secondary button button--secondary button--full-width single-logout-button">
-                Disconnect Wallet
-              </button>
-            </div>
-          </div>
-        </single-product-form>
-        <p class="single-product-description">{{ product.description }}</p>
-      </div>
-      <!-- End Single Header -->
-    </div>
-    <!-- End Right Column -->
-  </div>
-  <!-- End Inner Wrap -->
-</div>
-<!-- End Product Wrap -->
-
-{% if product_ids.size > 0 %}
-  <div class="single-grid">
-    <div class="single-grid-item">
-      <div class="single-col col-4_4">
-        <h2>Grants access to the following:</h2>
-      </div>
-      <div class="single-col col-2_4">
-        {% for product_input in product_ids %}
-          {% render 'single-product-card', product_input: product_input %}
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-{% endif %}
-
-{% if key_product_ids.size > 0 or key_product_listings.size > 0 %}
-  <div class="single-grid-item key-products">
-    <div class="single-col col-4_4 text-center">
-      {% section 'single-gated-need-access' %}
-    </div>
-    {% for key_product in key_product_ids %}
-      <div class="single-col col-2_4">
-        {% assign product_parts = key_product | split: '|' %}
-        {% render 'single-product-card', product_input: product_parts[0], required_amount: product_parts[1] %}
-      </div>
-    {% endfor %}
-    {% for product_listing in key_product_listings %}
-      <div class="single-col col-2_4">
-        {% render 'single-listing-card', product_listing: product_listing %}
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
-<script>
-  function showImage(index) {
-    document.querySelectorAll('.single-product-image').forEach(image => {
-      image.classList.add('hidden');
-    });
-    document.querySelector('#product-image-' + index).classList.remove('hidden');
-  }
-</script>
+{% render 'single-need-access', title_size: 'h2', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}

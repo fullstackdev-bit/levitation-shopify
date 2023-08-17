@@ -69,7 +69,7 @@
     {% for variant in product.variants %}
       <div class="inventory-item">
         <div class="inventory-bar">
-          <div class="filler">
+          <div class="filler filler-{{ product.id }}">
             <span>{{ bar_width }}%</span>
           </div>
         </div>
@@ -79,15 +79,15 @@
 
   {% if variant.inventory_quantity == 0 %}
     <style>
-      .filler {
+      .filler-{{ product.id }} {
         background: none;
         color: black;
       }
     </style>
   {% else %}
     <style>
-      .filler {
-          width: {{ bar_width }}%;
+      .filler-{{ product.id }} {
+        width: {{ bar_width }}%;
       }
     </style>
   {% endif %}

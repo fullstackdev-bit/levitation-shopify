@@ -22,7 +22,6 @@ SOFTWARE.
 /* Header Bar */
 
 .single-header-bar {
-  margin-top: 3em;
   width: 100%;
   display: flex;
   flex-direction: row;

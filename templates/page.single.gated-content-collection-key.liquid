@@ -19,19 +19,15 @@
   -->
 {% endcomment %}
 
-{% comment %}
-  <!-- Single App Default Styles -->
-{% endcomment %}
-{{ 'single-base.css' | asset_url | stylesheet_tag }}
-{{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
-
-<div class="single-grid" style="margin-bottom: 5em;">
-  {% render 'single-multi-login', login_details: login_types, page_url: page_url %}
-
+<div style="margin-top: 3em; margin-bottom: 5em;">
+  {% if login_types.size > 0 %}
+    {% render 'single-multi-login', login_details: login_types, page_url: page_url %}
+  {% endif %}
   {% if user_keys %}
+  <div class="single-grid" >
     <div class="single-grid-item">
-      <div class="single-col col-4_4">
-        <h2>Your Collection</h2>
+      <div class="single-col col-4_4 h2">
+        Your Collection
       </div>
       {% for user_key in user_keys %}
         <div class="single-col col-2_4">
@@ -40,75 +36,29 @@
         </div>
       {% endfor %}
     </div>
+  </div>
   {% endif %}
-
-  {% if key_product_id %}
-    <div class="single-grid-item">
-      <div class="single-col col-4_4">
-        <h2>Required for Access</h2>
-      </div>
-      <div class="single-col col-2_4">
-        {% render 'single-product-card', product_input: key_product_id %}
-      </div>
-    </div>
-  {% endif %}
-
-  {% unless product_ids.size > 0 or product_hidden_count or video_ids.size > 0 or video_hidden_count %}
-    <div class="single-grid-item">
-      <div class="single-col col-4_4 text-center" style="margin: 5em 0;">
-        <h2>No exclusive items for this token at this time.</h2>
-      </div>
-    </div>
-  {% endunless %}
-
-  {% if product_ids.size > 0 or product_hidden_count %}
-    <div class="single-grid-item">
-      <div class="single-col col-4_4">
-        <h2>Exclusive Products</h2>
-      </div>
-      {% for product_input in product_ids %}
-        <div class="single-col col-2_4">
-          {% render 'single-product-card', product_input: product_input %}
-        </div>
-      {% endfor %}
-      {% if product_hidden_count %}
-        <div class="single-col col-2_4">
-          {% render 'single-lock-card',
-            count: product_hidden_count,
-            denial_reason: product_denial_reason,
-            key_acquisition_url: product_key_acquisition_url,
-            login_types: login_types
-          %}
-        </div>
-      {% endif %}
-    </div>
-  {% endif %}
-
-  {% if video_ids.size > 0 or video_hidden_count %}
-    <div class="single-grid-item">
-      <div class="single-col col-4_4">
-        <h2>Exclusive Videos</h2>
-      </div>
-      {% for video_input in video_ids %}
-        <div class="single-col col-1_4">
-          {% render 'single-video-card',
-            video_input: video_input,
-            show_title: true,
-            show_date: true,
-            show_badge: false
-          %}
-        </div>
-      {% endfor %}
-      {% if video_hidden_count %}
-        <div class="single-col col-1_4">
-          {% render 'single-lock-card',
-            count: video_hidden_count,
-            denial_reason: video_denial_reason,
-            key_acquisition_url: video_key_acquisition_url,
-            login_types: login_types
-          %}
-        </div>
-      {% endif %}
-    </div>
-  {% endif %}
+  {% render 'single-grant-access',
+          login_types: login_types,
+          key_product_id: key_product_id,
+          product_ids: product_ids,
+          product_hidden_count: product_hidden_count,
+          video_ids: video_ids,
+          video_hidden_count: video_hidden_count,
+          title: 'Required for Access:',
+          title_size: 'h2',
+          show_key_product: 'true',
+          no_items_title: 'No exclusive items for this token at this time.',
+          row_title_size: 'h2',
+          product_title: 'Exclusive Products',
+          video_title: 'Exclusive Videos',
+          video_show_title: 'true',
+          video_show_artist: 'true',
+          video_show_date: 'true',
+          product_show_title: 'true',
+          product_show_description: 'true',
+          product_show_badge: 'true',
+          column_count: '4',
+          video_column_width: '1',
+          product_column_width: '2' %}
 </div>

@@ -19,26 +19,19 @@
   -->
 {% endcomment %}
 
-{% render 'single-video-block', preview_enabled: preview_enabled, chat_enabled: chat_enabled,
-        show_title: show_title, show_artist: show_artist, show_description: show_description,
-        title_size: title_size, artist_size: artist_size, customer_wallet: customer_wallet,
-        video_host: video_host, video_id: video_id, video_title: video_title, video_artist: video_artist,
-        video_description: video_description, video_thumbnail: video_thumbnail, section_id: section_id %}
+{% comment %}
+  <!-- Single Default Styles - Can be edited in assets/single.css -->
+{% endcomment %}
+{{ 'single-base.css' | asset_url | stylesheet_tag }}
+{{ 'single-video.css' | asset_url | stylesheet_tag }}
 
 {% comment %}
-  <!-- Products for unlocking the video -->
+  <!-- Video Player -->
 {% endcomment %}
-{% if preview_enabled == 'true' %}
-    {{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
-    {% render 'single-need-access', title_size: 'h2', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}
-{% endif %}
-
-{% comment %}
-  <!-- Promoted Products -->
-{% endcomment %}
-{% unless preview_enabled == 'true' %}
-    {% if collections[collection_handle].products %}
-        {% render 'single-video-promoted-products', collection_handle: collection_handle, video_id: video_id,
-                title_size: 'h5', column_count: '4' %}
-    {% endif %}
-{% endunless %}
+<div class="single-video-wrap">
+    <div id="single-livestream-player{{ section_id }}"
+         class="single-video-player">
+        <script src="https://{{ video_host }}/assets/livestream-chat-embed.js?id={{ video_id }}&customerEmail={{ customer.email }}{% if customer_wallet %}&customerId={{ customer_wallet }}{% endif %}&sectionId={{ section_id }}"
+                type="text/javascript"></script>
+    </div>
+</div>

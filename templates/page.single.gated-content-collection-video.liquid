@@ -47,7 +47,9 @@
     <div class="single-col col-1_1">
       <div class="single-header-bar">
         <!-- Search Bar -->
-        {% section 'single-gated-search-bar' %}
+        {% capture search_bar %}{% section 'single-gated-search-bar' %}{% endcapture %}
+        {% assign search_bar = search_bar | replace: 'CONTENT_QUERY', content_query %}
+        {{ search_bar }}
       </div>
     </div>
     <div class="single-col col-1_1 single-gate-loading" style="margin: 4em 0;" hidden>

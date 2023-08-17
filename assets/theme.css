@@ -4,6 +4,64 @@
 
 
 
+.tt-social-icon li a {
+    font-size: 18px !important;
+}
+
+
+.faq h4 {
+  font-size: 24px;
+}
+
+.faq a {
+  color: #40d1b4 !important;
+  font-weight: bold !important;
+}
+
+.faq a:hover {
+  text-decoration: underline !important;
+}
+
+.collectionfeature {
+
+display:block;
+width:100%;
+height: auto;
+overflow: auto;
+background: #333;
+font-size: 14px;
+font-color: #999 !important;
+}
+
+.collectionfeatureleft {
+float:left;
+width:70%;
+padding: 25px;
+}
+
+.collectionfeatureright {
+float:right;
+width:30%;
+padding-left: 25px;
+}
+
+@media (max-width: 575px) {
+.collectionfeatureright {
+float:left;
+width:100%;
+padding-left: 0px;
+}
+
+.collectionfeatureleft {
+float:left;
+width:100%;
+padding:  25px;
+}
+  
+}
+
+
+
 @media (max-width: 980px) {
 .logogrid .tt-portfolio-masonry .tt-grid-col-5 .element-item, .tt-portfolio-masonry .tt-grid-col-6 .element-item {
     width: 25%;
@@ -18,8 +76,38 @@
 }
 }
 
+h2:not(.tt-title) {
+    font-size: 22px!important;
+  text-transform: uppercase;
+}
+
+.pink {
+color:  #bc3562 !important;
+}
+
+.green {
+color:  #4B181A  !important;
+}
+
+.custom-1-2-layout .sm-banner-container .banner-content {
+    position: absolute;
+    left: 40px;
+    top: 50%;
+    color: #fff;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 30px !important;
+    transform: translateY(-50%);
+}
+
 .old-price {
 display: none !important;
+}
+
+.h2:not(.tt-title) {
+text-transform: uppercase !important;
+font-size: 20px !important;
+padding-bottom: 0 !important;
 }
 
 button.button {
@@ -30,6 +118,10 @@ button.button {
     margin: 10px 0;
 }
 
+button.button:hover, button.button:hover a  {
+    border: 2px solid #40d1b4;
+}
+
 .tt-portfolio-masonry .tt-filter-nav .button.current {
   
 border-bottom: 1px solid #000;
@@ -38,6 +130,10 @@ border-bottom: 1px solid #000;
 
 .tt-filters-options .tt-btn-toggle {
     display: none !important;
+}
+
+.tt-desctop-menu .tt-title-submenu {
+	font-size: 10px !important;
 }
   
 /* Rob changes FEB 2022 */
@@ -119,9 +215,9 @@ padding-bottom: 0 !important;
 font-size: 16px;
 }
 
-h3.article-lead {
+.article-lead {
 
-font-size: 26px !important;
+font-size: 24px !important;
     line-height: 32px !important;
 }
 
@@ -33359,7 +33455,7 @@ mark{
 /* Modal newsletter */
 #Modalnewsletter .tt-background {
   
-  background: #ffffff url("//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/popup_newsletter_image.png?9421") 0 0 no-repeat;
+  background: #ffffff url("//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/popup_newsletter_image.png?10486") 0 0 no-repeat;
   
   background-size: 50% auto;
 }
@@ -42660,4 +42756,13 @@ body.pagearticle .tt-featured-post-img img{
 }
 #eb-widget-modal-1{
   display:none;
+}
+@font-face{
+  font-family: 'oldways-regular';  
+  src: url("https://cdn.shopify.com/s/files/1/1366/5653/files/oldways.regular.otf?v=1674751388") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+.austinpsychfest{
+    font-family: 'oldways-regular' !important; 
 }

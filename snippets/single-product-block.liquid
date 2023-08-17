@@ -1,0 +1,171 @@
+{% comment %}
+  <!--
+  Copyright (c) 2022 Single, LLC - ALL RIGHTS RESERVED
+
+  NOTICE:  All information contained herein is, and remains the property of Single, LLC
+  and its suppliers, if any. The intellectual and technical concepts contained herein are
+  proprietary to Single, LLC and its suppliers and may be covered by U.S. and Foreign Patents,
+  patents in process, and are protected by trade secret or copyright law. Dissemination of this
+  information or reproduction of this material is strictly forbidden unless prior
+  written permission is obtained from Single, LLC.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+  -->
+{% endcomment %}
+
+{{ 'single-base.css' | asset_url | stylesheet_tag }}
+{{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
+
+<style>
+    .single-product-add-to-cart-btns .single-login-button {
+        width: 100%;
+    }
+
+    .single-image-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .single-image-row > img {
+        width: 15%;
+        cursor: pointer;
+    }
+</style>
+
+<div class="single-grid single-product" itemscope itemtype="http://schema.org/Product">
+    <div class="single-grid-item">
+        <!-- Product Metatags -->
+        <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+        <meta itemprop="image" content="{{ featured_image }}">
+        <meta property="og:title" content="{{ product.title }}">
+        <meta property="og:image" content="{{ featured_image }}">
+        <meta property="og:url" content="{{ shop.url }}{{ product.url }}">
+
+        <!-- Left Column -->
+        {% if show_images == 'true' %}
+            <div class="single-col col-{{ image_width }}">
+                {% for image in product.images %}
+                    <div class="single-product-image {% unless forloop.first %}hidden{% endunless %}" id="product-image-{{ forloop.index0 }}">
+                        <img src="{{ image.src }}">
+                    </div>
+                {% endfor %}
+                {% if product.images.size > 1 %}
+                    <div class="single-image-row">
+                        {% for image in product.images %}
+                            <img src="{{ image.src }}" onclick="showImage({{ forloop.index0 }});">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <!-- End Left Column -->
+
+        <!-- Right Column -->
+        <div class="single-col col-{{ product_width }}">
+            <!-- Begin Single Header -->
+            <div class="single-product-header">
+                {% if show_title == 'true' %}
+                    <div class="single-product-title {{ title_size }}" itemprop="name">
+                        <span>{{ product.title }}</span>
+                    </div>
+                {% endif %}
+                <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+                {% render 'single-nft-progress-bar', product: product %}
+                {% if description_position == 'above_price' %}<p class="single-product-description">{{ product.description }}</p>{% endif %}
+                <!-- Add to Cart -->
+                <single-product-form product='{ "id": "{{ product.id }}", "options": {{ product.options | json }}, "variants": {{ product.variants | json }} }'>
+                    <div class="single-product-price {{ price_size }}">{{ product.variants[0].price | money_with_currency }}</div>
+                    {% if product.variants.size > 1 %}
+                        <div class="single-product-options">
+                            {% for option in product.options %}
+                                {% assign option_loop = forloop %}
+                                <fieldset class="js product-form__input" id="fieldset-{{ option.name | handleize }}">
+                                    <legend class="form__label">{{ option.name }}</legend>
+                                    {% for value in option.values %}
+                                        <input
+                                                class="single-product-option-input"
+                                                type="radio"
+                                                id="{{ product.id }}-{{ option_loop.index0 }}-{{ forloop.index0 }}"
+                                                name="{{ option.name }}"
+                                                value="{{ value }}"
+                                                {% if forloop.first %}
+                                                    checked
+                                                {% endif %}
+                                        >
+                                        <label
+                                                class="single-product-option-label"
+                                                for="{{ product.id }}-{{ option_loop.index0 }}-{{ forloop.index0 }}"
+                                        >
+                                            {{- value -}}
+                                        </label>
+                                    {% endfor %}
+                                </fieldset>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {% assign variant = product.variants.first %}
+                        {% unless variant.title == 'Default Title' %}
+                            <div class="single-product-variant-title">
+                                {{ variant.title }}
+                            </div>
+                        {% endunless -%}
+                        <input name="id" value="{{ variant.id }}" type="hidden">
+                    {% endif %}
+                    {% if description_position == 'above_cart' %}<p class="single-product-description">{{ product.description }}</p>{% endif %}
+                    <div class="single-product-add-to-cart-btns">
+                        {% if product.available != true %}
+                            <button class="btn button button--full-width button--secondary" disabled>
+                                {{ 'products.product.sold_out' | t }}
+                            </button>
+                        {% elsif access_response == 'REQUEST_LOGIN' %}
+                            {% render 'single-login-buttons', login_types: login_types %}
+                        {% elsif access_response == 'ACCESS_DENIED' %}
+                            <button class="btn button button--full-width button--secondary" disabled>
+                                You do not have access to purchase this product.
+                            </button>
+                        {% elsif product.available %}
+                            {% if show_add_to_cart == 'true' %}
+                                <button type="submit" name="add" id="AddToCart" class="btn button button--full-width button--secondary">
+                                <span id="AddToCartText">
+                                  {% render 'single-add-to-cart' %}
+                                </span>
+                                </button>
+                            {% endif %}
+                            {% if show_buy_it_now == 'true' %}
+                                <button type="submit" name="add" id="BuyNow" class="btn button button--full-width button--primary">
+                                    <span id="BuyNowText">Buy it now</span>
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                        <div class="single-gate-logout hidden" hidden>
+                            <button class="btn btn-secondary button button--secondary button--full-width single-logout-button">
+                                Disconnect Wallet
+                            </button>
+                        </div>
+                    </div>
+                </single-product-form>
+                {% if description_position == 'below_cart' %}<p class="single-product-description">{{ product.description }}</p>{% endif %}
+            </div>
+            <!-- End Single Header -->
+        </div>
+        <!-- End Right Column -->
+    </div>
+    <!-- End Inner Wrap -->
+</div>
+<!-- End Product Wrap -->
+
+<script>
+    function showImage(index) {
+        document.querySelectorAll('.single-product-image').forEach(image => {
+            image.classList.add('hidden');
+        });
+        document.querySelector('#product-image-' + index).classList.remove('hidden');
+    }
+</script>

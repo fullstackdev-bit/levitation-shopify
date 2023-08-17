@@ -7,97 +7,132 @@ class SingleVideoBarSlider {
     this.chevLeft = this.cardRow.querySelector('.single-chevron.left');
     this.chevRight = this.cardRow.querySelector('.single-chevron.right');
 
-    // Slide Properties
-    this.cardsPerSlide = 4;
-    this.translateVal = 0;
-    this.currentTransVal = 0;
-    this.slideIndex = 0;
-    this.lockLeft = false;
-    this.lockRight = false;
-    this.isSliding = false;
+    this.videoModal = document.getElementById('videoModal');
+    this.videoIframe = document.getElementById('videoIframe');
+    this.closeModal = document.querySelector('.close');
+    this.prevVideo = document.getElementById('prevVideo');
+    this.nextVideo = document.getElementById('nextVideo');
 
-    if (this.isMobile()) {
-      this.cardRow.style.overflow = 'scroll';
+    this.currentVideoIndex = 0;
+    this.coversToScroll = 3;
+
+    this.initSlider();
+  }
+
+   initSlider = () => {
+    const numberOfCoversToShow = this.getNumberOfCoversToShow();
+    this.setCardRowWidth(numberOfCoversToShow);
+    this.updateButtonVisibility();
+    this.addSliderEventListeners();
+    // this.addModalEventListeners();
+  }
+
+  getNumberOfCoversToShow = () => {
+    if (window.innerWidth <= 768) {
+      return 2.5; // Show 3 covers on mobile
     } else {
-      this.init();
-      this.chevLeft.addEventListener('click', this.slideLeft.bind(this), false);
-      this.chevRight.addEventListener('click', this.slideRight.bind(this), false);
-
-      // Handle Browser Resize
-      window.addEventListener('resize', this.init.bind(this), false);
+      return 4.5; // Show 4 covers on desktop
     }
+  }
 
-    this.videoSlider.addEventListener('wheel', e => {
-      // Ignore vertical scroll
-      if (e.deltaY !== 0) {
-        return;
-      }
+  addSliderEventListeners = () => {
+    this.chevLeft.addEventListener('click', () => {
+      this.scrollCovers(-1);
+      setTimeout(this.updateButtonVisibility, 200);
+    });
+    this.chevRight.addEventListener('click', () => {
+      this.scrollCovers(1);
+      setTimeout(this.updateButtonVisibility, 200);
+    });
+    this.videoSlider.addEventListener('scroll', this.updateButtonVisibility);
+    window.addEventListener('resize', this.updateButtonVisibility);
 
-      e.preventDefault();
-      e.stopPropagation();
+    window.addEventListener('resize', () => {
+      const numberOfCoversToShow = this.getNumberOfCoversToShow();
+      this.setCardRowWidth(numberOfCoversToShow);
+      this.updateButtonVisibility();
+    });
 
-      if (this.isSliding) return;
-
-      if (e.deltaX >= 0 && !this.lockRight) {
-        this.isSliding = true;
-        this.slideRight();
-      }
-
-      if (e.deltaX < 0 && !this.lockLeft) {
-        this.isSliding = true;
-        this.slideLeft();
-      }
+    this.cardVideos.forEach((cover, index) => {
+      cover.addEventListener('click', () => {
+        // const videoId = cover.dataset.videoId;
+        // videoModal.style.display = 'flex';
+        this.adjustVideoAspectRatio();
+        this.currentVideoIndex = index;
+      });
     });
   }
 
-  init() {
-    this.chevLeft.style.height = `${this.cardImage.offsetHeight}px`;
-    this.chevRight.style.height = `${this.cardImage.offsetHeight}px`;
-    this.cardsPerSlide = Math.floor(this.cardRow.clientWidth / this.cardVideos[0].clientWidth);
-    this.translateVal = this.cardVideos[0].clientWidth * this.cardsPerSlide + (4 * this.cardsPerSlide);
-    this.handleShowChev();
+  addModalEventListeners = () => {
+    this.closeModal.addEventListener('click', () => {
+      videoModal.style.display = 'none';
+      videoIframe.src = '';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === videoModal) {
+        videoModal.style.display = 'none';
+        videoIframe.src = '';
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && videoModal.style.display === 'flex') {
+        videoModal.style.display = 'none';
+        videoIframe.src = '';
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (videoModal.style.display === 'flex') {
+        this.adjustVideoAspectRatio();
+      }
+    });
+
+    this.prevVideo.addEventListener('click', this.prevVideoHandler.bind(this));
+    this.nextVideo.addEventListener('click', this.nextVideoHandler.bind(this));
   }
 
-  isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-    ) || (navigator.userAgent.match(/Mac/) && navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  setCardRowWidth = (numberOfCoversToShow) => {
+    const coverWidth =
+      (this.cardRow.clientWidth - (numberOfCoversToShow - 1) * 16) /
+      numberOfCoversToShow;
+    this.cardVideos.forEach((cover) => {
+      cover.style.width = `${coverWidth}px`;
+    });
   }
 
-  handleShowChev() {
-    const grouped = this.cardVideos.length / this.cardsPerSlide;
-    if (this.slideIndex < grouped - 1) {
-      this.chevRight.classList.add('active');
-      this.lockRight = false;
-      this.chevLeft.classList.add('active');
-      this.lockLeft = false;
-    } else {
-      this.chevRight.classList.remove('active');
-      this.lockRight = true;
-      this.chevLeft.classList.add('active');
-      this.lockLeft = false;
-    }
-
-    if (this.slideIndex === 0) {
-      this.chevLeft.classList.remove('active');
-      this.lockLeft = true;
-    }
-
-    setTimeout(() => (this.isSliding = false), 1500);
+  scrollCovers = (direction) => {
+    const coverWidth = parseFloat(this.cardVideos[0].style.width);
+    this.videoSlider.scrollBy({
+      left: direction * this.coversToScroll * (coverWidth + 16),
+      behavior: 'smooth',
+    });
   }
 
-  slideLeft() {
-    this.slideIndex -= 1;
-    const val = this.currentTransVal - this.translateVal;
-    this.videoSlider.style.transform = `translate3d(-${val}px, 0px, 0px)`;
-    this.currentTransVal = this.translateVal * this.slideIndex;
-    this.handleShowChev();
+  updateButtonVisibility = () => {
+    this.chevLeft.style.visibility =
+      this.videoSlider.scrollLeft > 0 ? 'visible' : 'hidden';
+    this.chevRight.style.visibility =
+      this.videoSlider.scrollLeft + this.videoSlider.clientWidth <
+      this.videoSlider.scrollWidth
+        ? 'visible'
+        : 'hidden';
   }
 
-  slideRight() {
-    this.slideIndex += 1;
-    this.currentTransVal = this.translateVal * this.slideIndex;
-    this.videoSlider.style.transform = `translate3d(-${this.currentTransVal}px, 0px, 0px)`;
-    this.handleShowChev();
+  changeVideo = (index) => {
+    const newIndex = (this.cardVideos.length + index) % this.cardVideos.length;
+    const newCover = this.cardVideos[newIndex];
+    const videoId = newCover.dataset.videoId;
+    videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    this.currentVideoIndex = newIndex;
+  }
+
+  prevVideoHandler = () => {
+    this.changeVideo(this.currentVideoIndex - 1);
+  }
+
+  nextVideoHandler = () => {
+    this.changeVideo(this.currentVideoIndex + 1);
   }
 }

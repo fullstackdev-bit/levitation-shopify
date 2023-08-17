@@ -26,4 +26,4 @@
 {{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
 
 {% section 'single-gated-access-denied' %}
-{% render 'single-key-products', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}
+{% render 'single-need-access', title_size: 'h2', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}

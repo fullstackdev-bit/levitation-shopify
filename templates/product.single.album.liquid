@@ -118,7 +118,7 @@
                 {%- endif -%}
               {%- endcapture %}
               {% capture previewAvailable -%}
-                {%- if track.metafields.track.preview == 'true' %}true{% endif -%}
+                {%- if track.metafields.track.preview == 'true' and presale != 'true' %}true{% endif -%}
               {%- endcapture %}
               {% assign previewLink = track.metafields.track.preview_link %}
               {% assign tuning = track.metafields.track.tuning | default: 'C#' %}
