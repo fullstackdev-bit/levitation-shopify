@@ -44,7 +44,6 @@
 {% assign global_tag = 'has-ticket' %}
 {% assign video_product_type = pages[page_handle].metafields.single_livestream.video_product_type %}
 {% assign today_date = 'now' | date: '%s' | plus: 0 %}
-{% assign video_access = customer.metafields.single_video.video_access %}
 {%- capture contentForQuerystring -%}{{ content_for_header }}{%- endcapture -%}
 {%- assign pageUrl = contentForQuerystring
   | split: '"pageurl":"'
@@ -90,7 +89,6 @@
 {% else %}
   {% if customer.tags contains customer_tag
     or customer.tags contains global_tag
-    or video_access contains livestream_id
     or bypass_token_used
     or shopify_preview_host
   %}

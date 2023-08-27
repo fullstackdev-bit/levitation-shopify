@@ -1,0 +1,13 @@
+.sub-menus.level-2 .menu-item-wraper a:before {
+  display: none;
+}
+.sub-menus.level-2 .menu-item-wraper a {
+    padding: 3px 8px 3px 30px;
+    line-height: 18px;
+  font-weight: 400 !important;
+}
+.sub-menus.level-3,
+.sub-menus.level-4,
+.sub-menus.level-5{
+    margin-left: 15px;
+}

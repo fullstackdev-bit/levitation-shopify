@@ -14,9 +14,9 @@
       {%- endif -%}
 
       {%- if level_2.links != blank -%}
-      <ul>
+      <div class="sub-menus level-2">
         {%- for child_level_2 in level_2.links -%}
-        <li>
+        <div class="menu-item-wraper">
           <a href="{{ child_level_2.url }}">{{ child_level_2.title }}</a>
           
           {%- capture return -%}{%- include "get_linklist_dropdown", link: child_level_2 -%}{%- endcapture -%}{%- assign return = return | split: "%%" -%}{%- assign has_drop_down = return | first | strip -%}{%- assign child_list_handle = return | last | strip -%}
@@ -28,9 +28,9 @@
           {%- endif -%}
 
           {%- if level_3.links != blank -%}
-          <ul>
+          <div class="sub-menus level-3">
             {%- for child_level_3 in level_3.links -%}
-            <li><a href="{{ child_level_3.url }}">{{ child_level_3.title }}</a>
+            <div class="menu-item-wraper"><a href="{{ child_level_3.url }}">{{ child_level_3.title }}</a>
               
               {%- capture return -%}{%- include "get_linklist_dropdown", link: child_level_3 -%}{%- endcapture -%}{%- assign return = return | split: "%%" -%}{%- assign has_drop_down = return | first | strip -%}{%- assign child_list_handle = return | last | strip -%}
 
@@ -41,33 +41,33 @@
               {%- endif -%}
               
               {%- if level_4.links != blank -%}
-              <ul>
+              <div class="sub-menus level-4">
                 {%- for child_level_4 in level_4.links -%}
-                <li><a href="{{ child_level_4.url | downcase }}">{{ child_level_4.title }}</a>
+                <div class="menu-item-wraper"><a href="{{ child_level_4.url | downcase }}">{{ child_level_4.title }}</a>
                   
                   {%- capture return -%}{%- include "get_linklist_dropdown", link: child_level_4 -%}{%- endcapture -%}{%- assign return = return | split: "%%" -%}{%- assign has_drop_down = return | first | strip -%}{%- assign child_list_handle = return | last | strip -%}
 
                   {%- if has_drop_down == "true" -%}
                   {%- assign level_5 = linklists[child_list_handle] -%}
                   {%- unless level_5.empty? -%}
-                  <ul>
+                  <div class="sub-menus level-5">
                     {%- for child_level_5 in level_5.links -%}
-                    <li><a href="{{ child_level_5.url | downcase }}">{{ child_level_5.title }}</a></li>
+                    <div class="menu-item-wraper"><a href="{{ child_level_5.url | downcase }}">{{ child_level_5.title }}</a></div>
                     {%- endfor -%}
-                  </ul>
+                  </div>
                   {%- endunless -%}
                   {%- endif -%}
-                </li>
+                </div>
                 {%- endfor -%}
-              </ul>
+              </div>
               {%- endif -%}
-            </li>
+            </div>
             {%- endfor -%}
-          </ul>
+          </div>
          {%- endif -%}
-        </li>
+        </div>
         {%- endfor -%}
-      </ul>
+      </div>
       {%- endif -%}
 
     </li>

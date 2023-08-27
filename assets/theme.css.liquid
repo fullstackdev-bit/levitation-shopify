@@ -3,6 +3,10 @@
 {% capture font_name1 %}{% unless settings.use_shopify_font_title %}{{ settings.font_name1 }}{% else %}{{ settings.type_header_font.family | replace: '"', '' }}{% endunless %}{% endcapture %}
 {% capture font_name2 %}{% unless settings.use_shopify_font_content %}{{ settings.font_name2 }}{% else %}{{ settings.type_header_font_2.family | replace: '"', '' }}{% endunless %}{% endcapture %}
 
+.sub-menus.level-2{
+    font-size: 14px !important;
+}
+
 
 .tt-social-icon li a {
     font-size: 18px !important;
@@ -74,6 +78,10 @@ padding:  25px;
     padding: 20px;
     width: 33%;
 }
+
+.dark-background-text {
+    width: 100% !important;
+}
 }
 
 h2:not(.tt-title) {
@@ -101,7 +109,7 @@ color:  #4B181A  !important;
 }
 
 .old-price {
-display: none !important;
+
 }
 
 .h2:not(.tt-title) {
@@ -129,7 +137,6 @@ border-bottom: 1px solid #000;
 }
 
 .tt-filters-options .tt-btn-toggle {
-    display: none !important;
 }
 
 .tt-desctop-menu .tt-title-submenu {
@@ -12972,8 +12979,7 @@ html:not(.ie) .tt-layout-01-post .tt-post-content .tt-background {
 
 @media (max-width: 575px){
   .tt-portfolio-masonry .tt-grid-col-4 .element-item{
-    padding: 5px;
-    width: 100%;
+    width: 50%;
   }
 }
 
@@ -24518,7 +24524,7 @@ header .tt-stuck-nav .catmobbtn:hover svg path{
 
 .panel-menu ul li a{
   display: flex;
-  padding: 9px 27px 9px 30px;
+  padding: 9px 27px 4px 30px;
   font-size: 14px;
   line-height: 22px;
   text-decoration: none;
@@ -41408,8 +41414,8 @@ img{
   border-radius:0px !important;
 }
 .tp-revslider-mainul .tp-caption1-wd-4 a.btn,.av_promobox a.btn{
-  border: 2px solid #40d1b4 !important;
-    color: #40d1b4 !important;
+  border: 2px solid #2eedc7 !important;
+    color: #2eedc7 !important;
     background: none !important;
     font-weight:600;
     font-size: 12px;
@@ -43020,7 +43026,7 @@ body.news-and-events #custom-preloader.active{
 
 @media(max-width:479px){
   .tp-revslider-mainul .tp-caption1-wd-3{
-    display:none;
+font-size: 12px !important;
   }
   footer  .tt-footer-custom.tt-color-scheme-04 .tt-box-copyright{
      justify-content: space-around;

@@ -3,6 +3,10 @@
 
 
 
+.sub-menus.level-2{
+    font-size: 14px !important;
+}
+
 
 .tt-social-icon li a {
     font-size: 18px !important;
@@ -74,6 +78,10 @@ padding:  25px;
     padding: 20px;
     width: 33%;
 }
+
+.dark-background-text {
+    width: 100% !important;
+}
 }
 
 h2:not(.tt-title) {
@@ -101,7 +109,7 @@ color:  #4B181A  !important;
 }
 
 .old-price {
-display: none !important;
+
 }
 
 .h2:not(.tt-title) {
@@ -129,7 +137,6 @@ border-bottom: 1px solid #000;
 }
 
 .tt-filters-options .tt-btn-toggle {
-    display: none !important;
 }
 
 .tt-desctop-menu .tt-title-submenu {
@@ -13011,8 +13018,7 @@ html:not(.ie) .tt-layout-01-post .tt-post-content .tt-background {
 
 @media (max-width: 575px){
   .tt-portfolio-masonry .tt-grid-col-4 .element-item{
-    padding: 5px;
-    width: 100%;
+    width: 50%;
   }
 }
 
@@ -24527,7 +24533,7 @@ header .tt-stuck-nav .catmobbtn:hover svg path{
 
 .panel-menu ul li a{
   display: flex;
-  padding: 9px 27px 9px 30px;
+  padding: 9px 27px 4px 30px;
   font-size: 14px;
   line-height: 22px;
   text-decoration: none;
@@ -32347,7 +32353,7 @@ li[data-availability=false] a{
   overflow: hidden;
 }
 .tt-options-swatch:not(.options-large):not(.options-middle) li[data-availability="false"] span:not(.options-color-image){
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/cross_20.png?v=9648473165182455971644126896) 0 0 no-repeat;
+  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_20.png?v=9648473165182455971692234641) 0 0 no-repeat;
   width:20px;
   height:20px;
 }
@@ -32365,7 +32371,7 @@ li[data-availability=false] a{
   background-size: cover;
 }
 .tt-options-swatch:not(.options-large):not(.options-middle) li[data-availability="false"] span.options-color-image{
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/cross_40.png?v=92905605766750580471644126897) 0 0 no-repeat;
+  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_40.png?v=92905605766750580471692234641) 0 0 no-repeat;
   width:40px;
   height:40px;
 }
@@ -32387,12 +32393,12 @@ li[data-availability=false] a{
 }
 /*tt-options-swatch - product single*/
 .tt-options-swatch.options-large li[data-availability="false"] span:not(.options-color-image){
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/cross_30.png?v=55783826382955458961644126897) 0 0 no-repeat;
+  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_30.png?v=55783826382955458961692234641) 0 0 no-repeat;
   width:30px;
   height:30px;
 }
 .tt-options-swatch.options-large li[data-availability="false"] span.options-color-image{
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/cross_60.png?v=154273214565330162391644126898) 0 0 no-repeat;
+  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_60.png?v=154273214565330162391692234641) 0 0 no-repeat;
   width:60px;
   height:60px;
 }
@@ -33455,7 +33461,7 @@ mark{
 /* Modal newsletter */
 #Modalnewsletter .tt-background {
   
-  background: #ffffff url("//cdn.shopify.com/s/files/1/1366/5653/t/19/assets/popup_newsletter_image.png?10486") 0 0 no-repeat;
+  background: #ffffff url("//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/popup_newsletter_image.png?10605") 0 0 no-repeat;
   
   background-size: 50% auto;
 }
@@ -40940,8 +40946,8 @@ img{
   border-radius:0px !important;
 }
 .tp-revslider-mainul .tp-caption1-wd-4 a.btn,.av_promobox a.btn{
-  border: 2px solid #40d1b4 !important;
-    color: #40d1b4 !important;
+  border: 2px solid #2eedc7 !important;
+    color: #2eedc7 !important;
     background: none !important;
     font-weight:600;
     font-size: 12px;
@@ -42552,7 +42558,7 @@ body.news-and-events #custom-preloader.active{
 
 @media(max-width:479px){
   .tp-revslider-mainul .tp-caption1-wd-3{
-    display:none;
+font-size: 12px !important;
   }
   footer  .tt-footer-custom.tt-color-scheme-04 .tt-box-copyright{
      justify-content: space-around;

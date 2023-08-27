@@ -1,19 +1,9 @@
 {% assign product_pieces = product_input | split: '|' %}
+{% assign product = all_products[product_pieces[0]] %}
 
-{% if shop.metafields.single_gated_content[product_pieces[0]] != blank %}
-    {% assign product = shop.metafields.single_gated_content[product_pieces[0]].value %}
-{% elsif all_products[product_pieces[0]] != blank %}
-    {% assign product = all_products[product_pieces[0]] %}
-{% endif %}
-
-{% assign product_url = product.url %}
-{% if product_pieces.size > 1 %}
-    {% assign product_url = product_pieces[1] %}
-{% endif %}
-
-{% if product %}
+{% if product and product != blank %}
     <div class="single-card single-card-large single-accessibility" title="{{ product.title }}"
-         onclick="location.href='{{ product_url }}';">
+         onclick="location.href='/products/{{ product.handle }}';">
         <div class="single-card-image">
             {% render 'single-image', image: product.images.first %}
         </div>

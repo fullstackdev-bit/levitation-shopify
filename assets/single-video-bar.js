@@ -17,6 +17,7 @@ class SingleVideoBarSlider {
     this.coversToScroll = 3;
 
     this.initSlider();
+    window.addEventListener('resize', this.initSlider.bind(this), false);
   }
 
    initSlider = () => {
@@ -24,6 +25,8 @@ class SingleVideoBarSlider {
     this.setCardRowWidth(numberOfCoversToShow);
     this.updateButtonVisibility();
     this.addSliderEventListeners();
+    this.chevLeft.style.height = `${this.cardImage.offsetHeight}px`;
+    this.chevRight.style.height = `${this.cardImage.offsetHeight}px`;
     // this.addModalEventListeners();
   }
 

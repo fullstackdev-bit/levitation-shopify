@@ -5,7 +5,8 @@
   title="{{ video_pieces[0] }}"
   onclick="location.href='{{ video_pieces[3] }}';"
 >
-  <div class="single-card-image-wide" style="background-image: url({{ video_pieces[2] }})">
+  <div class="single-card-image-wide {% if show_card_drop_shadow == 'true' %}has-shadow{% endif %}"
+       style="background-image: url({{ video_pieces[2] }})">
     {% if show_badge == 'true' and video_pieces[4] == 'true' %}
       <div class="single-video-badge">{{ badge_text }}</div>
     {% endif %}

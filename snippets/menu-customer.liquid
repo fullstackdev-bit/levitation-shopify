@@ -18,20 +18,26 @@
       </div>
       <div class="tt-dropdown-inner">
         <ul>
-          {%- if shop.customer_accounts_enabled and customer -%}<li><a href="/account"><i class="icon-h-36"></i>{{ "layout.customer.account" | t }}</a></li>{%- endif -%}
+          {%- if shop.customer_accounts_enabled and customer -%}<li class="d-none d-lg-block"><a href="/account"><i class="icon-h-36"></i>{{ "layout.customer.account" | t }}</a></li>{%- endif -%}
 
           {%- if shop.customer_accounts_enabled -%}
-          {%- if customer -%}<li><a href="/account/logout"><i class="icon-f-76"></i>{{ "layout.customer.log_out" | t }}</a></li>
-          {%- else -%}<li><a href="/account/login"><i class="icon-f-77"></i>{{ "layout.customer.sign_in" | t }}</a></li>
-          <li><a href="/account/register"><i class="icon-f-94"></i>{{ "layout.customer.register" | t }}</a></li>
+          {%- if customer -%}<li class="d-none d-lg-block"><a href="/account/logout"><i class="icon-f-76"></i>{{ "layout.customer.log_out" | t }}</a></li>
+          {%- else -%}<li class="d-none d-lg-block"><a href="/account/login"><i class="icon-f-77"></i>{{ "layout.customer.sign_in" | t }}</a></li>
+          <li class="d-none d-lg-block"><a href="/account/register"><i class="icon-f-94"></i>{{ "layout.customer.register" | t }}</a></li>
           {%- endif -%}
           {%- endif -%}
           {%- if settings.terms_cond_checkbox_show -%}
-          <li><a href="/cart"><i class="icon-f-39"></i>{{ 'layout.customer.view_cart' | t }}</a></li>
+          <li class="d-none d-lg-block"><a href="/cart"><i class="icon-f-39"></i>{{ 'layout.customer.view_cart' | t }}</a></li>
           {%- else -%}
-          <li><a href="/checkout"><i class="icon-f-68"></i>{{ "layout.customer.checkout" | t }}</a></li>
+          <li class="d-none d-lg-block"><a href="/checkout"><i class="icon-f-68"></i>{{ "layout.customer.checkout" | t }}</a></li>
           {%- endif -%}
-          
+          <li class="d-lg-none" style="font-weight: 699; color: #41d1b4;">FOLLOW US</li>
+          <li class="d-lg-none d-flex" style="gap:20px;">
+            <a class="icon-g-67" target="_blank" style="font-size: 18px !important;font-weight: 400 !important;" href="http://instagram.com/levitation"></a>
+            <a class="icon-h-58" target="_blank" style="font-size: 18px !important;font-weight: 400 !important;" href="https://twitter.com/levitation"></a>
+            <a class="icon-g-64" target="_blank" style="font-size: 18px !important;font-weight: 400 !important;" href="https://facebook.com/austinpsychfest"></a>
+            <a class="icon-g-76" target="_blank" style="font-size: 18px !important;font-weight: 400 !important;" href="https://www.youtube.com/channel/UCJZnKFBXmA_e9UOHNdNOe4g"></a>
+          </li>
           {% if settings.show_wishlist %}<li><a href="/pages/wishlist">{% include "svg-heart" %}{{ "wishlist.header.wishlist" | t }}</a></li>{% endif %}
           {% if settings.show_compare %}<li><a href="/pages/compare">{% include "svg-compare" %}{{ "compare.header.compare" | t }}</a></li>{% endif %}
         </ul>
