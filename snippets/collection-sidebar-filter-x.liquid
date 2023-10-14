@@ -69,7 +69,7 @@
 {%- else -%}tt-list-row
 {%- endcase -%}{%- endcapture -%}
 
-<div class="tt-collapse {{ open }}{% if data == '' %} hide{% endif %}{{ sidebars_toright }}">
+<div class="tt-collapse {{ open }}{% if data == '' %} hide{% endif %}{{ sidebars_toright }}" c>
   <h3 class="tt-collapse-title{% if titlestouppercase %} text-uppercase{% endif %}">{{ settings[group_title] }}</h3>
   <div class="tt-collapse-content">
     <ul class="{{ design | strip }} filtres-js">{{ data }}</ul>

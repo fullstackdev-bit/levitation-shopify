@@ -25,12 +25,11 @@ SOFTWARE.
 {{ 'single-base.css' | asset_url | stylesheet_tag }}
 
 <style>
-     .fan-sub-mgmt-wrapper {
-          margin: 2em auto 4em;
-     }
+    .fan-sub-mgmt-wrapper {
+        margin: 2em auto 4em;
+    }
 
     .single-card-option {
-        border: 1px solid rgba(var(--color-foreground), 0.08);
         border-radius: 5px;
         padding: 1.5em;
         align-items: center;
@@ -73,11 +72,11 @@ SOFTWARE.
     }
 
     .single-modal-backdrop.show {
-        opacity: .5;
+        opacity: 0.5;
     }
 
     .fade {
-        transition: opacity .15s linear;
+        transition: opacity 0.15s linear;
     }
 
     .single-modal.fade {
@@ -112,9 +111,9 @@ SOFTWARE.
     }
 
     .single-modal.fade .modal-dialog {
-        transition: -webkit-transform .3s ease-out;
-        transition: transform .3s ease-out;
-        transition: transform .3s ease-out, -webkit-transform .3s ease-out;
+        transition: -webkit-transform 0.3s ease-out;
+        transition: transform 0.3s ease-out;
+        transition: transform 0.3s ease-out, -webkit-transform 0.3s ease-out;
         -webkit-transform: translate(0, -50px);
         transform: translate(0, -50px);
     }
@@ -122,7 +121,7 @@ SOFTWARE.
     .single-modal-dialog {
         position: relative;
         width: auto;
-        margin: .5rem;
+        margin: 0.5rem;
         pointer-events: none;
         display: -ms-flexbox;
         display: flex;
@@ -131,11 +130,12 @@ SOFTWARE.
         min-height: calc(100% - 1rem);
     }
 
-    @media(min-width: 576px)
-    .single-modal-dialog {
-        min-height: calc(100% - 3.5rem);
-        max-width: 500px;
-        margin: 1.75rem auto;
+    @media (min-width: 576px) {
+        .single-modal-dialog {
+            min-height: calc(100% - 3.5rem);
+            max-width: 500px;
+            margin: 1.75rem auto;
+        }
     }
 
     .modal-content {
@@ -148,8 +148,8 @@ SOFTWARE.
         pointer-events: auto;
         background-color: #fff;
         background-clip: padding-box;
-        border: 1px solid rgba(0, 0, 0, .2);
-        border-radius: .3rem;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 0.3rem;
         outline: 0;
     }
 
@@ -162,8 +162,8 @@ SOFTWARE.
         justify-content: space-between;
         padding: 1rem 1rem;
         border-bottom: 1px solid #dee2e6;
-        border-top-left-radius: calc(.3rem - 1px);
-        border-top-right-radius: calc(.3rem - 1px);
+        border-top-left-radius: calc(0.3rem - 1px);
+        border-top-right-radius: calc(0.3rem - 1px);
     }
 
     .modal-body {
@@ -182,9 +182,9 @@ SOFTWARE.
         align-items: center;
         -ms-flex-pack: end;
         justify-content: flex-end;
-        padding: .75rem;
-        border-bottom-right-radius: calc(.3rem - 1px);
-        border-bottom-left-radius: calc(.3rem - 1px);
+        padding: 0.75rem;
+        border-bottom-right-radius: calc(0.3rem - 1px);
+        border-bottom-left-radius: calc(0.3rem - 1px);
     }
 
     .modal-title {
@@ -192,477 +192,678 @@ SOFTWARE.
         margin-top: 0;
         line-height: 1.5;
     }
-    
-  	/*------------------------------------------------
-  	|
-  	| FAN SUBSCRIPTIONS LIST
-  	|
-  	------------------------------------------------*/
-  	.single-card-grid {
-		flex-direction: column;
+
+    /*------------------------------------------------
+    |
+    | FAN SUBSCRIPTIONS LIST
+    |
+    ------------------------------------------------*/
+    .single-card-grid {
+        flex-direction: column;
     }
-  
+
     .single-card-grid .single-fan-subscription {
-       width: 100%;
-	}
-
-	.single-card-grid .single-fan-subscription .single-card-info {
-		width: 100%;
-	}
-
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper {
-      	display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-  
- 	.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper .single-card-image {
-		width: 150px;
-		margin-right: 0;
-    }
-	
-  	.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper span {
-		display: none;
-	}
-
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper {
-      	align-items: stretch;
-	 	place-content: center;
-	 	box-sizing: border-box;
-	 	display: flex;
-	 	flex-flow: row wrap;
-	}
-
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option {
-	 	display: flex;
-	 	flex-direction: column;
-	 	flex-basis: 33.333333%;
-	 	padding: 0 12px;
-	 	border: 0;
-	}
-
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner {
-       display: flex;
-       flex-direction: column;
-       border: 1px solid black;
-       border-radius: 4px;
-       background: #fff;
-       padding: 20px 15px;
-       margin-bottom: 20px;
-       width: 100%;
-       height: 100%;
-	}
-
-    .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner h3 {
-	  margin: 0 0 15px 0;
-       text-align: center;
+        width: 100%;
     }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .line-clamp {
-       display: -webkit-box;
-       -webkit-line-clamp: 3;
-       overflow: hidden;
-       -webkit-box-orient: vertical;
-       margin-bottom: 0;
-	}
-  
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .more {
-       color: #7720bc;
-	}
+    .single-card-grid .single-fan-subscription .single-card-info {
+        width: 100%;
+    }
 
-    .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .starting-at-text {
-       text-align: center;
-       margin: 30px 0;
-	}
+    .single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .starting-at-text span {
-		display: block;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper
+    .single-card-image {
+        width: 150px;
+        margin-right: 0;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .starting-at-text span:first-child {
-     	text-transform: uppercase;
-	 	font-weight: bold;
-	 	font-size: 11px;
-	 	color: #9a9798;
-	}
+    .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper {
+        align-items: stretch;
+        place-content: center;
+        box-sizing: border-box;
+        display: flex;
+        flex-flow: row wrap;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .starting-at-text span:nth-child(2) {
-		color: black;
-	 	font-weight: bold;
-	 	font-size: 32px;
-	 	letter-spacing: 0.04em;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 33.333333%;
+        padding: 0 12px;
+        border: 0;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .starting-at-text span:last-child {
-		text-transform: uppercase;
-		font-weight: bold;
-		font-size: 13px;
-		letter-spacing: 0.04em;
-		color: #9a9798;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner {
+        display: flex;
+        flex-direction: column;
+        padding: 20px 15px;
+        margin-bottom: 20px;
+        width: 100%;
+        height: 100%;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .active-info {
-		display: flex;
-	 	justify-content: space-between;
-	 	margin: 15px 0;
-	 	width: 100%;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    h3 {
+        margin: 0 0 15px 0;
+        text-align: center;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .active-info div span {
-       font-weight: bold;
-       font-size: 12px;
-       letter-spacing: 0.04em;
-       color: #9a9798;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .line-clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        margin-bottom: 0;
+    }
 
-	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .active-info div p {
-	  color: black;
-	  font-weight: bold;
-	  font-size: 16px;
-	  margin: 0;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .more {
+        color: #7720bc;
+    }
 
-     .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .btn {
-	  display: block;
-	  margin: auto auto 0 auto;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .starting-at-text {
+        text-align: center;
+        margin: 30px 0;
+    }
 
-     .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .pending-buttons .btn {
-	  width: 80%;
-	}
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .starting-at-text
+    span {
+        display: block;
+    }
 
-     .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .single-card-option-inner .pending-buttons .btn:first-child {
-          margin-bottom: 15px;
-     }
-  
-	@media screen and (max-width: 768px) {
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .starting-at-text
+    span:first-child {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 11px;
+        color: #9a9798;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .starting-at-text
+    span:nth-child(2) {
+        color: black;
+        font-weight: bold;
+        font-size: 32px;
+        letter-spacing: 0.04em;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .starting-at-text
+    span:last-child {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        color: #9a9798;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .active-info {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px 0;
+        width: 100%;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .active-info
+    div
+    span {
+        font-weight: bold;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: #9a9798;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .active-info
+    div
+    p {
+        color: black;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .btn {
+        display: block;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .pending-buttons
+    .btn {
+        width: 100%;
+    }
+
+    .single-card-grid
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option-wrapper
+    .single-card-option
+    .single-card-option-inner
+    .pending-buttons
+    .btn:first-child {
+        margin-bottom: 15px;
+    }
+
+    @media screen and (max-width: 768px) {
         .single-card-grid .single-fan-subscription {
-		  border: 2px solid black;
-		  border-radius: 4px;
-		  background: #ececec;
-          padding: 15px;
-          margin-bottom: 10px;
-		}
+            border: 2px solid black;
+            border-radius: 4px;
+            background: #ececec;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
 
-	 	.single-card-grid .single-fan-subscription.tiers-open .single-card-info .single-card-title-wrapper {
+        .single-card-grid
+        .single-fan-subscription.tiers-open
+        .single-card-info
+        .single-card-title-wrapper {
             margin-bottom: 15px;
-		}
+        }
 
-		.single-card-grid .single-fan-subscription.tiers-open .single-card-info .single-card-title-wrapper span {
-		  transform: rotate(180deg);
-		}
+        .single-card-grid
+        .single-fan-subscription.tiers-open
+        .single-card-info
+        .single-card-title-wrapper
+        span {
+            transform: rotate(180deg);
+        }
 
-		.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper {
-		  display: flex;
-		  align-items: center;
-		  justify-content: space-between;
-		  flex-direction: row;
-          }
+        .single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+        }
 
-          .single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper .single-card-image {
-		  display: none;
-		}
+        .single-card-grid
+        .single-fan-subscription
+        .single-card-info
+        .single-card-title-wrapper
+        .single-card-image {
+            display: none;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper h2 {
-		  margin: 0;
-		}
+        .single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper h2 {
+            margin: 0;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper span {
-		  display: block;
-		  font-size: 12px;
-		}
+        .single-card-grid .single-fan-subscription .single-card-info .single-card-title-wrapper span {
+            display: block;
+            font-size: 12px;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper {
-		  display: none;
-		}
+        .single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper {
+            display: none;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper.show-options {
-		  display: block;
-		}
+        .single-card-grid
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option-wrapper.show-options {
+            display: block;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option {
-		  flex-basis: 100%;
-		  padding: 0;
-		}
+        .single-card-grid
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option-wrapper
+        .single-card-option {
+            flex-basis: 100%;
+            padding: 0;
+        }
 
-	 	.single-card-grid .single-fan-subscription .single-card-info .single-card-option-wrapper .single-card-option .btn {
-		  width: 100%;
-		}
-	}
-  
-   	/*------------------------------------------------
-  	|
-  	| MANAGE FAN SUBSCRIPTION
-  	|
-  	------------------------------------------------*/
-  
-  	#single-fan-subscription-mgmt .back {
-		display: flex;
-         align-items: center;
-         cursor: pointer;
-         margin-bottom: 15px;
+        .single-card-grid
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option-wrapper
+        .single-card-option
+        .btn {
+            width: 100%;
+        }
+    }
+
+    /*------------------------------------------------
+    |
+    | MANAGE FAN SUBSCRIPTION
+    |
+    ------------------------------------------------*/
+    #single-fan-subscription-mgmt .back {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        margin-bottom: 15px;
     }
 
     #single-fan-subscription-mgmt .back svg {
-         margin-right: 5px;
+        margin-right: 5px;
     }
 
     #single-fan-subscription-mgmt .cancel {
-         color: #dc3545;
-         font-weight: bold;
-         margin: 0;
+        color: #dc3545;
+        font-weight: bold;
+        margin: 0;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription {
-         width: 100%;
+        width: 100%;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription .single-card-info {
-         width: 100%;
+        width: 100%;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper {
-         text-align: center;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper {
+        text-align: center;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper .single-card-image {
-         width: 150px;
-         margin: 0 auto;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper
+    .single-card-image {
+        width: 150px;
+        margin: 0 auto;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      width: 100%;
-      text-align: left;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper.tier-title-wrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        text-align: left;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-image {
-      display: flex;
-      flex-direction: column;
-      flex-basis: 100%;
-      flex: 1;
-      max-width: 100px;
-      margin-right: 25px;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper.tier-title-wrapper
+    .single-card-image {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 100%;
+        flex: 1;
+        max-width: 100px;
+        margin-right: 25px;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text {
-      display: flex;
-      flex-direction: column;
-      flex-basis: 100%;
-      flex: 1;
-      text-align: left;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper.tier-title-wrapper
+    .single-card-text {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 100%;
+        flex: 1;
+        text-align: left;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text h3 {
-         margin-top: 0;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-title-wrapper.tier-title-wrapper
+    .single-card-text
+    h3 {
+        margin-top: 0;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option {
-         border: 1px solid black;
-         border-radius: 4px;
-         background: #fff;
-         padding: 20px 15px;
-         margin-bottom: 20px;
+        border: 1px solid black;
+        border-radius: 4px;
+        background: #fff;
+        padding: 20px 15px;
+        margin-bottom: 20px;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option h3 {
-         margin: 0 0 15px 0;
+        margin: 0 0 15px 0;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .line-clamp {
-         display: -webkit-box;
-         -webkit-line-clamp: 3;
-         overflow: hidden;
-         -webkit-box-orient: vertical;
-         margin-bottom: 0;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .line-clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        margin-bottom: 0;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .more {
-         color: #7720bc;
+        color: #7720bc;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .starting-at-text {
-         text-align: center;
-         margin: 30px 0;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .starting-at-text {
+        text-align: center;
+        margin: 30px 0;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .starting-at-text span {
-         display: block;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .starting-at-text
+    span {
+        display: block;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .starting-at-text span:first-child {
-         text-transform: uppercase;
-         font-weight: bold;
-         font-size: 11px;
-         color: #9a9798;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .starting-at-text
+    span:first-child {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 11px;
+        color: #9a9798;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .starting-at-text span:nth-child(2) {
-         color: black;
-         font-weight: bold;
-         font-size: 32px;
-         letter-spacing: 0.04em;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .starting-at-text
+    span:nth-child(2) {
+        color: black;
+        font-weight: bold;
+        font-size: 32px;
+        letter-spacing: 0.04em;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .starting-at-text span:last-child {
-         text-transform: uppercase;
-         font-weight: bold;
-         font-size: 13px;
-         letter-spacing: 0.04em;
-         color: #9a9798;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .starting-at-text
+    span:last-child {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        color: #9a9798;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info {
-         display: flex;
-         justify-content: space-evenly;
-         margin: 15px 0 30px 0;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .active-info {
+        display: flex;
+        justify-content: space-evenly;
+        margin: 15px 0 30px 0;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div {
-         flex-basis: 33.333333%;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .active-info
+    div {
+        flex-basis: 33.333333%;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div span {
-         font-weight: bold;
-         font-size: 12px;
-         letter-spacing: 0.04em;
-         color: #9a9798;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .active-info
+    div
+    span {
+        font-weight: bold;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: #9a9798;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div p {
-         color: black;
-         font-weight: bold;
-         font-size: 16px;
-         margin: 0;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .active-info
+    div
+    p {
+        color: black;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 0;
     }
 
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div .change-term {
-         color: #7720bc;
-         margin-left: 5px;
-         font-size: 13px;
-         font-weight: 400;
+    #single-fan-subscription-mgmt
+    .single-fan-subscription
+    .single-card-info
+    .single-card-option
+    .active-info
+    div
+    .change-term {
+        color: #7720bc;
+        margin-left: 5px;
+        font-size: 13px;
+        font-weight: 400;
     }
 
     #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .btn {
-         width: 250px;
+        width: 250px;
     }
 
-    /* Cancel Styles */
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled {
-      margin: 15px 0 30px 0;
-      background: var(--gradient-base-background-2);
-      padding: 15px;
-      border-radius: 4px;
-    }
-
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled h3 {
-      font-weight: 700;
-      margin-bottom: 0;
-    }
-  
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .sub-canceled p {
-      margin: 0;
-    }
-
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group {
-      display: flex;
-    }
-
-    #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group .btn {
-      margin-right: 15px;
-    }
-
-    @media screen and (max-width: 550px) {
-      #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group {
-        flex-direction: column;
-      }
-
-      #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text .btn-group .btn {
-        margin-right: 0;
-        margin-bottom: 15px;
-      }
-    }
-	
     @media screen and (max-width: 768px) {
-		#single-fan-subscription-mgmt .single-fan-subscription {
-             border: 2px solid black;
-             border-radius: 4px;
-             background: #ececec;
-             padding: 15px;
-        }
-        
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info {
-             width: 100%;
+        #single-fan-subscription-mgmt .single-fan-subscription {
+            border: 2px solid black;
+            border-radius: 4px;
+            background: #ececec;
         }
 
-        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper {
-             display: flex;
-             align-items: center;
-             justify-content: space-between;
-             margin-bottom: 15px;
-        }
-        
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper h2 {
-             margin: 0;
-        }
-        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper > .single-card-image {
-          display: none;
+        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info {
+            width: 100%;
         }
 
-        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-image {
-            max-width: fit-content;
-            margin-right: 0;
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 15px;
         }
 
-        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-title-wrapper.tier-title-wrapper .single-card-text {
-          flex: auto;
-        }
-        
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info {
-             justify-content: space-between;
-        }
-
-		#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div {
-             flex-basis: auto;
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-title-wrapper
+        h2 {
+            margin: 0;
         }
 
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .active-info div .change-term {
-             display: block;
-             margin-left: 0;
-        }
-        
-      	#single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .btn {
-             width: 100%;
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-title-wrapper
+        .single-card-image {
+            display: none;
         }
 
-        #single-fan-subscription-mgmt .single-fan-subscription .single-card-info .single-card-option .cancel {
-             text-align: center;
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option
+        .active-info {
+            justify-content: space-between;
         }
-	}
 
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option
+        .active-info
+        div {
+            flex-basis: auto;
+        }
 
-  	/*------------------------------------------------
-  	|
-  	| MOBILE STYLES
-  	|
-  	------------------------------------------------*/
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option
+        .active-info
+        div
+        .change-term {
+            display: block;
+            margin-left: 0;
+        }
+
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option
+        .btn {
+            width: 100%;
+        }
+
+        #single-fan-subscription-mgmt
+        .single-fan-subscription
+        .single-card-info
+        .single-card-option
+        .cancel {
+            text-align: center;
+        }
+    }
+
+    /*------------------------------------------------
+    |
+    | MOBILE STYLES
+    |
+    ------------------------------------------------*/
     @media screen and (max-width: 768px) {
-      .single-card-grid {
-        flex-direction: column;
-      }
+        .single-card-grid {
+            flex-direction: column;
+        }
     }
 
 </style>
 
 <div class="single-gated-page page-width fan-sub-mgmt-wrapper">
-    {% if customer %}
-        {% include 'single-customer-storage' %}
-        <single-fan-subscription-management></single-fan-subscription-management>
-    {% else %}
+    {% include 'single-customer-storage' %}
+    <single-membership-management
+            columns="3"
+            column-alignment="center"
+            show-block="always"
+            show-program-name="true"
+            show-tier-image="true"
+            show-tier-name="true"
+            show-tier-description="true"
+            show-price="true"
+            show-quick-add="true"
+            quick-add-text="Add to cart"
+            text-color="#000000"
+            button-color="#000000"
+            column-border-color="#000000"
+            column-border-width="1px"
+            column-border-radius="5px"
+    ></single-membership-management>
+    {% unless customer %}
         {% capture single-customer-login %}{% section 'single-base-login' %}{% endcapture %}
         {{ single-customer-login | replace: 'PAGE_URL', page.url }}
-    {% endif %}
+    {% endunless %}
 </div>

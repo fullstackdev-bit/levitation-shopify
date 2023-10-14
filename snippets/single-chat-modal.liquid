@@ -26,7 +26,7 @@
     }
     const modal = document.getElementById('chat-login-modal');
     modal.classList.remove('hidden');
-    setupForms();
+    setupForms('{{ register_url }}', '{{ login_url }}');
   }
 
   function closeModal(id) {
@@ -37,46 +37,6 @@
   function handleIframeMessage(event) {
     if (event.data.type === 'openChatModal') {
       openModal(event.data.id);
-    }
-  }
-
-  function getUrlOrDefault(url) {
-    if (!url || url === '') {
-      return window.location.href;
-    }
-    return url;
-  }
-
-  function setupForm(formId, postUrl, returnUrl) {
-    jQuery(formId).submit(function (event) {
-      event.preventDefault();
-      const data = jQuery(this).serialize();
-
-      jQuery.post(postUrl, data).done(function (data) {
-        const formErrors = jQuery(data).find('.errors').text();
-        const formMessages = jQuery(data).find('.form__message').siblings('ul').text();
-        const errorsElement = jQuery(formId + ' .errors');
-
-        //if there are errors show them in the html form
-        if (formErrors !== '' && formErrors !== 'undefined') {
-          errorsElement.html(formErrors);
-          errorsElement.show();
-        } else if (formMessages !== '' && formMessages !== 'undefined') {
-          errorsElement.html(formMessages);
-          errorsElement.show();
-        } else {
-          document.location.href = returnUrl;
-        }
-      });
-      return false;
-    });
-  }
-
-  function setupForms() {
-    setupForm('#create_customer', '/account', getUrlOrDefault('{{ register_url }}'));
-    const loginUrl = getUrlOrDefault('{{ login_url }}');
-    if (loginUrl !== window.location.href) {
-      setupForm('#customer_login', '/account/login', loginUrl);
     }
   }
 

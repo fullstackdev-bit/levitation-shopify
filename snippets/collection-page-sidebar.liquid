@@ -1,7 +1,7 @@
 <link rel="preload" href="{{ 'price_range_widget.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <script src="{{ 'price_range_widget.js' | asset_url }}" defer="defer"></script>
 
-<div class="col-md-4 col-lg-3 col-xl-3 leftColumn{% if item_sidebar == "rightColumn" %} rightColumn{% endif %} aside{% if item_sidebar contains "hidden_closed" %} desctop-no-sidebar{% endif %}">
+<div aa class="col-md-4 col-lg-3 col-xl-3 leftColumn{% if item_sidebar == "rightColumn" %} rightColumn{% endif %} aside{% if item_sidebar contains "hidden_closed" %} desctop-no-sidebar{% endif %}">
   <div class="tt-btn-col-close">
     <a href="#">{{ 'collections.sidebar.back' | t }}</a>
   </div>
@@ -27,11 +27,6 @@
   {%- include "collection-sidebar-filter-shopping" -%}
   
   {%- comment -%}Filters{%- endcomment -%}
-  
-  {%- for filter in collection.filters -%}
-  {%- include "collection-sidebar-filter-x2" -%}
-  {%- endfor -%}
-  
 
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:1 -%}{%- endcapture -%}{{ value | strip }}
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:2 -%}{%- endcapture -%}{{ value | strip }}
@@ -44,6 +39,10 @@
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:8 -%}{%- endcapture -%}{{ value | strip }}
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:9 -%}{%- endcapture -%}{{ value | strip }}
   {%- capture value -%}{%- include "collection-sidebar-filter-x" index:10 -%}{%- endcapture -%}{{ value | strip }}
+
+  {%- for filter in collection.filters -%}
+  {%- include "collection-sidebar-filter-x2" -%}
+  {%- endfor -%}
   
   {%- if settings.show_collectionsbanner -%}{%- include "collection-sidebar-banner" -%}{%- endif -%}
 

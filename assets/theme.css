@@ -32353,7 +32353,7 @@ li[data-availability=false] a{
   overflow: hidden;
 }
 .tt-options-swatch:not(.options-large):not(.options-middle) li[data-availability="false"] span:not(.options-color-image){
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_20.png?v=9648473165182455971692234641) 0 0 no-repeat;
+  background: url(//levitation.fm/cdn/shop/t/23/assets/cross_20.png?v=9648473165182455971692234641) 0 0 no-repeat;
   width:20px;
   height:20px;
 }
@@ -32371,7 +32371,7 @@ li[data-availability=false] a{
   background-size: cover;
 }
 .tt-options-swatch:not(.options-large):not(.options-middle) li[data-availability="false"] span.options-color-image{
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_40.png?v=92905605766750580471692234641) 0 0 no-repeat;
+  background: url(//levitation.fm/cdn/shop/t/23/assets/cross_40.png?v=92905605766750580471692234641) 0 0 no-repeat;
   width:40px;
   height:40px;
 }
@@ -32393,12 +32393,12 @@ li[data-availability=false] a{
 }
 /*tt-options-swatch - product single*/
 .tt-options-swatch.options-large li[data-availability="false"] span:not(.options-color-image){
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_30.png?v=55783826382955458961692234641) 0 0 no-repeat;
+  background: url(//levitation.fm/cdn/shop/t/23/assets/cross_30.png?v=55783826382955458961692234641) 0 0 no-repeat;
   width:30px;
   height:30px;
 }
 .tt-options-swatch.options-large li[data-availability="false"] span.options-color-image{
-  background: url(//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/cross_60.png?v=154273214565330162391692234641) 0 0 no-repeat;
+  background: url(//levitation.fm/cdn/shop/t/23/assets/cross_60.png?v=154273214565330162391692234641) 0 0 no-repeat;
   width:60px;
   height:60px;
 }
@@ -33461,7 +33461,7 @@ mark{
 /* Modal newsletter */
 #Modalnewsletter .tt-background {
   
-  background: #ffffff url("//cdn.shopify.com/s/files/1/1366/5653/t/23/assets/popup_newsletter_image.png?10605") 0 0 no-repeat;
+  background: #ffffff url("//levitation.fm/cdn/shop/t/23/assets/popup_newsletter_image.png?10849") 0 0 no-repeat;
   
   background-size: 50% auto;
 }

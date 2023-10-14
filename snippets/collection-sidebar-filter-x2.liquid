@@ -128,7 +128,7 @@
 {%- endif -%}
 {%- endcapture -%}
 
-<div class="tt-collapse{% unless closedtabs contains _label %} open{% endunless %}{{ state }}">
+<div class="tt-collapse{% unless closedtabs contains _label %} open{% endunless %}{{ state }}" d>
   {%- assign fl = filter.label | append: '_' -%}
   {%- if title_new_name contains fl -%}{%- assign fl = title_new_name | split: fl | last | split: ',' | first | strip -%}
   {%- else -%}{%- assign fl = filter.label -%}

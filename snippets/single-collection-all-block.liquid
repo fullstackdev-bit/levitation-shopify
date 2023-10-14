@@ -100,6 +100,7 @@
                   <!-- Account Options Selector -->
                 {% endcomment %}
                 {% capture single-gated-account-selector %}{% section 'single-gated-account-selector' %}{% endcapture %}
+                {% assign single-gated-account-selector = single-gated-account-selector | replace: 'MEMBERSHIP_URL', membership_url %}
                 {% if login_types.size > 0 %}
                     {% capture single-login-buttons-val %}{% render 'single-login-buttons', login_types: login_types, page_url: page_url %}{% endcapture %}
                     {% assign single-login-buttons = '<div class="single-dropdown-content-row single-gate-login">' | append: single-login-buttons-val | append: '</div>' %}

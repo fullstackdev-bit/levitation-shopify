@@ -125,7 +125,7 @@
 {%- assign _data = _data | strip -%}
 {%- assign data = _data | append: data -%}
 
-<div class="tt-collapse open{% if data == '' %} hide{% endif %}">
+<div class="tt-collapse open{% if data == '' %} hide{% endif %}" b>
   <h3 class="tt-collapse-title{% if titlestouppercase %} text-uppercase{% endif %}">{{ 'collections.sidebar.filtres_title' | t }}</h3>
   <div class="tt-collapse-content filtres-remove-js">
     <ul class="tt-filter-list filtres-js clear-filters">{{ data }}</ul>

@@ -62,6 +62,10 @@
   .single-login .recover-links a:hover {
     text-decoration: underline;
   }
+
+  .single-errors {
+    color: red;
+  }
 </style>
 
 <section class="single-login customer">
@@ -70,13 +74,12 @@
   {% endcomment %}
   <div id="form-login" class="single-form">
     <h2 id="LoginHeading" class="text-center">{{ 'single.login.title' | t }}</h2>
-    {% form 'customer_login' %}
-      {% if form.errors %}
-        <div class="errors">
+    {% form 'customer_login', return_to: 'PAGE_URL' %}
+      <div class="errors single-errors">
+        {% if form.errors %}
           {{ form_errors | default_errors }}
-        </div>
-      {% endif %}
-      <input type="hidden" name="return_to" value="PAGE_URL">
+        {% endif %}
+      </div>
       <div class="email field">
         <input type="email" name="customer[email]" placeholder="Email">
         <label for="email">{{ 'single.login.email' | t }}</label>
@@ -111,13 +114,12 @@
   <div id="form-recover" class="single-form hidden">
     <h2 id="LoginHeading" class="text-center">{{ 'single.recover_password.title' | t }}</h2>
     <p>{{ 'single.recover_password.subtext' | t }}</p>
-    {% form 'recover_customer_password' %}
-      {% if form.errors %}
-        <div class="errors">
+    {% form 'recover_customer_password', return_to: 'PAGE_URL' %}
+      <div class="errors single-errors">
+        {% if form.errors %}
           {{ form_errors | default_errors }}
-        </div>
-      {% endif %}
-      <input type="hidden" name="return_to" value="{{ page.url }}">
+        {% endif %}
+      </div>
       <div class="email field">
         <input type="email" name="email" placeholder="Email">
         <label for="email">{{ 'single.login.email' | t }}</label>
@@ -143,43 +145,13 @@
   {% endcomment %}
   <div id="form-register" class="single-form hidden">
     <div class="customer register">
-      <svg style="display: none">
-        <symbol id="icon-error" viewBox="0 0 13 13">
-          <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
-          <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
-          <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z"
-                fill="white"/>
-          <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z"
-                fill="white" stroke="#EB001B" stroke-width="0.7">
-        </symbol>
-      </svg>
       <h2>{{ 'single.register.title' | t }}</h2>
-      {%- form 'create_customer', novalidate: 'novalidate' -%}
-        <input type="hidden" name="return_to" value="PAGE_URL">
-        {%- if form.errors -%}
-          <div class="errors">
-            <h2 class="form__message" tabindex="-1" autofocus>
-              <svg aria-hidden="true" focusable="false" role="presentation">
-                <use href="#icon-error"/>
-              </svg>
-              {{ 'templates.contact.form.error_heading' | t }}
-            </h2>
-            <ul>
-              {%- for field in form.errors -%}
-                <li>
-                  {%- if field == 'form' -%}
-                    {{ form.errors.messages[field] }}
-                  {%- else -%}
-                    <a href="#RegisterForm-{{ field }}">
-                      {{ form.errors.translated_fields[field] | capitalize }}
-                      {{ form.errors.messages[field] }}
-                    </a>
-                  {%- endif -%}
-                </li>
-              {%- endfor -%}
-            </ul>
-          </div>
-        {%- endif -%}
+      {% form 'create_customer', return_to: 'PAGE_URL' %}
+        <div class="errors single-errors">
+          {% if form.errors %}
+            {{ form_errors | default_errors }}
+          {% endif %}
+        </div>
         <div class="field">
           <input
                   type="text"
@@ -268,7 +240,8 @@
           <input
                   type="submit"
                   value="{{ 'single.register.title' | t }}"
-                  class="overlayButton single-collection-add-to-cart button add-to-cart-btn w-full btn btn-solid-primary-accent single-ignore">
+                  class="overlayButton single-collection-add-to-cart button add-to-cart-btn w-full btn btn-solid-primary-accent single-ignore"
+          >
         </div>
       {%- endform -%}
     </div>
@@ -284,6 +257,10 @@
 </section>
 
 <script type="text/javascript">
+  function isCaptchaEnabled() {
+    return !!window.Shopify.recaptchaV3;
+  }
+
   function toggleForms(showFormId, hideFormIds) {
     document.getElementById(showFormId).classList.remove('hidden');
     hideFormIds.forEach((formId) => {
@@ -306,7 +283,6 @@
     toggleForms('form-recover', ['form-login', 'form-register']);
   }
 
-  // Function to get a URL parameter by its name
   function getURLParameter(name) {
     return (
             decodeURIComponent(
@@ -318,18 +294,92 @@
     );
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    // Check if we should show the register form based on the URL param 'show'
+  function getUrlOrDefault(url) {
+    if (!url || url === '') {
+      return window.location.href;
+    }
+    return url;
+  }
+
+  function setupForm(formId, url) {
+    const returnUrl = getUrlOrDefault(url);
+    const formElement = document.querySelector(formId);
+    formElement.querySelectorAll('[name="return_to"]').forEach((node) => (node.value = returnUrl));
+    if (isCaptchaEnabled()) {
+      return;
+    }
+    const cloneElement = formElement.cloneNode(true);
+    formElement.parentNode.replaceChild(cloneElement, formElement);
+
+    cloneElement.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const action = this.getAttribute('action');
+      const params = new FormData(this);
+      const request = new XMLHttpRequest();
+      request.open('POST', action, true);
+      request.onreadystatechange = () => {
+        if (request.readyState === 4) {
+          if (request.responseURL &&
+              !request.responseURL.includes('/account/register') &&
+              !request.responseURL.includes('/account/login') &&
+              !request.responseURL.includes('/account/recover')) {
+            if (request.responseURL.includes('/challenge') || request.responseURL === returnUrl ||
+                    request.responseURL.includes(returnUrl)) {
+              document.location.href = request.responseURL;
+              return;
+            }
+            const responseURL = new URL(request.responseURL);
+            if (window.location.hostname === responseURL.hostname && responseURL.pathname === '/') {
+              document.location.href = returnUrl;
+              return;
+            }
+          }
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(request.responseText, 'text/html');
+          const formErrors = doc.querySelector('.errors')?.innerText;
+          const formMessageElements = doc.querySelectorAll('.form__message');
+          let formMessages = '';
+          if (!!formMessageElements) {
+            formMessages = [...formMessageElements].map(element => {
+              const text = element.innerText;
+              const listItems = element.parentNode.querySelectorAll('li');
+              return text + '<ul>' + [...listItems].map(li => '<li>' + li.innerText + '</li>').reduce((a,b) => a + b, '')
+            }).reduce((a,b) => a + '<div>' + b + '</div>', '');
+          }
+          const errorsElement = document.querySelector(formId + ' .errors');
+
+          //if there are errors show them in the html form
+          if (!!formErrors && formErrors !== '' && formErrors !== 'undefined') {
+            errorsElement.innerHTML = formErrors;
+          } else if (!!formMessages && formMessages !== '' && formMessages !== 'undefined') {
+            errorsElement.innerHTML = formMessages;
+          } else {
+            errorsElement.innerHTML = 'An unknown error occurred. Please try again later.';
+            console.log('Unable to parse error messages from response: ', doc);
+          }
+        }
+      };
+      request.send(params);
+      return false;
+    });
+  }
+
+  function setupForms(registerUrl, loginUrl) {
+    setupForm('#create_customer', registerUrl);
+    setupForm('#customer_login', loginUrl);
+    setupForm('form[action="/account/recover"]', loginUrl);
+  }
+
+  function loginSetup() {
     if (getURLParameter('show') === 'register') {
       showRegisterForm();
     }
 
-    // Get the email, firstname, and lastname parameters from the URL
     const emailParam = getURLParameter('email');
     const firstNameParam = getURLParameter('first_name');
     const lastNameParam = getURLParameter('last_name');
 
-    // Autofill the email field if the parameter exists
     if (emailParam) {
       const emailField = document.getElementById('RegisterForm-email');
       if (emailField) {
@@ -337,7 +387,6 @@
       }
     }
 
-    // Autofill the firstname field if the parameter exists
     if (firstNameParam) {
       const firstNameField = document.getElementById('RegisterForm-FirstName');
       if (firstNameField) {
@@ -345,12 +394,18 @@
       }
     }
 
-    // Autofill the lastname field if the parameter exists
     if (lastNameParam) {
       const lastNameField = document.getElementById('RegisterForm-LastName');
       if (lastNameField) {
         lastNameField.value = lastNameParam;
       }
     }
-  });
+    setupForms('PAGE_URL', 'PAGE_URL');
+  }
+
+  if (/complete|interactive|loaded/.test(document.readyState)) {
+    loginSetup();
+  } else {
+    window.addEventListener('DOMContentLoaded', loginSetup);
+  }
 </script>

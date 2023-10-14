@@ -1,7 +1,7 @@
 {{ 'single-base.css' | asset_url | stylesheet_tag }}
 {{ 'single-video-bar.css' | asset_url | stylesheet_tag }}
 
-<section class="single-content-section">
+<section class="single-content-section {% if display_type == 'grid' and max_width == 'true' %}page-width{% endif %}">
   <h2 class="title {{ title_size }} video-collection-title">{{ section_title }}</h2>
   {% if section_description %}
     <p class="video-collection-description">{{ section_description }}</p>
