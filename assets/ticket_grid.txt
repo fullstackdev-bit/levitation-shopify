@@ -1,0 +1,74 @@
+​​[settings grid="3" title="" categories="ALL SHOWS, THU, FRI, SAT, SUN" ticket="true"]
+[images]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_UNWOUND_800x.jpg?v=1697248846" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458733" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460656" title="Ga Tickets" title_2="Deluxe Tickets" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT-26-TY-SEGALL_SHANNON_800x.jpg?v=1697249443" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458734" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460657" title="Ga Tickets" title_2="Deluxe Sold out" disable_2="true" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_ONEOHTRIX_POINT_NEVER_800x.jpg?v=1697248896" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458938" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460741" title="Ga Tickets" title_2="Deluxe Tickets" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT26_-_THE_CHURCH_800x.jpg?v=1697249410" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458934" href_2="" title="Buy Tickets" title_2="" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_JOCKSTRAP_800x.jpg?v=1697248879" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458935" href_2="" title="Buy Tickets" title_2="" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_DEAD_MEADOW_800x.jpg?v=1697248508" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458936" href_2="" title="Buy Tickets" title_2="" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_TWIN_TRIBES_800x.jpg?v=1697249416" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1458939" href_2="" title="Buy Tickets" title_2="" categorie="THU" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_SLOW_PULP_800x.jpg?v=1697248904" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459180" href_2="" title="Sold Out" title_2="" categorie="THU" disable="true" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_26_-_FLAT_WORMS_800x.jpg?v=1697248869" href="#" href_2="" title="Buy Tickets" title_2="" categorie="THU" content=""]
+
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_UMO_800x.jpg?v=1697250907" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459181" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460659" title="Ga Tickets" title_2="Deluxe Tickets" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_UNCLE_ACID_THE_DEADBEATS_800x.jpg?v=1697250503" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459183" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460660" title="Ga Tickets" title_2="Deluxe Tickets" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_FLYING_LOTUS-updated_800x.jpg?v=1697250462" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459187" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460661" title="Ga Tickets" title_2="Deluxe Tickets" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_BLONDE_REDHEAD_800x.jpg?v=1697250423" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459184" href_2="" title="Sold Out" title_2="" categorie="FRI" content="" disable="true"]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_ALAN_PALOMO_800x.jpg?v=1697250927" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459185" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_WARMDUSCHER_CIVIC_800x.jpg?v=1697250914" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459186" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.27_-CRACK_CLOUD_800x.jpg?v=1697250450" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460477" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_BULLY_800x.jpg?v=1697250433" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459189" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.27-ULRIKA_SPACEK_HOLY_WAVE_800x.jpg?v=1697250484" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460473" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_27_-_PALLBEARER_800x.jpg?v=1697250475" href="#" href_2="" title="Buy Tickets" title_2="" categorie="FRI" content=""]
+
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28_BJM_BA_TDW_800x.jpg?v=1697251581" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460538" href_2="https://www.seetickets.us/event/LEVITATION-OCT-26-29-2023/555480?ttc=1460662" title="Ga Tickets" title_2="Deluxe Sold out" disable_2="true" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28-AMYL___THE_SNIFFERS_800x.jpg?v=1697251563" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459191" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460663" title="Ga Tickets" title_2="Deluxe Tickets" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28-PELICAN-_-KING-WOMAN_800x.jpg?v=1697251612" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1485654" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28_-_DURAND_JONES_800x.jpg?v=1697251550" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459192" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28_-_SONIDO_GALLO_NEGRO_800x.jpg?v=1697251623" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459195" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28-MERCURY_REV_800x.jpg?v=1697251602" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459199" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28-SPEEDY_ORTIZ_PALEHOUND_800x.jpg?v=1697251633" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460542" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.28_-_DUMBO_GETS_MAD_800x.jpg?v=1697251592" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460543" href_2="" title="Buy Tickets" title_2="" categorie="SAT" content=""]
+
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/OCT_29_-_BADBADNOTGOOD_800x.jpg?v=1697252259" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459209" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460664" title="Ga Tickets" title_2="Deluxe Tickets" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29_-_BEACH_FOSSILS_800x.jpg?v=1697252278" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459210" href_2="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460665" title="Ga Tickets" title_2="Deluxe Tickets" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29-DEATH_FROM_ABOVE_1979_800x.jpg?v=1697252299" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1459217" href_2="" title="Buy Tickets" title_2="" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29_-_ALTIN_GUN_800x.jpg?v=1697252248" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460547" href_2="" title="Buy Tickets" title_2="" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29_-_PIGS_PIGS_PIGS_PIGS_PIGS_PIGS_PIGS_800x.jpg?v=1697252332" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460548" href_2="" title="Buy Tickets" title_2="" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29-MUSTARD_SERVICE_VIDEO_AGE_800x.jpg?v=1697252313" href="https://wl.seetickets.us/wafform.aspx?_act=eventtickets&_pky=555480&afflky=LEVITATION&ttc=1460549" href_2="" title="Buy Tickets" title_2="" categorie="SUN" content=""]
+
+[image src="https://cdn.shopify.com/s/files/1/1366/5653/files/10.29_BIG_BILL_800x.jpg?v=1697252289" href="#" href_2="" title="Buy Tickets" title_2="" categorie="SUN" content=""]
+

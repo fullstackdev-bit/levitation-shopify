@@ -6,6 +6,17 @@
     {%- endif -%}
   </div>
 </div>
+{%- if section.blocks.size > 0 -%}
+  {%- for block in section.blocks -%}{%- assign b_i = block.settings -%}
+    <div class="container-indent{% unless b_i.topoffset %} nomargin{% endunless %}"{% if b_i.usebgcolor and b_i.usebgcolorfullwidth %} style="background: {{ b_i.bgco }}"{% endif %}>
+      <div{% unless b_i.fullwidth2 %} class="container{% if b_i.fullwidth %}-fluid-custom container-fluid-custom-mobile-padding{% endif %}"{% endunless %}{% if b_i.usebgcolor and b_i.usebgcolorfullwidth == false %} style="background: {{ b_i.bgco }}"{% endif %}>
+        {%- if b_i.data contains '[images]' -%}{% include 'portfolio-widget' value: b_i.data %}
+        {%- else -%}{{ b_i.data }}
+        {%- endif -%}
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
 
 {% schema %}
 {
@@ -57,6 +68,60 @@
       "id": "bgco",
       "label": "Background color",
       "default": "#ffffff"
+    }
+  ],
+  "blocks":[
+    {
+      "type": "sub_html",
+      "name": "Sub Html",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "topoffset",
+          "label": "Top Offset",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "fullwidth",
+          "label": "Fullwidth Container",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "fullwidth2",
+          "label": "Fullwidth without container",
+          "default": false,
+    	  "info": "Work with option \"Fullwidth Container\""
+        },
+        {
+          "type": "textarea",
+          "id": "data",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Background color"
+        },
+        {
+          "type": "checkbox",
+          "id": "usebgcolor",
+          "label": "Use background color",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "usebgcolorfullwidth",
+          "label": "Fullwidth background color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "bgco",
+          "label": "Background color",
+          "default": "#ffffff"
+        }
+      ]
     }
   ],
   "presets": [

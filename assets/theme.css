@@ -7,7 +7,6 @@
     font-size: 14px !important;
 }
 
-
 .tt-social-icon li a {
     font-size: 18px !important;
 }
@@ -27907,7 +27906,7 @@ Content
 }
 
 .tt-block-title .tt-description{
-  font-size: 16px;
+  font-size: 18px;
   line-height: 24px;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -33461,7 +33460,7 @@ mark{
 /* Modal newsletter */
 #Modalnewsletter .tt-background {
   
-  background: #ffffff url("//levitation.fm/cdn/shop/t/23/assets/popup_newsletter_image.png?10849") 0 0 no-repeat;
+  background: #ffffff url("//levitation.fm/cdn/shop/t/23/assets/popup_newsletter_image.png?10980") 0 0 no-repeat;
   
   background-size: 50% auto;
 }

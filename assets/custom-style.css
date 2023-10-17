@@ -11,3 +11,8 @@
 .sub-menus.level-5{
     margin-left: 15px;
 }
+.in-cell-link {
+ color: #00c9a1 !important;
+ width: 100% !important;
+ display: block;
+}

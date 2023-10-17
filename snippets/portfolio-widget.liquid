@@ -1,6 +1,7 @@
 {%- capture grid -%}{%- include 'get_property' data:value name:'[settings' property:'grid' default:'3' -%}{%- endcapture -%}
 {%- capture title -%}{%- include 'get_property' data:value name:'[settings' property:'title' default:'notitle' -%}{%- endcapture -%}
 {%- capture categories -%}{%- include 'get_property' data:value name:'[settings' property:'categories' default:'' -%}{%- endcapture -%}
+{%- capture ticket -%}{%- include 'get_property' data:value name:'[settings' property:'ticket' default:'' -%}{%- endcapture -%}
 
 {% unless title == 'notitle' %}<h1 class="tt-title-subpages noborder">{{ title }}</h1>{% endunless %}
 <div class="tt-portfolio-masonry">
@@ -20,21 +21,31 @@
     {%- for content in images offset: 1 -%}
       {%- capture src -%}{%- include 'get_property' data:content name:'[image' property:'src' default:'' -%}{%- endcapture -%}
       {%- capture href -%}{%- include 'get_property' data:content name:'[image' property:'href' default:'' -%}{%- endcapture -%}
+      {%- capture href_2 -%}{%- include 'get_property' data:content name:'[image' property:'href_2' default:'' -%}{%- endcapture -%}
       {%- capture cat -%}{%- include 'get_property' data:content name:'[image' property:'categorie' default:'' -%}{%- endcapture -%}
       {%- capture titl -%}{%- include 'get_property' data:content name:'[image' property:'title' default:'' -%}{%- endcapture -%}
+      {%- capture titl_2 -%}{%- include 'get_property' data:content name:'[image' property:'title_2' default:'' -%}{%- endcapture -%}
       {%- capture cont -%}{%- include 'get_property' data:content name:'[image' property:'content' default:'' -%}{%- endcapture -%}
+      {%- capture disable -%}{%- include 'get_property' data:content name:'[image' property:'disable' default:'' -%}{%- endcapture -%}
+      {%- capture disable_2 -%}{%- include 'get_property' data:content name:'[image' property:'disable_2' default:'' -%}{%- endcapture -%}
 
     <div class="element-item {{ cat | handle }}">
       <figure>
-        {%- if href != '' -%}
-        <a href="{{ href }}"><img src="{{ src }}" alt="" /></a>
+        {% if ticket == "true" %}
+          <img src="{{ src }}" alt="" />
+          <div class="bottom-btn-wrapers" style="display: flex; justify-content: center; gap: 10px; padding: 10px 0px;flex-wrap: wrap;">
+            {%- if titl != '' -%}<a href="{{ href }}" class="btn btn-sm {% if disable == "true" %}disabled{% endif %}" target="_blank" style="text-transform: uppercase;">{{ titl }}</a>{%- endif -%}
+            {%- if titl_2 != '' -%}<a href="{{ href_2 }}" class="btn btn-sm {% if disable_2 == "true" %}disabled{% endif %}" target="_blank" style="text-transform: uppercase;">{{ titl_2 }}</a>{%- endif -%}            
+          </div>
+        {%- elsif href != '' -%}
+          <a href="{{ href }}"><img src="{{ src }}" alt="" /></a>
         {%- else -%}
-        <img src="{{ src }}" alt="" />
-        <figcaption>
-          {%- if titl != '' -%}<h6 class="tt-title">{%- if href != '' -%}<a href="{{ href }}">{{ titl }}</a>{%- else -%}{{ titl }}{%- endif -%}</h6>{%- endif -%}
-          {%- if cont != '' -%}<p>{{ cont }}</p>{%- endif -%}
-          <a href="{{ src }}" title="{{ 'general.general.portfolio_zoom_in' | t }}" class="tt-btn-zomm"></a>
-        </figcaption>
+          <img src="{{ src }}" alt="" />
+          <figcaption>
+            {%- if titl != '' -%}<h6 class="tt-title">{%- if href != '' -%}<a href="{{ href }}">{{ titl }}</a>{%- else -%}{{ titl }}{%- endif -%}</h6>{%- endif -%}
+            {%- if cont != '' -%}<p>{{ cont }}</p>{%- endif -%}
+            <a href="{{ src }}" title="{{ 'general.general.portfolio_zoom_in' | t }}" class="tt-btn-zomm"></a>
+          </figcaption>
         {%- endif -%}
       </figure>
     </div>
