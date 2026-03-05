@@ -1,0 +1,154 @@
+{%- liquid
+  assign uppercase_text = false
+  if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_text = true
+  elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_text = true
+  elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_text = true
+  elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+      assign uppercase_text = true
+  elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+      assign uppercase_text = true
+  endif
+-%}
+  {% if block.settings.use_store_availability %}
+    {% liquid
+      assign variant = product.selected_or_first_available_variant
+      assign current_store = cart.attributes.store
+      assign is_available = false
+      assign has_match = false
+
+      if current_store != blank and variant.store_availabilities != nil and variant.store_availabilities.size > 0
+        for availability in variant.store_availabilities
+          if availability.location.name == current_store
+            assign is_available = availability.available
+            assign has_match = true
+            break
+          endif
+        endfor
+      endif
+
+      unless has_match
+        assign is_available = variant.available
+      endunless
+    %}
+    <ul class="product__inventory {{ product.selected_or_first_available_variant.inventory_quantity }} list-unstyled" 
+      id="inventory-{{ section.id }}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+      <li class="product__inventory-item {% if is_available %}product__inventory-item--in-stock{% else %}product__inventory-item--sold{% endif %}">
+        {% if block.settings.show_label %}
+          <p class="product__inventory-label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            {% if block.settings.label_bolder_font %}<b>{% endif %}{{ 'products.product.inventory.inventory_label' | t }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+          </p>
+        {% endif %}
+        <p class="product__inventory-status {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+          {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+          {% if is_available %}
+            {{ 'products.product.inventory.in_stock_label' | t }}
+          {% else %}
+            {{ 'products.product.inventory.out_of_stock' | t }}
+          {% endif %}
+          {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+        </p>
+        {% if block.settings.show_bar %}<progress-bar class="progress-bar"></progress-bar>{% endif %}
+      </li>
+    </ul>
+  {% else %}
+    {% if block.settings.low_threshold != blank and block.settings.base_quantity != blank %}
+      <ul class="product__inventory {{ product.selected_or_first_available_variant.inventory_quantity }} list-unstyled" 
+        id="inventory-{{ section.id }}" {% if from_details %} data-place-for-id="inventory-{{ section.id }}"{% endif %} style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+        {%- liquid
+          assign inventory_threshold = block.settings.low_threshold | plus: 0
+          assign inventory_quantity = product.selected_or_first_available_variant.inventory_quantity
+        -%}
+        
+          {%- if inventory_quantity > inventory_threshold or product.selected_or_first_available_variant.inventory_management == nil or product.selected_or_first_available_variant.inventory_policy == 'continue' and inventory_quantity <= 0 or product.selected_or_first_available_variant.available -%}
+            
+              {% unless product.selected_or_first_available_variant.incoming and block.settings.show_transfer %}
+              <li class="product__inventory-item product__inventory-item--in-stock">
+                {% if block.settings.show_label %}
+                  <p class="product__inventory-label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                    {% if block.settings.label_bolder_font %}<b>{% endif %}{{ 'products.product.inventory.inventory_label' | t }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                  </p>
+                {% endif %}
+                <p class="product__inventory-status {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                  {{ 'products.product.inventory.in_stock_label' | t: count: product.selected_or_first_available_variant.inventory_quantity }}
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                </p>
+                {% if block.settings.show_bar %}
+                  <progress-bar class="progress-bar"></progress-bar>
+                {% endif %}
+              </li>
+            {% endunless %}
+            
+          {%- elsif inventory_threshold >= inventory_quantity and inventory_quantity > 0 and product.selected_or_first_available_variant.inventory_management == 'shopify' -%}
+            <li class="product__inventory-item product__inventory-item--low">
+              {% if block.settings.show_label %}
+                <p class="product__inventory-label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                  {% if block.settings.label_bolder_font %}<b>{% endif %}{{ 'products.product.inventory.inventory_label' | t }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                </p>
+              {% endif %}
+              <p class="product__inventory-status {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                {% if product.selected_or_first_available_variant.inventory_quantity > 1 %}{{ 'products.product.inventory.stock_label_html' | t: count: product.selected_or_first_available_variant.inventory_quantity }}
+                {% else %}{{ 'products.product.inventory.stock_label_one_html' | t: count: product.selected_or_first_available_variant.inventory_quantity }}
+                {% endif %}
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+              </p>
+              {% if block.settings.show_bar %}
+                <progress-bar class="{{ block.settings.color_scheme }}" data-quantity="{{ product.selected_or_first_available_variant.inventory_quantity }}" data-total="{{ block.settings.base_quantity }}"></progress-bar>
+              {% endif %}
+            </li>
+          {%- elsif inventory_quantity <= 0 and product.selected_or_first_available_variant.inventory_policy == 'deny' -%}
+            {% unless product.selected_or_first_available_variant.incoming and block.settings.show_transfer %}
+              <li class="product__inventory-item product__inventory-item--sold">
+                {% if block.settings.show_label %}
+                  <p class="product__inventory-label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                    {% if block.settings.label_bolder_font %}<b>{% endif %}{{ 'products.product.inventory.inventory_label' | t }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                  </p>
+                {% endif %}
+                <p class="product__inventory-status {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                  {{ 'products.product.inventory.out_of_stock' | t: count: product.selected_or_first_available_variant.inventory_quantity }}
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                </p>
+                {% if block.settings.show_bar %}
+                  <progress-bar class="progress-bar"></progress-bar>
+                {% endif %}
+              </li>                        
+            {% endunless %}
+          {%- endif -%}
+        
+        {%- if block.settings.show_transfer and product.selected_or_first_available_variant.incoming -%}
+          {% if inventory_quantity <= 0 %}
+            <li class="product__inventory-item">
+              {% if block.settings.show_label %}
+                <p class="product__inventory-label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                  {% if block.settings.label_bolder_font %}<b>{% endif %}{{ 'products.product.inventory.inventory_label' | t }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+              </p>
+              {% endif %}
+              <span class="icon-and-text {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                <span class="js-incoming-text" style="--in-stock-color: {{ settings.in_stock_color.red }}, {{ settings.in_stock_color.green }}, {{ settings.in_stock_color.blue }};">
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                  {%- liquid
+                    if product.selected_or_first_available_variant.next_incoming_date
+                      assign date = product.selected_or_first_available_variant.next_incoming_date | date: format: 'date'
+                      if product.selected_or_first_available_variant.inventory_quantity <= 0
+                        echo 'products.product.inventory.will_not_ship_until' | t: date: date
+                      else
+                        echo 'products.product.inventory.will_be_in_stock_after' | t: date: date
+                      endif
+                    else
+                      echo 'products.product.inventory.waiting_for_stock' | t
+                    endif
+                  -%}
+                  {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                </span>
+              </span>
+            </li>
+          {% endif %}
+        {%- endif -%}
+      </ul>
+    {% endif %}
+  {% endif %}

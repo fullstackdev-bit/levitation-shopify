@@ -1,0 +1,27 @@
+.gift-card__image-wrapper,
+.gift-card__qr-code,
+.gift-card__print,
+.gift_card__apple-wallet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+}
+
+.gift-card__image-wrapper, .gift-card__image {
+    width: var(--logo-image-width);
+}
+
+.gift-card__qr-code {
+    width: 120px;
+    height: 120px;
+}
+
+.template-header ~ *:not(:last-child), .gift-card__info > *:not(:last-child) {
+    margin-bottom: 16px;
+}
+
+#shopify-section-main-gift-card .gift-card {
+    min-height: 100vh;
+}

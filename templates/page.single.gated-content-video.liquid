@@ -26,14 +26,6 @@
         video_description: video_description, video_thumbnail: video_thumbnail, section_id: section_id %}
 
 {% comment %}
-  <!-- Products for unlocking the video -->
-{% endcomment %}
-{% if preview_enabled == 'true' %}
-    {{ 'single-gated-content.css' | asset_url | stylesheet_tag }}
-    {% render 'single-need-access', title_size: 'h2', key_product_ids: key_product_ids, key_product_listings: key_product_listings %}
-{% endif %}
-
-{% comment %}
   <!-- Promoted Products -->
 {% endcomment %}
 {% unless preview_enabled == 'true' %}

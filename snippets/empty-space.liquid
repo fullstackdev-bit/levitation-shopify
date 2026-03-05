@@ -1,0 +1,16 @@
+<div class="spacer spacer--{{ block.id }}" {{ block.shopify_attributes }}>
+    {% style %}
+      .spacer--{{ block.id }} {
+        --height: {{ block.settings.desktop_height }};
+        height: calc(var(--block-padding) * var(--height));
+      }
+      @media screen and (max-width: 768px) {
+        .spacer--{{ block.id }} {
+        --height: {{ block.settings.mobile_height }};
+      }
+      .footer .spacer--{{ block.id }} {
+        display: none;
+      }
+      }
+    {% endstyle %}
+</div>

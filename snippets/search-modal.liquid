@@ -1,0 +1,264 @@
+{%- liquid
+    assign disable_max_width = false
+    if settings.search_disable_max_width 
+        assign disable_max_width = true
+    elsif settings.search_grid_style == 'page' and settings.full_width_page_grid
+        assign disable_max_width = true
+    elsif settings.search_grid_style == 'alternative' and settings.full_width_alt_grid
+        assign disable_max_width = true
+    elsif settings.search_grid_style == 'secondary' and settings.full_width_second_grid
+        assign disable_max_width = true
+    endif
+    
+    assign max_width = '100vw'
+    if disable_max_width == false and settings.search_grid_style == 'page'
+        assign max_width =  settings.page_width
+    elsif disable_max_width == false and settings.search_grid_style == 'alternative'
+        assign max_width = settings.alt_grid_width
+    elsif disable_max_width == false and settings.search_grid_style == 'secondary'
+        assign max_width = settings.second_grid_width
+    endif
+
+    assign quick_search_drawer = false
+    if settings.quick_search_style == 'drawer'
+        assign quick_search_drawer = true
+        assign header_search_style = 'icon'
+    endif
+    if settings.quick_search_style == 'drawer' and settings.quick_search_width == 'regular'
+        assign max_width = '640'
+        assign disable_max_width = false
+    elsif settings.quick_search_style == 'drawer' and settings.quick_search_width == 'wide'
+        assign max_width = '50'
+        assign disable_max_width = true
+    endif
+
+    assign column_information = 0
+    assign quick_search_banner = 0
+    assign drawer_column = 1
+    assign column_merge = false
+    if settings.popular_searches_menu != blank
+        assign column_information = column_information | plus: 1
+    endif
+    if settings.search_banner_image_1 != blank or settings.search_banner_heading_1 != blank or settings.search_banner_subheading_1 != blank
+        assign column_information = column_information | plus: 1
+        assign quick_search_banner = quick_search_banner | plus: 1
+    endif
+    if settings.search_banner_image_2 != blank or settings.search_banner_heading_2 != blank or settings.search_banner_subheading_2 != blank
+        assign column_information = column_information | plus: 1
+        assign quick_search_banner = quick_search_banner | plus: 1
+    endif
+    if settings.search_banner_image_3 != blank or settings.search_banner_heading_3 != blank or settings.search_banner_subheading_3 != blank
+        assign column_information = column_information | plus: 1
+        assign quick_search_banner = quick_search_banner | plus: 1
+    endif
+    if settings.search_banner_image_4 != blank or settings.search_banner_heading_4 != blank or settings.search_banner_subheading_4 != blank
+        assign column_information = column_information | plus: 1
+        assign quick_search_banner = quick_search_banner | plus: 1
+    endif
+    if column_information != 0 and column_information < 3
+        assign column_information = 3
+        assign column_merge = true
+    endif
+
+    if quick_search_banner > 1
+        assign drawer_column = 2
+    endif
+    if quick_search_banner > 1 and quick_search_drawer 
+        assign column_merge = true
+    else 
+        assign column_merge = false
+    endif
+
+    assign onload_script = ''
+    assign loading_images = 'lazy'
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+    endif
+-%}
+<div class="overlay search-modal__overlay overlay-scheme--{{ settings.overlay_scheme_color }}"></div>
+<div class="search-modal header-search-style-{{ header_search_style }} color-{{ settings.search_color_scheme }} {% if quick_search_drawer %} drawer drawer--{{ settings.quick_search_drawer_position }} {% if settings.quick_search_width == 'wide' %}wide{% endif %} modal hide-scrollbar{% else %} search-modal--popover{% endif %} {% if settings.modal_enable_shadow %}modal--shadow{% endif %} {% if settings.modal_border %}modal--border{% endif %}" {% if settings.quick_search_style == 'popover' %}role="dialog" aria-modal="true"{% endif %} aria-label="{{ 'templates.search.search_title' | t }}">
+    <div class="scroll-area hide-scrollbar">
+        {% if quick_search_drawer %}
+            <div class="button-wrapper">
+                <button type="button" class="button-close button-close--search-drawer close-popup icon--large" aria-label="{{ 'accessibility.close' | t }}" data-modal-toggle>
+                    {%- render 'glyphs_interface', icon: 'close' -%}
+                </button>
+            </div>
+        {% endif %}
+        <div class="search-modal__container">
+        <div class="search-modal__content" tabindex="-1">
+            {%- if settings.enable_quick_search -%}
+            <predictive-search class="predictive-search-container" data-loading-text="{{ 'accessibility.loading' | t }}">
+            {%- endif -%}
+            {% style %}
+                .search-modal__header {
+                    --search-field-radius: {{ search_field_radius }};
+                }
+            {% endstyle %}
+            <form action="{{ routes.search_url }}" method="get" role="search" class="search-modal__form{% unless quick_search_drawer %} side-margins{% endunless %}">
+                <div class="search-modal__header">
+                    <div class="search-field__wrapper flex--row">
+                        <div class="field search-field flex--row {% if fill_search_background %} search-field--filled{% endif %}{% if show_search_outline %} search-field--outlined{% endif %}">
+                            <label class="visually-hidden" for="Search-in-quick-view">{{ 'templates.search.search_title' | t }}</label>
+                            <button type="submit" class="search-field__icon" aria-label="{{ 'templates.search.search_for' | t: terms: search.terms }}" tabindex="0">
+                                <span class="search__icon icon icon--large">
+                                    {%- render 'glyphs_header', icon: 'search' -%}
+                                </span>
+                            </button>
+                            <input
+                            id="Search-in-quick-view"
+                            class="search__input search-field__text{% if settings.quick_search_style == 'drawer' %} search-field__text--drawer{% endif %} body-font{% if settings.uppercase_body %} uppercase{% endif %}"
+                            type="search"
+                            name="q"
+                            value="{{ search.terms | escape }}"
+                            placeholder="{{ 'templates.search.placeholder' | t }}"
+                            autocomplete="off"
+                            {%- if settings.enable_quick_search %}
+                                role="combobox"
+                                aria-expanded="false"
+                                aria-owns="predictive-search-results-list"
+                                aria-controls="predictive-search-results-list"
+                                aria-haspopup="listbox"
+                                aria-autocomplete="list"
+                                autocorrect="off"
+                                autocomplete="off"
+                                autocapitalize="off"
+                                spellcheck="false"
+                            {% endif -%}
+                            />
+                            <input type="hidden" name="options[prefix]" value="last"/>
+                            {%- if settings.enable_quick_search -%}
+                            <div class="predictive-search__loading-state"></div>
+                            {%- endif -%}     
+                            {%- if settings.enable_quick_search -%}
+                            <button type="reset" class="search__button" aria-label="{{ 'templates.search.clear' | t }}">
+                                <div class="loading-overlay__spinner hidden">
+                                <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                </svg>
+                                </div> 
+                                <span class="search__button-text flex--row caption-font {% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %} visually-hidden">
+                                    {%- render 'glyphs_header', icon: 'search-clear' -%}
+                                </span>
+                            </button>
+                            {%- endif -%}
+                        </div>
+                        {% if settings.quick_search_style == 'popover' %}
+                        <button type="button" class="button-close close-popup icon--large button-close--search flex--row" aria-label="{{ 'accessibility.close' | t }}" data-modal-toggle>
+                            {%- render 'glyphs_interface', icon: 'close' -%}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="search-modal__information">
+                    {% style %}
+                        .search-modal__information--container {
+                            {% if quick_search_drawer %}
+                                --grid-columns: {{ drawer_column }};
+                            {% else %}
+                                --grid-columns: {{ column_information }};
+                            {% endif %}
+                            --aspect-ratio: {{ settings.search_banner_media_ratio }};
+                            --overlay-opacity: {{ settings.search_banner_overlay_opacity | divided_by: 100.0 }};
+                            --vertical-position: {{ settings.search_vertical_content_position }};
+                            {%- if settings.search_banner_image_radius == 'default' -%}
+                                --image-radius: {{ settings.images_and_sections_radius }};
+                            {%- else -%}
+                                --image-radius: {{ settings.search_banner_image_radius }};
+                            {%- endif -%}
+                            --banner-size: {{ settings.search_banner_size }}%;
+                        }
+                        {% if settings.images_loading != 'disable' and settings.search_banner_media_ratio == 'auto' %}
+                            .search-modal__information--container .lazy-image {
+                                aspect-ratio: var(--asp-rat);
+                            }
+                        {% endif %}
+                        @media screen and (max-width: 768px) {
+                            .search-modal__information--container {
+                                --grid-columns: 2;
+                            }
+                        }
+                        {% if settings.search_vertical_content_position == 'below' %}
+                        .search-modal__information .search-modal__banner-content {
+                            --layout-text-color: {{ settings.search_color_scheme.settings.layout_text_color.red }},{{ settings.search_color_scheme.settings.layout_text_color.green }},{{ settings.search_color_scheme.settings.layout_text_color.blue }};
+                        }
+                        {% endif %}
+                    {% endstyle %}
+                    <div class="search-modal__information--wrapper">
+                        <div class="search-modal__information--container {% if quick_search_drawer %}search-modal__information--drawer{% endif %}{% if settings.show_lines_quick_search %} show-lines{% endif %} grid {{ settings.search_grid_style }}-grid {{ settings.search_grid_style }}-grid-gaps{% if disable_max_width %} disable-max-width{% endif %}">
+                            {%- if settings.show_lines_quick_search and column_information == 2 -%}
+                                <span class="quick-search__line" data-index="1"></span>
+                            {%- elsif settings.show_lines_quick_search and column_information == 3 -%}
+                                <span class="quick-search__line" data-index="1"></span>
+                                <span class="quick-search__line" data-index="2"></span>
+                            {%- elsif settings.show_lines_quick_search and column_information == 4 -%}
+                                <span class="quick-search__line" data-index="1"></span>
+                                <span class="quick-search__line" data-index="2"></span>
+                                <span class="quick-search__line" data-index="3"></span>
+                            {%- elsif settings.show_lines_quick_search and column_information == 5 -%}
+                                <span class="quick-search__line" data-index="1"></span>
+                                <span class="quick-search__line" data-index="2"></span>
+                                <span class="quick-search__line" data-index="3"></span>
+                                <span class="quick-search__line" data-index="4"></span>
+                            {%- endif -%}
+                            {%- if settings.popular_searches_menu != blank -%}
+                                <div class="search__menu{% if column_merge %} column-merge{% endif %}">
+                                    {% if settings.popular_searches_menu_title %}
+                                        {%- liquid
+                                            assign uppercase_title = false
+                                            if settings.popular_searches_titles_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                                assign uppercase_title = true
+                                            elsif settings.popular_searches_titles_style == 'subheading-font' and settings.uppercase_subheadings
+                                                assign uppercase_title = true
+                                            elsif settings.popular_searches_titles_style == 'body-font' and settings.uppercase_body
+                                                assign uppercase_title = true
+                                            elsif settings.popular_searches_titles_style == 'caption-font' and settings.uppercase_caption
+                                                assign uppercase_title = true
+                                            elsif settings.popular_searches_titles_style == 'section-heading' and settings.uppercase_section_headings
+                                                assign uppercase_title = true
+                                            endif
+                                            -%}
+                                        <h4 class="search__menu-title {{ settings.popular_searches_titles_style }}{% if uppercase_title %} uppercase{% endif %}{% if settings.popular_searches_titles_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                            {% if settings.popular_searches_titles_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ settings.popular_searches_menu.title }}{% if settings.popular_searches_titles_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                        </h4>
+                                    {% endif %}
+                                    {%- if settings.popular_searches_menu.size > 0  -%}
+                                    <ul class="search__menu-list flex--column">
+                                    {%- for link in settings.popular_searches_menu.links limit: 5 -%}
+                                        <li class="menu__item {{ settings.popular_searches_link_style }}{% if settings.popular_searches_link_uppercase %} uppercase{% endif %}{% if settings.popular_searches_link_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                            <a href="{{ link.url }}">
+                                                {% if settings.popular_searches_link_bolder_font %}<b>{% endif %}{{ link.title }}{% if settings.popular_searches_link_bolder_font %}</b>{% endif %}
+                                            </a>
+                                        </li>
+                                    {%- endfor -%}
+                                    </ul>
+                                {%- endif -%}
+                                </div>
+                            {%- endif -%}
+                            {%- if settings.search_banner_image_1 != blank or settings.search_banner_heading_1 != blank or settings.search_banner_subheading_1 != blank -%}
+                                {% render 'quick-search-banner', image: settings.search_banner_image_1, heading: settings.search_banner_heading_1, subheading: settings.search_banner_subheading_1, link: settings.search_banner_link_1, disable_max_width: disable_max_width, max_width: max_width, number: 1, columns: column_information, drawer_column: drawer_column, onload_script: onload_script, loading_images: loading_images %}
+                            {%- endif -%}
+                            {%- if settings.search_banner_image_2 != blank or settings.search_banner_heading_2 != blank or settings.search_banner_subheading_2 != blank -%}
+                                {% render 'quick-search-banner', image: settings.search_banner_image_2, heading: settings.search_banner_heading_2, subheading: settings.search_banner_subheading_2, link: settings.search_banner_link_2, disable_max_width: disable_max_width, max_width: max_width, number: 2, columns: column_information, drawer_column: drawer_column, onload_script: onload_script, loading_images: loading_images %}
+                            {%- endif -%}
+                            {%- if settings.search_banner_image_3 != blank or settings.search_banner_heading_3 != blank or settings.search_banner_subheading_3 != blank -%}
+                                {% render 'quick-search-banner', image: settings.search_banner_image_3, heading: settings.search_banner_heading_3, subheading: settings.search_banner_subheading_3, link: settings.search_banner_link_3, disable_max_width: disable_max_width, max_width: max_width, number: 3, columns: column_information, drawer_column: drawer_column, onload_script: onload_script, loading_images: loading_images %}
+                            {%- endif -%}
+                            {%- if settings.search_banner_image_4 != blank or settings.search_banner_heading_4 != blank or settings.search_banner_subheading_4 != blank -%}
+                                {% render 'quick-search-banner', image: settings.search_banner_image_4, heading: settings.search_banner_heading_4, subheading: settings.search_banner_subheading_4, link: settings.search_banner_link_4, disable_max_width: disable_max_width, max_width: max_width, number: 4, columns: column_information, drawer_column: drawer_column, onload_script: onload_script, loading_images: loading_images %}
+                            {%- endif -%}
+                        </div>
+                    </div>
+                </div>
+                {%- if settings.enable_quick_search -%}
+                <div class="predictive-search {% if settings.show_lines_quick_search %} show-lines{% endif %} predictive-search--header" tabindex="-1" data-predictive-search></div>
+                <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+                {%- endif -%}
+            </form>
+            {%- if settings.enable_quick_search -%}
+            </predictive-search>
+            {%- endif -%} 
+        </div>
+        </div>
+    </div>
+</div> 

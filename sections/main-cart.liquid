@@ -1,0 +1,1507 @@
+{{ 'main-cart.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+    assign disable_max_width = false
+    if section.settings.disable_max_width 
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+      assign disable_max_width = true
+    endif
+
+    assign uppercase_product_title = false
+    if settings.small_product_titles_uppercase
+      assign uppercase_product_title = true
+    endif
+
+    assign onload_script = ''
+    assign loading_images = ''
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+        assign loading_images = 'lazy'
+    endif
+-%}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+        --grid-columns: 2;
+        --aspect-ratio: {{ settings.cart_product_media_ratio }};
+        --focal-point: {{ settings.cart_product_focal_point }};
+        --border-radius: {{ section.settings.border_radius }};
+    }
+{% endstyle %}
+
+{%- unless settings.enable_cart_drawer -%}
+    <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+{%- endunless -%}
+
+<div class="section section-container color-{{ section.settings.color_scheme }} side-margins {% if cart == empty %}template-cart-empty{% endif %}{% if section.settings.show_bottom_line %} bottom-line{% endif %}" id="main-cart" data-id="{{ section.id }}">
+    <div class="{{ section.settings.grid_style }}-grid {% if disable_max_width %}disable-max-width{% endif %}">
+        {% if section.settings.hide_heading == false %}
+          <div class="section-header">
+              <h1 class="page-title custom-heading {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                {% if section.settings.heading != blank %}
+                  {% liquid
+                    assign heading_text = section.settings.heading
+                    assign processed_text = ''
+                    assign split_text = heading_text | split: '['
+
+                    for part in split_text
+                      if part contains ']'
+                        assign split_bracket = part | split: ']'
+                        assign highlight_text = split_bracket[0]
+                        assign after_bracket = split_bracket[1]
+                        assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                      else
+                        assign processed_text = processed_text | append: part
+                      endif
+                    endfor
+
+                    assign final_text = ''
+                    assign split_text_curly = processed_text | split: '{'
+
+                    for part in split_text_curly
+                      if part contains '}'
+                        assign split_curly = part | split: '}'
+                        assign styled_text = split_curly[0]
+                        assign after_curly = split_curly[1]
+                        assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                      else
+                        assign final_text = final_text | append: part
+                      endif
+                    endfor
+                  %}
+                  {{ final_text }}
+                {% else %}
+                  {%- if settings.cart_name == 'cart' -%}{{ 'cart.title_cart' | t }}{% elsif settings.cart_name == 'basket' %}{{ 'cart.title_basket' | t }}{%- else -%}{{ 'cart.title_bag' | t }}{%- endif -%}
+                {% endif %}
+                {% if section.settings.show_item_count %}<span> {{ cart.item_count }}</span>{% endif %}
+              </h1>
+          </div>
+        {% endif %}
+        <div class="cart-page grid {{ section.settings.grid_style }}-grid-gaps{% if cart == empty %} cart-empty{% endif %}">
+            {%- if cart == empty -%}
+                <h2 class="cart-empty__text secondary-heading {% if settings.uppercase_secondary_headings %}uppercase{% endif %}">
+                    {%- if settings.cart_name == 'cart' -%}{{ 'cart.empty_cart' | t }}{%- elsif settings.cart_name == 'basket' -%}{{ 'cart.empty_basket' | t }}{%- else -%}{{ 'cart.empty_bag' | t }}{%- endif -%}
+                </h2>
+                <div class="cart-empty__actions flex--row">
+                    {%- if shop.customer_accounts_enabled and customer == null -%}
+                      <a href="{{ routes.account_login_url }}" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'cart.login' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                    </a>
+                    {%- endif -%}
+                    <a href="{{ routes.root_url }}" class="button outlined-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif %} {{ 'cart.continue_shopping' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                    </a>
+                </div>
+            {%- else -%}
+            <cart-items class="cart-page__block cart-page__block--items flex--column">
+              <form action="{{ routes.cart_url }}" class="cart__contents" method="post" id="cart">
+                  <div class="cart__items" id="main-cart-items" data-id="{{ section.id }}">
+                      <table class="cart-items">
+                          <tbody>
+                            {% for item in cart.items %}
+                              {% liquid 
+                                case settings.sale_badge_style
+                                  when 'percentage'
+                                    assign discount = item.variant.compare_at_price | minus: item.final_price
+                                    assign discount_percent = discount | times: 100 | divided_by: item.variant.compare_at_price
+                                    assign sale_badge = discount_percent | round | prepend: '-' | append: '%'
+                                  when 'text'
+                                    assign sale_badge = 'products.product.badges.sale_badge' | t
+                                endcase
+                              %}
+                              <tr class="cart-item{% if item.parent_relationship.parent != null %} cart-item__nested-line{% endif %}" id="CartItem-{{ item.index | plus: 1 }}"
+                                {% if item.parent_relationship.parent != null %}
+                                  aria-label="{{- 'products.product.nested_label' | t: title: item.product.title, parent_title: item.parent_relationship.parent.title | escape -}}"
+                                {% endif %}>
+                                <td class="cart-item__product{% if settings.enable_blending %} enable-blending{% endif %}">
+                                  {% if item.image or settings.product_placeholder %}
+                                  <span class="cart-item__media-wrapper">
+                                    <span class="cart-item__media aspect-ratio {% if settings.cart_fit_product_media %}cart-item__media--fit{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                                      {% comment %} theme-check-disable ImgLazyLoading {% endcomment %}
+                                      {% if item.image %}
+                                        {% if settings.images_loading != 'disable' %}
+                                          <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                                        {% endif %}
+                                        <img class="cart-item__image"
+                                            srcset="{{ item.image | image_url: width: 250 }} 1x, {{ item.image | image_url: width: 250 }} 2x"
+                                            src="{{ item.image | image_url: width: 250 }}"
+                                            alt="{{ item.image.alt | escape | split: '#' | first }}"
+                                            {% if section.index > 2 or settings.images_loading != 'disable' %}loading="lazy"{% endif %}
+                                            {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                            draggable="false"
+                                            width="250"
+                                            height="127"/>
+                                        {% if settings.images_loading != 'disable' %}
+                                          {% if settings.images_loading != 'fade_scale' %}
+                                          <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                              <img 
+                                              alt="{{ item.image.alt | escape }}" 
+                                              src="{{ item.image | image_url: width: 10 }}"
+                                              draggable="false"
+                                              width="10" 
+                                              height="10">
+                                          </div>
+                                          {% endif %}
+                                      </figure>
+                                      {% endif %}
+                                      {% elsif settings.product_placeholder %}
+                                      {% if settings.images_loading != 'disable' %}
+                                          <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                                      {% endif %}
+                                        <img class="cart-item__image cart-item__image--placeholder"
+                                          srcset="{{ settings.product_placeholder | image_url: width: 250 }} 1x, {{ settings.product_placeholder | image_url: width: 250 }} 2x"
+                                          src="{{ settings.product_placeholder | image_url: width: 250 }}"
+                                          alt="{{ settings.product_placeholder.alt | escape | split: '#' | first }}"
+                                          {% if section.index > 2 or settings.images_loading != 'disable' %}loading="lazy"{% endif %}
+                                          {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                          draggable="false"
+                                          width="250"
+                                          height="127"/>
+                                        {% if settings.images_loading != 'disable' %}
+                                          {% if settings.images_loading != 'fade_scale' %}
+                                          <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                              <img 
+                                              alt="{{ settings.product_placeholder.alt | escape }}" 
+                                              src="{{ settings.product_placeholder | image_url: width: 10 }}"
+                                              draggable="false"
+                                              width="10" 
+                                              height="10">
+                                          </div>
+                                          {% endif %}
+                                      </figure>
+                                      {% endif %}
+                                      {% endif %}
+                                      {% comment %} theme-check-enable ImgLazyLoading {% endcomment %}
+                                    </span>
+                                  </span>
+                                  {% endif %}
+                                  <div class="cart-item__details body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                    <div class="cart-item__first-row">
+                                      {% if settings.card_show_title %}
+                                        {% liquid
+                                          assign product_title = item.product.title
+                                          if settings.max_product_name_characters != blank and settings.max_product_name_characters > 0
+                                              assign product_title = item.product.title | truncate: settings.max_product_name_characters, ''
+                                              if settings.max_product_name_characters < item.product.title.size
+                                                  assign product_title = product_title | append: '...'
+                                              endif
+                                          endif 
+                                      %}
+                                        <a href="{{ item.product.url }}" class="cart-item__name{% if settings.small_use_accent_color_for_title %} color-accent{% endif %} {{ settings.small_product_titles_style }}{% if uppercase_product_title %} uppercase{% endif %}{% if settings.small_product_titles_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                          {% if settings.small_bolder_product_titles %}<b>{% endif %}{{ product_title }}{% if settings.small_bolder_product_titles %}</b>{% endif %}
+                                        </a>
+                                      {% endif %}
+                                      <div class="cart-item__totals right">
+                                        <div class="loading-overlay__spinner hidden">
+                                          <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                            <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                          </svg>
+                                        </div>
+                                        {% liquid 
+                                          assign uppercase_price = false
+                                          if settings.small_product_price_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                            assign uppercase_price = true
+                                          elsif settings.small_product_price_style == 'subheading-font' and settings.uppercase_subheadings
+                                              assign uppercase_price = true
+                                          elsif settings.small_product_price_style == 'body-font' and settings.uppercase_body
+                                              assign uppercase_price = true
+                                          elsif settings.small_product_price_style == 'caption-font' and settings.uppercase_caption
+                                              assign uppercase_price = true
+                                          endif
+                                          if settings.small_product_titles_uppercase
+                                            assign uppercase_price = true
+                                          endif
+                                        %}
+                                        <div class="cart-item__price-wrapper {{ settings.small_product_price_style }}{% if uppercase_price %} uppercase{% else %} none-uppercase{% endif %}{% if settings.small_product_price_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.small_bolder_product_price %} bold{% endif %}">
+                                          {%- if item.original_line_price != item.final_line_price -%}
+                                            <dl class="cart-item__discounted-prices flex--column">
+                                              <dt class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</dt>
+                                              <dd class="price price--end">
+                                                <price-money><bdi>{{ item.final_line_price | money }}</bdi></price-money>
+                                              </dd> 
+                                            </dl>
+                                          {%- else -%}
+                                            <span class="price price--end">
+                                              <price-money><bdi>{{ item.original_line_price | money }}</bdi></price-money>
+                                            </span>
+                                          {%- endif -%}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {% liquid 
+                                      assign uppercase_price = false
+                                      if settings.small_product_price_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                        assign uppercase_price = true
+                                      elsif settings.small_product_price_style == 'subheading-font' and settings.uppercase_subheadings
+                                          assign uppercase_price = true
+                                      elsif settings.small_product_price_style == 'body-font' and settings.uppercase_body
+                                          assign uppercase_price = true
+                                      elsif settings.small_product_price_style == 'caption-font' and settings.uppercase_caption
+                                          assign uppercase_price = true
+                                      endif
+                                      if settings.small_product_titles_uppercase
+                                        assign uppercase_price = true
+                                      endif
+                                    %}
+                                    <div class="cart-item__price-wrapper flex--row {{ settings.small_product_price_style }}{% if uppercase_price %} uppercase{% else %} none-uppercase{% endif %}{% if settings.small_bolder_product_price %} bold{% endif %}">
+                                      {%- if item.original_price != item.final_price -%}
+                                        {% liquid
+                                          assign show_compare_at_price = false
+                                          if settings.include_compare_at_price_in_before_discount and item.variant.compare_at_price and item.variant.compare_at_price > item.original_price
+                                            assign show_compare_at_price = true
+                                          endif
+                                        %}
+
+                                        <dl class="cart-item__discounted-prices flex--row">
+                                          {% if settings.include_compare_at_price_in_before_discount %} 
+                                            <dt class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</dt>
+                                            {% if show_compare_at_price %}
+                                                <dd class="price price--end price--{{ settings.small_compare_at_price_color }}">
+                                                    <price-money><bdi>{{ item.original_price | money  }}</bdi></price-money>
+                                                </dd> 
+                                            {% else %}    
+                                                <dd class="price">
+                                                    <s class="price price-item--regular price--end {% if settings.small_use_accent_color_for_price %}price--accent{% endif %}">
+                                                        <price-money><bdi>{{ item.original_price | money  }}</bdi></price-money>
+                                                    </s>
+                                                </dd> 
+                                            {% endif %}                                                           
+                                          {% else %}  
+                                              <dt class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</dt>
+                                              <dd class="price price--end price--{{ settings.small_compare_at_price_color }}">
+                                                  <price-money><bdi>{{ item.final_price | money }}</bdi></price-money>
+                                              </dd> 
+                                              <dt class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</dt>
+                                              <dd class="price--on-sale">
+                                                  <s class="price price-item--regular price--end {% if settings.small_use_accent_color_for_price %}price--accent{% endif %}">
+                                                      <price-money><bdi>{{ item.original_price | money }}</bdi></price-money>
+                                                  </s>
+                                              </dd>
+                                          {% endif %}
+
+                                          {% if show_compare_at_price %}
+                                            <dt class="visually-hidden">{{ 'products.product.price.original_price' | t }}</dt>
+                                            <dd class="price price--on-sale">
+                                                <s class="price price-item--regular price--end {% if settings.small_use_accent_color_for_price %}price--accent{% endif %}">
+                                                <price-money><bdi>{{ item.variant.compare_at_price | money }}</bdi></price-money>
+                                                </s>
+                                            </dd>
+                                            {% if settings.show_badge_sale %}
+                                              <span {% if settings.sale_badge_style == 'percentage' %}dir="ltr"{% endif %} class="card__badges-item card__badges-item--sale {% if settings.make_badges_transparent %} card__badges-item--transparent {% endif %}">{{ sale_badge }}</span>
+                                            {% endif %}
+                                          {% endif %}
+                                        </dl>
+                                      {%- else -%}
+                                        {% if settings.include_compare_at_price_in_before_discount and item.variant.compare_at_price %}
+                                          <span class="price price--end price--sale price--{{ settings.small_compare_at_price_color }}">
+                                              <price-money><bdi>{{ item.final_price | money }}</bdi></price-money>
+                                          </span>
+                                          <span class="price price--on-sale {% if settings.small_use_accent_color_for_price %}price--accent{% endif %}">
+                                              <price-money><bdi>{{ item.variant.compare_at_price | money }}</bdi></price-money>
+                                          </span>
+                                          {% if settings.show_badge_sale %}
+                                            <span {% if settings.sale_badge_style == 'percentage' %}dir="ltr"{% endif %} class="card__badges-item card__badges-item--sale {% if settings.make_badges_transparent %} card__badges-item--transparent {% endif %}">{{ sale_badge }}</span>
+                                          {% endif %}
+                                        {% else %}
+                                          <span class="price price--end {% if settings.small_use_accent_color_for_price %}price--accent{% endif %}">
+                                              <price-money><bdi>{{ item.final_price | money }}</bdi></price-money>
+                                          </span>
+                                        {% endif %}
+                                      {%- endif -%}
+                                      {%- if item.variant.available and item.unit_price_measurement -%}
+                                            <div class="unit-price">
+                                            <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+                                            <price-money><bdi>&#40;{{ item.variant.unit_price | money }}</bdi></price-money>
+                                            <span aria-hidden="true">/</span>
+                                            <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+                                            {%- if item.variant.unit_price_measurement.reference_value != 1 -%}{{- item.variant.unit_price_measurement.reference_value -}}{%- endif -%}
+                                            {{ item.variant.unit_price_measurement.reference_unit }}&#41;
+                                            </div>
+                                        {%- endif -%}
+                                        {% if settings.show_badge_preorder and item.product.template_suffix == 'preorder' %}
+                                          <span class="product-badge--preorder caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'products.product.pre_order' | t }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {%- if item.line_level_discount_allocations.size > 0 -%}
+                                      <ul class="discounts" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                                        {%- for discount in item.line_level_discount_allocations -%}
+                                          {% liquid
+                                            assign your_saved = 0
+                                            assign your_saved = item.original_price | minus: item.final_price | times: item.quantity | plus: your_saved 
+                                          %}
+                                          <li class="discounts__discount {% if settings.uppercase_body %}uppercase{% endif %} flex--row">
+                                              <span class="icon--small icon">{%- render 'glyphs_signs', icon: 'price-tag' -%}</span>
+                                            {{ discount.discount_application.title }} {% if your_saved > 0 %}{% if settings.currency_code_enabled %}(-{{ your_saved | money_with_currency }}){% else %}(-{{ your_saved | money }}){% endif %}{% endif %}
+                                          </li>
+                                        {%- endfor -%}
+                                      </ul>
+                                    {%- endif -%}
+                                      {%- if settings.cart_show_vendor -%}<p class="cart-item__vendor">{{ item.product.vendor }}</p>{%- endif -%}
+                                      {% if item.product.has_only_default_variant == false %}
+                                      <dl>
+                                        {% for option in item.options_with_values %}
+                                          <div class="product-option"><dt>{{ option.name }}</dt><dd>{{ option.value | prepend: ': ' }}</dd></div>
+                                        {% endfor %}
+                                      </dl>
+                                      {% endif %}
+                                      {%- unless item.properties == empty  -%}
+                                      <dl>
+                                      {%- for property in item.properties -%}
+                                          {%- assign property_first_char = property.first | slice: 0 -%}
+                                          {%- if property.last != blank and property_first_char != '_' -%}
+                                          <div class="product-option">
+                                              <dt>{{ property.first }}: </dt>
+                                              <dd>{% if property.last contains '/uploads/' %}
+                                                  <a href="{{ property.last }}" target="_blank">{{ property.last | split: '/' | last }}</a>
+                                              {%- else -%}
+                                                  {{ property.last }}
+                                              {%- endif -%}</dd>
+                                          </div>
+                                          {%- endif -%}
+                                      {%- endfor -%}
+                                      </dl>
+                                      {%- endunless -%}
+                                      {%- if item.selling_plan_allocation != nil -%}
+                                          <div class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</div>
+                                      {%- endif -%}
+                                  {%- if settings.inventory_notice_cart_page and item.variant.inventory_management -%}
+                                      {%- liquid
+                                          assign product_inventory = item.variant.inventory_quantity
+                                      -%}
+                                      {% if product_inventory <= settings.low_inventory and settings.inventory_notice == 'low' or settings.inventory_notice == 'yes' %}
+                                        {% if settings.show_count_inventory == 'yes' or settings.show_count_inventory == 'low' %}
+                                          <div class="cart-product__inventory cart-product__inventory--low">{{ 'cart.low_stock_with_count' | t: count: product_inventory }}</div>
+                                        {% endif %}
+                                        {% if settings.show_count_inventory == 'no' %}
+                                          <div class="cart-product__inventory cart-product__inventory--low">{{ 'cart.low_stock' | t }}</div>
+                                        {% endif %}
+                                      {% endif %}
+                                      {% if settings.inventory_notice == 'yes' and product_inventory > settings.low_inventory %}
+                                        {% if settings.show_count_inventory == 'yes' %}
+                                          <div class="cart-product__inventory">{{ 'cart.in_stock_with_count' | t: count: product_inventory }}</div>
+                                        {% endif %}
+                                        {% if settings.show_count_inventory == 'no' or settings.show_count_inventory == 'low' %}
+                                          <div class="cart-product__inventory">{{ 'cart.in_stock' | t }}</div>
+                                        {% endif %}
+                                      {% endif %}
+                                    {%- endif -%}
+                                      <div class="cart-item__details-actions-wrapper">
+                                        <div class="cart-item__details-actions">
+                                            <label class="visually-hidden" for="Quantity-{{ item.index | plus: 1 }}">{{ 'products.product.quantity.label' | t }}</label>
+                                            <quantity-input class="quantity flex--row">
+                                              {% assign can_update_quantity = item.instructions.can_update_quantity | default: true %}
+                                              <button class="quantity__button" name="minus" type="button" {% if item.quantity == 0 %}disabled{% endif %}{% if can_update_quantity == false %} disabled{% endif %}>
+                                                  <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: item.product.title | escape }}</span>
+                                                  {%- render 'glyphs_interface', icon: 'minus' -%}
+                                                </button>
+                                                <input class="quantity__input"
+                                                type="number"
+                                                dir="ltr"
+                                                name="updates[]"
+                                                value="{{ item.quantity }}"
+                                                min="0"
+                                                {% if item.variant.quantity_rule.max != null %}
+                                                  max="{{ item.variant.quantity_rule.max }}"
+                                                {% endif %}
+                                                step="{{ item.variant.quantity_rule.increment }}"
+                                                aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                                                id="Quantity-{{ item.index | plus: 1 }}"
+                                                data-index="{{ item.index | plus: 1 }}"
+                                                onclick="this.select();"
+                                                {% if can_update_quantity == false %}disabled{% endif %}/>
+                                                <button class="quantity__button no-js-hidden" name="plus" type="button" {% if can_update_quantity == false %}disabled{% endif %}>
+                                                <span class="visually-hidden">{{ 'products.product.quantity.increase' | t: product: item.product.title | escape }}</span>
+                                                {%- render 'glyphs_interface', icon: 'plus' -%}
+                                                </button>
+                                            </quantity-input>
+                                            {% assign can_remove = item.instructions.can_remove | default: true %}
+                                            <cart-remove-button class="remove-button{% if can_remove == false %} hidden{% endif %}" id="Remove-{{ item.index | plus: 1 }}" data-index="{{ item.index | plus: 1 }}">
+                                                <a href="{{ item.url_to_remove }}" class="" aria-label="{{ 'cart.remove_title' | t: title: item.title }}">
+                                                  {{ 'cart.remove_button' | t }}
+                                                </a>
+                                            </cart-remove-button>
+                                        </div>
+                                      </div>
+                                      <p class="cart-item__error form__message errors" id="Line-item-error-{{ item.index | plus: 1 }}"><span class="cart-item__error-text error-color"></span></p>
+                                  </div>
+                                </td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+                  <p class="visually-hidden" id="cart-live-region-text" aria-live="polite" role="status"></p>
+                  <p class="visually-hidden" id="shopping-cart-line-item-status" aria-live="polite" aria-hidden="true" role="status">{{ 'accessibility.loading' | t }}</p>  
+              </form>
+              {% if section.settings.show_continue_shopping %}
+              <a href="{% if section.settings.shopping_link != blank %}{{ section.settings.shopping_link }}{% else %}{{ routes.root_url }}{% endif %}" 
+                class="cart-return button button--secondary outlined-button body-font {% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'cart.continue_shopping' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+              </a>
+              {% endif %}
+            </cart-items>
+            <div class="cart-page__block color-{{ section.settings.summary_block_color_scheme }} {% if section.settings.summary_block_color_scheme != section.settings.color_scheme or section.settings.show_border %}cart-page__block--padding{% endif %}{% if section.settings.show_border %} cart-page__block--border{% endif %} cart-page__block--price">
+                <div class="cart-page__block-container">
+                  {%- liquid
+                    if cart != empty and settings.free_shipping_cart_page
+                      render 'free-shipping'
+                    endif
+                  -%}
+                  {%- for block in section.blocks -%}
+                    {%- case block.type -%}
+                      {%- when '@app' -%}
+                        <div class="app-block" {{ block.shopify_attributes }}>{% render block %}</div>
+                      {%- when 'price' -%}
+                        {% liquid 
+                          if block.settings.show_before_discounts or block.settings.show_saved                              
+                              if settings.include_compare_at_price_in_before_discount
+                                  assign before_discounts = 0
+          
+                                  for item in cart.items
+                                      assign compare_at_price = item.variant.compare_at_price
+                                      assign compare_at_line_price = 0
+          
+                                      if compare_at_price
+                                          assign compare_at_line_price = compare_at_price | times: item.quantity
+                                      endif
+          
+                                      assign max_price = compare_at_line_price | at_least: item.original_line_price
+                                      assign before_discounts = before_discounts | plus: max_price
+                                  endfor
+                              else
+                                  assign before_discounts = cart.original_total_price
+                              endif
+          
+                              assign savings = before_discounts | minus: cart.total_price
+                          endif
+                        %}
+                      <div {{ block.shopify_attributes }}>
+                        <div class="block-prices flex--column">
+                          {%- liquid
+                            assign uppercase_heading = false
+                            if block.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+                              assign uppercase_heading = true
+                            elsif block.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                              assign uppercase_heading = true
+                            elsif block.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+                                assign uppercase_heading = true
+                            elsif block.settings.heading_style == 'body-font' and settings.uppercase_body
+                                assign uppercase_heading = true
+                            elsif block.settings.heading_style == 'caption-font' and settings.uppercase_caption
+                                assign uppercase_heading = true
+                            endif
+                          -%}
+                          {% if section.settings.show_order_weight and cart.total_weight > 0 %}
+                            <div class="cart-weight body-font {% if settings.uppercase_body %}uppercase{% endif %}"><span class="{{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %} bold{% endif %}">{{ 'cart.weight' | t }}</span><span>{{ cart.total_weight | weight_with_unit }}</span></div>
+                          {% endif %}
+                          {%- if block.settings.show_before_discounts -%}
+                            <div class="before-discounts-wrapper">
+                              <div class="before-discounts body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                <p class="before-discounts__title {{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %} bold{% endif %}">
+                                  {{ 'cart.before_discounts' | t }}
+                                </p>
+                                <p class="before-discounts__value">{% if settings.currency_code_enabled %}{{ before_discounts | money_with_currency }}{% else %}{{ before_discounts | money }}{% endif %}</p>
+                              </div>
+                              {%- if cart.discount_applications.size > 0 -%}
+                                <div class="discounts-wrapper body-font{% if settings.uppercase_body %} uppercase{% endif %} right">
+                                  <ul class="discounts" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                                    {%- for discount in cart.discount_applications -%}
+                                      {% liquid
+                                        assign is_cart_level = false                                       
+                                        for cart_discount in cart.cart_level_discount_applications
+                                          if cart_discount.title == discount.title
+                                            assign is_cart_level = true
+                                            break
+                                          endif
+                                        endfor
+                                      %}
+
+                                      {%- unless is_cart_level -%}
+                                        <li class="discounts__discount discounts__discount--position flex--row">
+                                          <span class="icon--small icon">{%- render 'glyphs_signs', icon: 'price-tag' -%}</span>
+                                          {{ discount.title }}
+                                          <span dir="ltr">
+                                            {% if settings.currency_code_enabled %}
+                                              (-{{ discount.total_allocated_amount | money_with_currency }})
+                                            {% else %}
+                                              (-{{ discount.total_allocated_amount | money }})
+                                            {% endif %}
+                                          </span>
+                                        </li>
+                                      {%- endunless -%}
+                                    {%- endfor -%}
+                                  
+                                    {%- for discount in cart.cart_level_discount_applications -%}
+                                      <li class="discounts__discount discounts__discount--position flex--row">
+                                        <span class="icon--small icon">{%- render 'glyphs_signs', icon: 'price-tag' -%}</span>
+                                        {{ discount.title }}
+                                        <span dir="ltr">
+                                          {% if settings.currency_code_enabled %}
+                                            (-{{ discount.total_allocated_amount | money_with_currency }})
+                                          {% else %}
+                                            (-{{ discount.total_allocated_amount | money }})
+                                          {% endif %}
+                                        </span>
+                                      </li>
+                                    {%- endfor -%}                                
+                                  </ul>
+                                </div>
+                              {%- endif -%}
+                            </div>
+                          {% endif %}
+                          
+                          {%- if block.settings.show_saved and savings > 0 -%}
+                            <div class="discount body-font{% if settings.uppercase_body %} uppercase{% endif %}" aria-label="{{ 'customer.order.discount' | t }}">
+                              <p class="discount__title {{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %} bold{% endif %}">{{ 'cart.saved' | t }}</p>
+                              <p class="discount__value price--{{ settings.cart_compare_at_price_color }}">{% if settings.currency_code_enabled %}{{ savings | money_with_currency }}{% else %}{{ savings | money }}{% endif %}</p>
+                            </div>
+                          {% endif %}
+                          {%- liquid
+                            assign uppercase_cart_total = false
+                            if block.settings.cart_total_style == 'section-heading' and settings.uppercase_section_headings
+                              assign uppercase_cart_total = true
+                            elsif block.settings.cart_total_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                              assign uppercase_cart_total = true
+                            elsif block.settings.cart_total_style == 'subheading-font' and settings.uppercase_subheadings
+                                assign uppercase_cart_total = true
+                            elsif block.settings.cart_total_style == 'body-font' and settings.uppercase_body
+                                assign uppercase_cart_total = true
+                            elsif block.settings.cart_total_style == 'caption-font' and settings.uppercase_caption
+                                assign uppercase_cart_total = true
+                            endif
+                          -%}
+                          <div class="totals {{ block.settings.cart_total_style }}{% if uppercase_cart_total %} uppercase{% endif %}{% if block.settings.cart_total_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}
+                            {% if block.settings.cart_total_style == 'subheading-font' and settings.bolder_subheadings_font %} bold{% endif %}">
+                            <p class="totals__total">{%- if settings.cart_name == 'cart' -%}{{ 'cart.cart_total' | t }}{%- elsif settings.cart_name == 'basket' -%}{{ 'cart.basket_total' | t }}{%- else -%}{{ 'cart.bag_total' | t }}{%- endif -%}</p>
+                            <p class="totals__total-value">{% if settings.currency_code_enabled %}{{ cart.total_price | money_with_currency }}{% else %}{{ cart.total_price | money }}{% endif %}</p>
+                          </div>
+                        </div>
+                        {%- unless block.settings.show_before_discounts -%}
+                          {%- if cart.cart_level_discount_applications.size > 0 -%}
+                            <div class="discounts-wrapper body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                              <ul class="discounts" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                                {%- for discount in cart.cart_level_discount_applications -%}
+                                  <li class="discounts__discount discounts__discount--position flex--row">
+                                    <span class="icon--small icon">{%- render 'glyphs_signs', icon: 'price-tag' -%}</span>
+                                    {{ discount.title }}
+                                    <span dir="ltr">{% if settings.currency_code_enabled %}(-{{ discount.total_allocated_amount | money_with_currency }}){% else %}(-{{ discount.total_allocated_amount | money }}){% endif %}</span>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            </div>
+                          {%- endif -%}
+                        {%- endunless -%}
+                        {% if section.settings.show_taxes %}
+                        <small class="tax-note link-underline body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+                          {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+                            {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                          {%- elsif cart.taxes_included -%}
+                            {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
+                          {%- elsif shop.shipping_policy.body != blank -%}
+                            {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+                          {%- else -%}
+                            {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+                          {%- endif -%}
+                        </small>
+                        {% endif %}
+                      </div>
+                      {%- when 'checkout_button' -%}
+                        {%- if settings.enable_checkbox and settings.checkbox_label != blank -%}
+                          <label class="field field--checkbox flex--row align-center body-font {% if settings.uppercase_body %}uppercase{% endif %}" for="checkbox--cart" form="cart">
+                            <input-checkbox>
+                              <input form="cart" type="checkbox" id="checkbox--cart" name="enable-checkout" {%  if settings.make_required %}required{% endif %}>
+                            </input-checkbox>
+                              <span class="richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %}">{{ settings.checkbox_label }}</span>
+                          </label>
+                        {%- endif -%}
+                      <div class="cart__checkouts" {{ block.shopify_attributes }}>
+                        <button type="submit" id="checkout" class="cart__checkout-button button solid-button body-font {% if block.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}" 
+                          name="checkout"{% if cart == empty %} disabled{% endif %} form="cart">
+                          {% if block.settings.use_main_button %}
+                            {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'cart.checkout' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                          {% else %}
+                            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'cart.checkout' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                          {% endif %}
+                        </button>
+                        {%- if section.settings.show_accelerated_buttons and additional_checkout_buttons -%}
+                          <div class="cart__dynamic-checkout-buttons additional-checkout-buttons body-font {% if block.settings.use_main_button %}{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} {% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}">
+                            {% if block.settings.use_main_button %}
+                              {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ content_for_additional_checkout_buttons }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                            {% else %}
+                              {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ content_for_additional_checkout_buttons }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                            {% endif %}
+                          </div>
+                        {%- endif -%}
+                      </div>
+                      {%- when 'discount_code' -%}
+                        {% render 'cart-discount', block: block, section_id: section.id, object_settings: block.settings %}
+                      {%- when 'order_note' -%}
+                        {% render 'order-note', block: block, object_settings: block.settings, form_id: 'cart', textarea_id: 'Cart-note', rows: 5 %}
+                      {%- when 'shipping_calculator' -%}
+                        {% render 'shipping-calculator', block: block, object_settings: block.settings %}
+                      {%- when 'text' -%}
+                        {%- if block.settings.text != blank -%}
+                          {%- liquid
+                            assign uppercase_text = false
+                            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                              assign uppercase_text = true
+                            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                              assign uppercase_text = true
+                            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                                assign uppercase_text = true
+                            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                                assign uppercase_text = true
+                            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                                assign uppercase_text = true
+                            endif
+                            assign uppercase_headings = false
+                            if block.settings.richtext_heading_style == 'body-font' and settings.uppercase_body
+                              assign uppercase_headings = true
+                            elsif block.settings.richtext_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                              assign uppercase_headings = true
+                            elsif block.settings.richtext_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                              assign uppercase_headings = true
+                            elsif block.settings.richtext_heading_style == 'section-heading' and settings.uppercase_section_headings
+                                assign uppercase_headings = true
+                            elsif block.settings.richtext_heading_style == 'page-title' and settings.uppercase_page_titles
+                                assign uppercase_headings = true
+                            endif
+                          -%}
+                          <div class="richtext heading-style-{{ block.settings.richtext_heading_style }} rte link-underline{% if uppercase_headings %} headings-uppercase{% endif %} 
+                            {% if block.settings.richtext_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                            {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                            {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" {{ block.shopify_attributes }}>
+                              {{ block.settings.text }}
+                          </div>
+                        {%- endif -%}
+                      {%- when 'offer' -%}
+                        {%- liquid 
+                          assign background_color_no_transparent = false
+                          assign background_color_rgb = block.settings.background_color | color_to_rgb | strip
+                          assign text_color_rgb = block.settings.text_color | color_to_rgb | strip
+                          if background_color_rgb != 'rgba(0, 0, 0, 0.0)'
+                          assign background_color_no_transparent = true
+                          endif
+                          assign text_color_no_transparent = false
+                          if text_color_rgb != 'rgba(0, 0, 0, 0.0)'
+                          assign text_color_no_transparent = true
+                          endif
+                      -%}
+                        {% style %}
+                              .offer--{{ block.id }} {
+                                  --icon-width: {{ block.settings.icon_width }}px;
+                                  {%- if block.settings.background_color != 'transparent' -%}
+                                    --background: {{ background_color_rgb }};
+                                  {%- endif -%}
+                                  {%- if block.settings.text_color != 'transparent' -%}
+                                    --color: {{ text_color_rgb }};
+                                  {%- endif -%}
+                              }
+                        {% endstyle %}
+                        {% if block.settings.icon != blank or block.settings.custom_icon != blank or block.settings.heading != blank or block.settings.text != blank %}
+                        <div class="section-block offer flex--column offer--{{ block.id }} {% if background_color_no_transparent %}bg-custom section-radius{% endif %}{% if text_color_no_transparent %} color-custom{% endif %} {% if block.settings.center_text %}center{% endif %}"  {{ block.shopify_attributes }}>
+                          {%- if block.settings.custom_icon != blank or block.settings.icon != blank or block.settings.offer_heading != blank -%}
+                          <div class="offer__header flex--{{ block.settings.icon_position }}">
+                            {%- if block.settings.custom_icon != blank -%}
+                                {%- liquid
+                                  assign widths = '20, 40, 60, 80, 100, 150, 300, 500, 750, 1000'
+                                  assign img_class = "offer__icon"
+                              -%}
+                              {% if settings.images_loading != 'disable' %}
+                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                              {% endif %}
+                              {%- capture sizes -%}
+                                  {{ block.settings.icon_width }}px
+                              {%- endcapture -%}
+                              {{
+                                block.settings.custom_icon
+                                  | image_url: width: 1000
+                                  | image_tag:
+                                  sizes: sizes,
+                                  widths: widths,
+                                  class: img_class,
+                                  alt: block.settings.custom_icon.alt,
+                                  draggable: false,
+                                  loading: loading_images,
+                                  onload: onload_script
+                              }}
+                              {% if settings.images_loading != 'disable' %}
+                                {% if settings.images_loading != 'fade_scale' %}
+                                <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                  <img 
+                                  alt="{{ block.settings.custom_icon.alt | escape }}" 
+                                  src="{{ block.settings.custom_icon | image_url: width: 10 }}"
+                                  draggable="false"
+                                  width="10" 
+                                  height="10">
+                                </div>
+                                {% endif %}
+                            </figure>
+                            {% endif %}
+                            {%- else -%}
+                            {% if block.settings.icon != blank %}
+                              {%- liquid
+                                assign icon_name = block.settings.icon | split: '/'
+                                if icon_name.size == 3
+                                  assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                elsif icon_name.size == 2
+                                  assign file_name = icon_name.first
+                                endif
+                                assign icon = icon_name.last
+                                assign color_rgb = block.settings.color | color_to_rgb | strip
+                                assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip
+                                -%}
+                            <span class="offer__icon" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                            {% endif %}
+                            {%- endif -%}
+                            {%- if block.settings.heading != blank -%}
+                              {%- liquid
+                                assign uppercase_heading = false
+                                if block.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+                                  assign uppercase_heading = true
+                                elsif block.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                  assign uppercase_heading = true
+                                elsif block.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+                                    assign uppercase_heading = true
+                                elsif block.settings.heading_style == 'body-font' and settings.uppercase_body
+                                    assign uppercase_heading = true
+                                elsif block.settings.heading_style == 'caption-font' and settings.uppercase_caption
+                                    assign uppercase_heading = true
+                                endif
+
+                                assign heading_text = block.settings.heading
+                                assign processed_text = ''
+                                assign split_text = heading_text | split: '['
+
+                                for part in split_text
+                                  if part contains ']'
+                                    assign split_bracket = part | split: ']'
+                                    assign highlight_text = split_bracket[0]
+                                    assign after_bracket = split_bracket[1]
+                                    assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                                  else
+                                    assign processed_text = processed_text | append: part
+                                  endif
+                                endfor
+
+                                assign final_text = ''
+                                assign split_text_curly = processed_text | split: '{'
+
+                                for part in split_text_curly
+                                  if part contains '}'
+                                    assign split_curly = part | split: '}'
+                                    assign styled_text = split_curly[0]
+                                    assign after_curly = split_curly[1]
+                                    assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                                  else
+                                    assign final_text = final_text | append: part
+                                  endif
+                                endfor
+                              -%}
+                            <p class="offer__heading custom-heading {{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                              {% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ final_text }}{% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                            </p>
+                            {%- endif -%}
+                          </div>
+                          {%- endif -%}
+                          {% if block.settings.text != blank %}
+                            {%- liquid
+                              assign uppercase_text = false
+                              if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                                assign uppercase_text = true
+                              elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                assign uppercase_text = true
+                              elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                                  assign uppercase_text = true
+                              elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                                  assign uppercase_text = true
+                              elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                                  assign uppercase_text = true
+                              endif
+                            -%}
+                            <div class="richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                              {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" {{ block.shopify_attributes }}>
+                                {{ block.settings.text }}
+                            </div>
+                          {% endif %}
+                        </div>
+                        {% endif %}
+                    {%- endcase -%}
+                  {%- endfor -%}
+                </div>
+            </div>
+            {%- endif -%}
+        </div>
+    </div>
+    <div id="cart-errors" class="{{ section.settings.grid_style }}-grid {% if disable_max_width %}disable-max-width{% endif %} body-font {% if settings.uppercase_body %}uppercase{% endif %}"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function isIE() {
+        const ua = window.navigator.userAgent;
+        const msie = ua.indexOf('MSIE ');
+        const trident = ua.indexOf('Trident/');
+  
+        return (msie > 0 || trident > 0);
+      }
+  
+      if (!isIE()) return;
+      const cartSubmitInput = document.createElement('input');
+      cartSubmitInput.setAttribute('name', 'checkout');
+      cartSubmitInput.setAttribute('type', 'hidden');
+      document.querySelector('#cart').appendChild(cartSubmitInput);
+      document.querySelector('#checkout').addEventListener('click', function(event) {
+        document.querySelector('#cart').submit();
+      });
+    });
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.main-cart.name",
+  "tag": "section",
+  "class": "main-cart",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.all.settings_titles.heading.custom_heading.label",
+      "info": "t:sections.all.settings_titles.heading.heading.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_heading",
+      "default": false,
+      "label": "t:sections.all.settings_titles.heading.hide_heading.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_item_count",
+      "default": true,
+      "label": "t:sections.main-cart.settings.show_item_count.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text",
+      "default": false,
+      "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_order_weight",
+      "default": true,
+      "label": "t:sections.main-cart.settings.show_order_weight.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_taxes",
+      "default": true,
+      "label": "t:sections.main-cart.settings.show_taxes.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_accelerated_buttons",
+      "default": true,
+      "label": "t:sections.main-cart.settings.show_accelerated_buttons.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_continue_shopping",
+      "default": true,
+      "label": "t:sections.main-cart.settings.show_continue_shopping.label"
+    },
+    {
+      "type": "url",
+      "id": "shopping_link",
+      "label": "t:sections.main-cart.settings.shopping_link.label",
+      "info": "t:sections.main-cart.settings.shopping_link.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main-cart.settings.summary_block.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "default": true,
+      "label": "t:sections.all.show_border.label"
+    },
+    {
+      "type": "select",
+      "id": "border_radius",
+      "options": [
+        {
+          "value": "0px",
+          "label": "t:sections.all.corner_radius.options__1.label"
+        },
+        {
+          "value": "3px",
+          "label": "t:sections.all.corner_radius.options__2.label"
+        },
+        {
+          "value": "5px",
+          "label": "t:sections.all.corner_radius.options__3.label"
+        },
+        {
+          "value": "12px",
+          "label": "t:sections.all.corner_radius.options__4.label"
+        },
+        {
+          "value": "16px",
+          "label": "t:sections.all.corner_radius.options__5.label"
+        }
+      ],
+      "default": "0px",
+      "label": "t:sections.all.corner_radius.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.settings_titles.section_layout_header.content"
+    },
+    {
+      "type": "select",
+      "id": "grid_style",
+      "options": [
+        {
+          "value": "page",
+          "label": "t:sections.all.grid_style.options__1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:sections.all.grid_style.options__3.label"
+        },
+        {
+          "value": "alternative",
+          "label": "t:sections.all.grid_style.options__2.label"
+        }
+      ],
+      "default": "page",
+      "label": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_max_width",
+      "default": false,
+      "label": "t:sections.all.disable_max_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "summary_block_color_scheme",
+      "label": "t:sections.all.colors.summary_block_color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "price",
+      "name": "t:sections.main-cart.blocks.price.name",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_before_discounts",
+          "default": true,
+          "label": "t:sections.main-cart.blocks.price.settings.show_before_discounts.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_saved",
+          "default": true,
+          "label": "t:sections.main-cart.blocks.price.settings.show_saved.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.heading_style.label"
+        },
+        {
+          "type": "select",
+          "id": "cart_total_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.cart_total_style.label"
+        }
+      ]
+    },
+    {
+      "type": "checkout_button",
+      "name": "t:sections.main-cart.blocks.checkout_button.name",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "use_main_button",
+          "default": true,
+          "label": "t:sections.all.buttons.use_main_button.label"
+        }
+      ]
+    },
+    {
+      "type": "discount_code",
+      "name": "t:sections.main-cart.blocks.discount_code.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_collapsible",
+          "default": true,
+          "label": "t:blocks.all.show_collapsible.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.all.settings_titles.heading.heading.label",
+          "info": "t:sections.all.settings_titles.heading.heading.info",
+          "default": "Discount"
+        },
+        {
+          "type": "select",
+          "id": "heading_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.heading_style.label"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.all.settings_titles.label.label",
+          "default": "Discount code"
+        }
+      ]
+    },
+    {
+      "type": "order_note",
+      "name": "t:sections.main-cart.blocks.order_note.name",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_collapsible",
+          "default": true,
+          "label": "t:blocks.all.show_collapsible.label"
+        },
+        {
+          "type": "text",
+          "id": "order_heading",
+          "label": "t:sections.main-cart.blocks.order_note.settings.order_heading.label",
+          "info": "t:sections.all.settings_titles.heading.heading.info",
+          "default": "Order note"
+        },
+        {
+          "type": "select",
+          "id": "order_heading_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.heading_style.label"
+        },
+        {
+          "type": "text",
+          "id": "order_label",
+          "label": "t:sections.main-cart.blocks.order_note.settings.order_label.label",
+          "default": "Add a note to your order"
+        },
+        {
+          "type": "text",
+          "id": "order_placeholder",
+          "label": "t:sections.main-cart.blocks.order_note.settings.order_placeholder.label",
+          "default": "Write your comment for seller here"
+        }
+      ]
+    },
+    {
+      "type": "shipping_calculator",
+      "name": "t:sections.main-cart.blocks.shipping_calculator.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "shipping_heading",
+          "label": "t:sections.main-cart.blocks.shipping_calculator.settings.shipping_heading.label",
+          "info": "t:sections.all.settings_titles.heading.heading.info",
+          "default": "Estimate shipping"
+        },
+        {
+          "type": "select",
+          "id": "shipping_heading_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.heading_style.label"
+        },
+        {
+          "type": "text",
+          "id": "shipping_country",
+          "label": "t:sections.main-cart.blocks.shipping_calculator.settings.shipping_country.label",
+          "info": "t:sections.main-cart.blocks.shipping_calculator.settings.shipping_country.info",
+          "default": "United States"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "t:blocks.text.name",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "t:sections.all.settings_titles.text.text.label",
+          "default": "<p>Short content about your shipping rates or discounts.</p>"
+        },
+        {
+          "type": "select",
+          "id": "richtext_heading_style",
+          "options": [
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            },
+            {
+              "value": "page-title",
+              "label": "t:sections.all.headings_style.options__5.label"
+            }
+          ],
+          "default": "section-heading",
+          "label": "t:sections.all.headings_style.richtext_heading_style.label"
+        },
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "body-font",
+          "label": "t:sections.all.headings_style.text_style.label"
+        }
+      ]
+    },
+    {
+      "type": "offer",
+      "name": "t:sections.main-cart.blocks.offer.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "t:sections.all.icons.icon.label",
+          "info": "t:sections.all.icons.icon.info"
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "t:blocks.icon.settings.color.label",
+          "info": "t:blocks.icon.settings.color.info",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "mobile_color",
+          "label": "t:blocks.icon.settings.mobile_color.label",
+          "info": "t:blocks.icon.settings.color.info",
+          "default": "#000000"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "t:sections.all.icons.custom_icon.label"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "min": 20,
+          "max": 100,
+          "step": 2,
+          "unit": "px",
+          "label": "t:sections.all.icons.icon_width.label",
+          "default": 24
+        },
+        {
+          "type": "select",
+          "id": "icon_position",
+          "options": [
+            {
+              "value": "row",
+              "label": "t:sections.all.icons.icon_position.options__1.label"
+            },
+            {
+              "value": "column",
+              "label": "t:sections.all.icons.icon_position.options__2.label"
+            }
+          ],
+          "default": "row",
+          "label": "t:sections.all.icons.icon_position.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Shipping",
+          "label": "t:sections.all.settings_titles.heading.heading.label",
+          "info": "t:sections.all.settings_titles.heading.heading.info"
+        },
+        {
+          "type": "select",
+          "id": "heading_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "secondary-heading",
+          "label": "t:sections.all.headings_style.heading_style.label"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Short content about your shipping rates or discounts.</p>",
+          "label": "t:sections.all.settings_titles.text.text.label"
+        },
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            {
+              "value": "caption-font",
+              "label": "t:sections.all.headings_style.options__6.label"
+            },
+            {
+              "value": "body-font",
+              "label": "t:sections.all.headings_style.options__1.label"
+            },
+            {
+              "value": "subheading-font",
+              "label": "t:sections.all.headings_style.options__2.label"
+            },
+            {
+              "value": "secondary-heading",
+              "label": "t:sections.all.headings_style.options__3.label"
+            },
+            {
+              "value": "section-heading",
+              "label": "t:sections.all.headings_style.options__4.label"
+            }
+          ],
+          "default": "body-font",
+          "label": "t:sections.all.headings_style.text_style.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "center_text",
+          "default": false,
+          "label": "t:sections.all.alignment.center_text.label"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "t:sections.main-cart.blocks.offer.settings.background_color.label",
+          "default": "transparent"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "t:sections.main-cart.blocks.offer.settings.text_color.label",
+          "default": "transparent"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

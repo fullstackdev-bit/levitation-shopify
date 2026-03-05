@@ -1,0 +1,93 @@
+<div class="swiper-slide color-{{ section.settings.banner_color_scheme }}">
+    <div class="stories-slide__swiper-slide-wrapper swiper-slide__wrapper">
+        <div class="stories-slider-content none-autoplay"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+            {% if image != blank %}
+                {%- liquid
+                    assign widths = '200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000'
+                -%}
+                {%- capture sizes -%}
+                    (max-width: 768px) calc(100vh - 80px), (max-width: 1200px) 40vw, 30vw
+                {%- endcapture -%}
+                {{
+                    image
+                    | image_url: width: 1500
+                    | image_tag:
+                    sizes: sizes,
+                    widths: widths,
+                    alt: image.alt,
+                    draggable: false,
+                    fetchpriority: fetchpriority
+                  }}
+            {% endif %}
+        </div>
+        {% if label != blank %}
+            <{% if link != blank %}a href="{{ link }}"{% if target_blank %} target="_blank"{% endif %}{% else %}span{% endif %} class="stories-slider-conten__button button {{ button_style }}-button body-font {% if use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}">
+                {% if use_main_button %}
+                    {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ label }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                {% else %}
+                    {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ label }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                {% endif %}
+            </{% if link != blank %}a{% else %}span{% endif %}>
+        {% endif %}
+        <div class="stories-slider-button stories-slider-button-prev"></div>
+        <div class="stories-slider-button stories-slider-button-next"></div>
+    </div>
+    {% if products.count > 0 %}
+        {% liquid
+            assign selector_container = '#stories__products-' | append: block.id | append: '-{{ index }}'
+            assign max_width = '700'
+         %}        
+        <div class="stories__products color-{{ settings.popup_color_scheme }}" id="stories__products-{{ block.id }}-{{ index }}">
+            <div class="stories__products-wrapper">
+                <div class="stories__products-title center">
+                    <p class="subheading-font {% if settings.use_heading_font_subheadings %}subheading-heading-font{% endif %} {% if settings.uppercase_subheadings %}uppercase{% endif %}">{% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'sections.stories_slideshow.products_promotion_label' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}</p>
+                    <div class="icon--large flex--row align-center">
+                        {%- render 'glyphs_arrows', icon: 'chevron-up' -%}
+                    </div>
+                </div>
+                <div class="stories__products-scroll scroll-area hide-scrollbar">
+                    <ul class="stories__products-container grid">
+                        {% for product in products %}
+                            <li class="grid-item">
+                                {% render 'card-product',
+                                    card_product: product,
+                                    show_vendor: section.settings.show_vendor,
+                                    show_title: section.settings.show_title,
+                                    hover_behavior: 'none',
+                                    quick_buy: 'disable',
+                                    price_position: section.settings.price_position,
+                                    options_position: 'bottom',
+                                    desktop_options: 'disable',
+                                    mobile_options: 'disable',
+                                    max_product_name_characters: section.settings.max_product_name_characters,
+                                    show_short_description: section.settings.show_short_description,
+                                    show_rating: section.settings.show_rating,
+                                    lazy_load: 'lazy',
+                                    max_width: max_width,
+                                    disable_max_width: false,
+                                    accent_price: accent_price,
+                                    desktop_columns: 2,
+                                    mobile_columns: 2,
+                                    autoplay_speed: 0,
+                                    product_card_color_scheme: section.settings.product_card_color_scheme,
+                                    show_product_card_border: section.settings.show_product_card_border,
+                                    index: forloop.index,
+                                    complementary_block: false,
+                                    card_content_style: section.settings.card_content_style,
+                                    use_sale_color_for_new_price: use_sale_color_for_new_price, 
+                                    use_accent_color_for_price: use_accent_color_for_price,
+                                    parent_color_scheme: section.settings.color_scheme,
+                                    full_width: false,
+                                    selector_container: selector_container,
+                                    show_bullets: false,
+                                    grid_type: 'grid',
+                                    disable_grid_gaps: true
+                                %}
+                                </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {%endif %}
+</div>

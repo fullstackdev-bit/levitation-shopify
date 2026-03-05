@@ -6,13 +6,18 @@
     background: {{ background_color }};
     color: {{ font_color }};
   }
+
+  .popup .single-login {
+    background: {{ background_color }};
+  }
 </style>
 
-<div id="chat-login-modal" class="pulogin hidden">
+<div id="chat-login-modal" class="pulogin single-hidden">
   <div class="popup">
     <button onClick="closeModal('chat-login-modal')" class="close" href="#">&times;</button>
     <div class="content">
-      {% section 'single-base-login' %}
+      {% capture login_section %}{% section 'single-base-login' %}{% endcapture %}
+      {{ login_section | replace: 'REGISTER_CLASSES', 'single-hidden' | replace: 'CANCEL_SIGNUP_LINK_CLASSES', 'single-hidden' | replace: 'SIGNUP_LINK_CLASSES', 'single-hidden' | replace: 'LOGIN_TITLE', 'Login', | replace: 'CREATE_ACCT_TITLE', 'Create Account' }}
     </div>
   </div>
 </div>
@@ -25,13 +30,13 @@
       showLoginForm();
     }
     const modal = document.getElementById('chat-login-modal');
-    modal.classList.remove('hidden');
+    modal.classList.remove('single-hidden');
     setupForms('{{ register_url }}', '{{ login_url }}');
   }
 
   function closeModal(id) {
     const modal = document.getElementById(id);
-    modal.classList.add('hidden');
+    modal.classList.add('single-hidden');
   }
 
   function handleIframeMessage(event) {

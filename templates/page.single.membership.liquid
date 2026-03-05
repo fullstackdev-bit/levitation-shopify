@@ -864,6 +864,6 @@ SOFTWARE.
     ></single-membership-management>
     {% unless customer %}
         {% capture single-customer-login %}{% section 'single-base-login' %}{% endcapture %}
-        {{ single-customer-login | replace: 'PAGE_URL', page.url }}
+        {{ single-customer-login | replace: 'LOGIN_REDIRECT_URL', page.url | replace: 'SIGNUP_REDIRECT_URL', page.url | replace: 'REGISTER_CLASSES', 'single-hidden' |  replace: 'LOGIN_TITLE', 'Login' }}
     {% endunless %}
 </div>

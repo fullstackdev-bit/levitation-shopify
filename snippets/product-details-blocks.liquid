@@ -1,0 +1,850 @@
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
+{%- assign block_product_price = false -%}
+{% for block in section.blocks %}
+{%- case block.type -%}
+      {%- when 'breadcrumbs' -%}
+        {% if forloop.index > second_container_index %}
+          <div style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};">
+            {%- render 'breadcrumbs', object: block -%}
+          </div>
+        {% endif %}
+      {%- when '@app' -%}
+        {% if forloop.index > second_container_index %}
+            <div class="app-block" style="--spacing: {{ block.settings.top_spacing }};" {{ block.shopify_attributes }}>{% render block %}</div>
+        {% endif %}
+      {%- when 'title' -%}
+        {% if forloop.index > second_container_index %}
+            <{{ block.settings.heading_tag }} class="product__title {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+              style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            {% if block.settings.bolder_font %}<b>{% endif %}{{ product.title | escape }}{% if block.settings.bolder_font %}</b>{% endif %}
+            </{{ block.settings.heading_tag }}>
+        {% endif %}
+      {%- when 'title_with_price' -%}
+        {% if forloop.index > second_container_index %}
+          {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+            assign bold_price = false
+            if block.settings.price_bolder_font == true
+              assign bold_price = true
+            endif
+
+            assign block_product_price = true
+            assign hide_price = false
+            if block.settings.show_price == false
+              assign hide_price = true
+              assign block_product_price = false
+            endif
+          -%}
+
+          {% liquid
+            assign target = product.selected_or_first_available_variant
+
+            assign has_badge = false
+            if product.available and product.selected_or_first_available_variant.metafields.custom.badge != blank
+              assign has_badge = true
+            elsif product.available and product.metafields.custom.badge != blank
+              assign has_badge = true
+            elsif product.available and target.compare_at_price > target.price and settings.show_badge_sale
+              assign has_badge = true
+            elsif product.available == false and product.selected_or_first_available_variant != 'continue' and settings.show_badge_sold
+              assign has_badge = true
+            elsif settings.show_badge_preorder and product.template_suffix == 'preorder'
+              assign has_badge = true
+            endif 
+          %}
+
+          <div class="flex--column" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            <div class="title-with-price flex--row">
+              <{{ block.settings.heading_tag }} class="truncate product__title {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if block.settings.bolder_font %}<b>{% endif %}{{ product.title | escape }}{% if block.settings.bolder_font %}</b>{% endif %}
+              </{{ block.settings.heading_tag }}>
+
+              {% if block.settings.show_price or block.settings.show_badges and has_badge %}
+                <div class="price-block {% if hide_price and block.settings.hide_shipping_note %}price-block-hidden{% endif %}{% if hide_price %} price-block-hidden-price{% endif %}{% if hide_price and block.settings.hide_shipping_note and block.settings.show_badges == false %} price-block-hidden-no-badges{% endif %}" id="price-{{ section.id }}" data-place-for-id="price-{{ section.id }}" role="status">
+                  <div class="price-block__price {{ block.settings.price_style }}{% if block.settings.price_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                    {%- render 'price', product: product, use_variant: true, price_style: true, block: block, show_badges: block.settings.show_badges, bold_price: bold_price, use_accent_color_for_price: settings.use_accent_color_for_price, compare_at_price_color: block.settings.compare_at_price_color, parent_product_card: false, badge_style: block.settings.text_style, uppercase_text: uppercase_text -%}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            {%- unless block.settings.hide_shipping_note -%}
+              {%- if shop.shipping_policy.body != blank or cart.taxes_included -%}               
+                <div class="product__shipping-policy link-underline {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+                  {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                  {% if cart.taxes_included %}{{ 'products.product.include_taxes' | t }}&nbsp;{% endif %}{% if shop.shipping_policy.body != blank %}{{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}{% endif %}
+                </div>
+              {%- endif -%}
+            {%- endunless -%}
+            <div class="product__payment-terms {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+              {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+              {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
+              {%- form 'product', product, data-productid: product.id, id: product_form_installment_id, class: 'installment caption-large' -%}                  
+                <input type="hidden" name="id" data-productid="{{ product.id }}" value="{{ product.selected_or_first_available_variant.id }}">
+                {{ form | payment_terms }}
+              {%- endform -%}
+            </div>
+          </div>
+        {% endif %}
+      {%- when 'title_with_vendor' -%}
+        {% if forloop.index > second_container_index %}
+          <div class="flex--column" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            <div class="title-with-price flex--row">
+              <{{ block.settings.heading_tag }} class="truncate product__title {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if block.settings.bolder_font %}<b>{% endif %}{{ product.title | escape }}{% if block.settings.bolder_font %}</b>{% endif %}
+              </{{ block.settings.heading_tag }}>
+              <a href="{{ product.vendor | url_for_vendor }}" aria-label="{{ product.vendor }}" class="link" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }}; --vendor-img-height: {{ block.settings.vendor_image_height }}px;" {{ block.shopify_attributes }}>
+                {% liquid 
+                  assign vendor_name = product.vendor
+                  assign file_extensions = "svg,png,webp,jpg,jpeg" | split: "," 
+                  capture vendor_value
+                    render 'filename-normalize', value: vendor_name
+                  endcapture
+               
+                  for ext in file_extensions
+                    capture vendor_file_name
+                      render 'filename-normalize', value: vendor_name, keep_case: true
+                    endcapture
+                    assign vendor_file_name = vendor_file_name | append: '.' | append: ext
+
+                    if images[vendor_file_name] != blank
+                      assign vendor_img_file = images[vendor_file_name] | downcase                         
+                      break
+                    endif
+                  endfor
+                  assign img_height = block.settings.vendor_image_height | times: 2
+                %}
+                {% if block.settings.show_vendor == 'image' %}
+                  {% if images[vendor_file_name] != blank and vendor_img_file contains vendor_value %}
+                      <div class="product__vendor product__vendor-img" >
+                        {{ images[vendor_file_name] | image_url: height: img_height | image_tag: loading: 'lazy', width: 400, alt: product.vendor }}
+                      </div>
+                  {% else %}
+                      <p class="product__vendor {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">{% if block.settings.bolder_font %}<b>{% endif %}{{ product.vendor }}{% if block.settings.bolder_font %}</b>{% endif %}</p>
+                  {% endif %}
+                {% else %}
+                  <p class="product__vendor {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">{% if block.settings.bolder_font %}<b>{% endif %}{{ product.vendor }}{% if block.settings.bolder_font %}</b>{% endif %}</p>
+                {% endif %}
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      {%- when 'vendor' -%}
+        {% if forloop.index > second_container_index %}
+          <a href="{{ product.vendor | url_for_vendor }}" aria-label="{{ product.vendor }}" class="link vendor-block" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};--vendor-img-height: {{ block.settings.vendor_image_height }}px;" {{ block.shopify_attributes }}>
+            {% liquid 
+              assign vendor_name = product.vendor
+              assign file_extensions = "svg,png,webp,jpg,jpeg" | split: "," 
+              capture vendor_value
+                render 'filename-normalize', value: vendor_name
+              endcapture
+         
+              for ext in file_extensions
+                capture vendor_file_name
+                  render 'filename-normalize', value: vendor_name, keep_case: true
+                endcapture
+                assign vendor_file_name = vendor_file_name | append: '.' | append: ext
+
+                if images[vendor_file_name] != blank
+                  assign vendor_img_file = images[vendor_file_name] | downcase                         
+                  break
+                endif
+              endfor
+              assign img_height = block.settings.vendor_image_height | times: 2
+            %}
+            {% if block.settings.show_vendor == 'image' %}
+              {% if images[vendor_file_name] != blank and vendor_img_file contains vendor_value %}
+                <div class="product__vendor product__vendor-img" >
+                  {{ images[vendor_file_name] | image_url: height: img_height | image_tag: loading: 'lazy', width: 400, alt: product.vendor }}
+                </div>
+              {% else %}
+                  <p class="product__vendor {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">{% if block.settings.bolder_font %}<b>{% endif %}{{ product.vendor }}{% if block.settings.bolder_font %}</b>{% endif %}</p>
+              {% endif %}
+            {% else %}
+              <p class="product__vendor {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">{% if block.settings.bolder_font %}<b>{% endif %}{{ product.vendor }}{% if block.settings.bolder_font %}</b>{% endif %}</p>
+            {% endif %}
+          </a>
+        {% endif %}
+      {%- when 'heading' -%}
+        {% if forloop.index > second_container_index and block.settings.heading != blank %}
+          {%- liquid
+            assign uppercase_heading = false
+            if block.settings.heading_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_heading = true
+            elsif block.settings.heading_style == 'body-font' and settings.uppercase_body
+                assign uppercase_heading = true
+            elsif block.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_heading = true
+            elsif block.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                assign uppercase_heading = true
+            elsif block.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+                assign uppercase_heading = true
+            elsif block.settings.heading_style == 'page-title' and settings.uppercase_page_titles
+                assign uppercase_heading = true
+            endif
+
+            assign heading_text = block.settings.heading
+            assign processed_text = ''
+            assign split_text = heading_text | split: '['
+
+            for part in split_text
+              if part contains ']'
+                assign split_bracket = part | split: ']'
+                assign highlight_text = split_bracket[0]
+                assign after_bracket = split_bracket[1]
+                assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+              else
+                assign processed_text = processed_text | append: part
+              endif
+            endfor
+
+            
+            assign final_text = ''
+            assign split_text_curly = processed_text | split: '{'
+
+            for part in split_text_curly
+              if part contains '}'
+                assign split_curly = part | split: '}'
+                assign styled_text = split_curly[0]
+                assign after_curly = split_curly[1]
+                assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+              else
+                assign final_text = final_text | append: part
+              endif
+            endfor
+          -%}
+          <{{ block.settings.heading_tag }} class="section-block custom-heading heading-block {{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            {% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ final_text }}{% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+          </{{ block.settings.heading_tag }}>                                
+        {%- endif -%}
+      {%- when 'description' -%}
+        {% if product.description != blank and forloop.index > second_container_index %}
+          {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+          -%}
+          <div class="product__description rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+            {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" 
+            style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            {{ product.description }}
+          </div>
+        {% endif %}
+      {%- when 'image' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'image', image_settings: block.settings, block: block -%}
+        {% endif %}
+      {%- when 'collapsible_description' -%}
+        {% if product.description != blank and block.settings.heading != blank and forloop.index > second_container_index %}
+          <div class="accordion accordion--compact" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            <accordion-toggle>
+            <div class="accordion-toggle{% if block.settings.default_open_tab %} open_collapsible is-open{% endif %}">
+              <div tabindex="0" class="accordion__summary">
+                <div class="summary__title">
+                  {%- liquid
+                    assign heading_text = block.settings.heading | default: page.title
+                    assign processed_text = ''
+                    assign split_text = heading_text | split: '['
+
+                    for part in split_text
+                      if part contains ']'
+                        assign split_bracket = part | split: ']'
+                        assign highlight_text = split_bracket[0]
+                        assign after_bracket = split_bracket[1]
+                        assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                      else
+                        assign processed_text = processed_text | append: part
+                      endif
+                    endfor
+
+                    
+                    assign final_text = ''
+                    assign split_text_curly = processed_text | split: '{'
+
+                    for part in split_text_curly
+                      if part contains '}'
+                        assign split_curly = part | split: '}'
+                        assign styled_text = split_curly[0]
+                        assign after_curly = split_curly[1]
+                        assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                      else
+                        assign final_text = final_text | append: part
+                      endif
+                    endfor
+                  -%}
+                  <div class="summary__title-name custom-heading {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                      {% if block.settings.icon != blank %}
+                        {%- liquid
+                          assign icon_name = block.settings.icon | split: '/'
+                          if icon_name.size == 3
+                            assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                          elsif icon_name.size == 2
+                            assign file_name = icon_name.first
+                          endif
+                          assign icon = icon_name.last
+                          assign color_rgb = block.settings.color | color_to_rgb | strip
+                          assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip
+                          -%}
+                       <span class="icon-accordion flex--row icon--large icon-accordion--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                      {% endif %}
+                    <h3 class="accordion__title">
+                      {% if block.settings.bolder_font %}<b>{% endif %}{{ final_text }}{% if block.settings.bolder_font %}</b>{% endif %}
+                    </h3>
+                  </div>
+                  <span class="icon-accordion icon-accordion--close icon--large">
+                    {%- render 'glyphs_interface', icon: 'plus' -%}
+                  </span>
+                  <span class="icon-accordion icon-accordion--open icon--large">
+                    {%- render 'glyphs_interface', icon: 'minus' -%}
+                  </span>
+                </div>
+              </div>
+              <div class="accordion__panel hide-scrollbar">
+                <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                    {%- liquid
+                      assign uppercase_text = false
+                      if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                        assign uppercase_text = true
+                      elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                        assign uppercase_text = true
+                      elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                          assign uppercase_text = true
+                      elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                          assign uppercase_text = true
+                      elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                          assign uppercase_text = true
+                      endif
+                    -%}
+                    <div class="accordion__text richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                      {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                        {{ product.description  }}
+                    </div>
+                </div>
+              </div>
+            </div>
+            </accordion-toggle>
+          </div>
+        {% endif %}
+      {%- when 'popup_description' -%}
+        {% if product.description != blank and block.settings.link_text != blank and forloop.index > second_container_index %}
+          <div class="popup-block" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+              <modal-opener class="product-popup-modal__opener no-js-hidden quick-add-hidden" data-modal="#PopupModal-{{ block.id }}">
+                  <button id="ProductPopup-{{ block.id }}" class="popup-button button--modal-opener flex--row {{ block.settings.link_text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.link_text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+                      {% if block.settings.icon != blank %}
+                        {% assign color_rgb = block.settings.color | color_to_rgb | strip %}
+                        {% assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip %}
+                          <div class="popup__icon icon--large flex--row popup__icon--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">
+                              {%- liquid
+                                  assign icon_name = block.settings.icon | split: '/'
+                                  if icon_name.size == 3
+                                    assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                  elsif icon_name.size == 2
+                                    assign file_name = icon_name.first
+                                  endif
+                                  assign icon = icon_name.last
+                                  render 'catalog-icons', file_name: file_name, icon: icon
+                              -%}
+                          </div>
+                      {% endif %}
+                      <span class="popup__link-text">{% if block.settings.bolder_font %}<b>{% endif %}{{ block.settings.link_text }}{% if block.settings.bolder_font %}</b>{% endif %}</span>
+                      <div class="popup__arrow flex--row icon--large" tabindex="0">	
+                        {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                      </div>  
+                  </button>
+              </modal-opener>
+          </div>
+        {% endif %}
+      {%- when 'sku' -%}
+        {% if product.selected_or_first_available_variant.sku != blank and forloop.index > second_container_index %}
+          <p class="product__sku {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            id="sku-{{ section.id }}" data-place-for-id="sku-{{ section.id }}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            {% if block.settings.bolder_font %}<b>{% endif %}
+            {{ "products.product.sku" | t }}: {{ product.selected_or_first_available_variant.sku }}
+            {% if block.settings.bolder_font %}</b>{% endif %}
+          </p>
+        {% endif %}
+      {%- when 'rating' -%}
+        {%- if product.metafields.reviews.rating.value != blank and forloop.index > second_container_index -%}
+          {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+          -%}
+          <a class="rating-container {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" href="#" onclick="var el=document.querySelector('[id*=\'reviews\'][data-id=\'{{ product.id }}\']');el&&el.scrollIntoView();return false;" {{ block.shopify_attributes }}>
+            {% liquid
+              assign rating_decimal = 0
+              assign decimal = product.metafields.reviews.rating.value.rating | modulo: 1
+              assign rating_decimal = decimal
+            %} 
+            <div class="rating" role="img" aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: product.metafields.reviews.rating.value, rating_max: product.metafields.reviews.rating.value.scale_max }}">
+              <span aria-hidden="true" class="rating-star" style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"></span>
+            </div>
+            <p class="rating-text">
+              {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+              <span aria-hidden="true">{{ product.metafields.reviews.rating.value | slice: 0, 3 }} / {{ product.metafields.reviews.rating.value.scale_max }}</span>
+              {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            </p>
+            <p class="rating-count">
+              {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+              <span aria-hidden="true">{{ product.metafields.reviews.rating_count }} {% if product.metafields.reviews.rating_count > 1 %}{{ "accessibility.review.other" | t }}{% else %}{{ "accessibility.review.one" | t }}{% endif %}</span>
+              <span class="visually-hidden">{{ product.metafields.reviews.rating_count }} {{ "accessibility.total_reviews" | t }}</span>
+              {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            </p>
+          </a>
+        {%- endif -%}
+      {%- when 'pickup_availability' -%}
+        {% if forloop.index > second_container_index %}
+          {% liquid
+            assign current_store = nil
+            assign availability = nil
+
+            if cart.attributes['store'] != blank
+              assign current_store = cart.attributes['store']
+              assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities 
+
+              assign current_store_availability = nil
+              for availability in pick_up_availabilities 
+                if availability.location.name == current_store 
+                  assign current_store_availability = availability 
+                  break
+                endif 
+              endfor
+
+              if current_store_availability.available and current_store_availability.pick_up_enabled
+                assign availability = 'available'
+              else
+                assign availability = 'unavailable'
+              endif
+            endif   
+          %}
+                  
+          {% unless block.settings.hide_store_selection_text and current_store == nil %}
+            <div id="store_locator-{{ section.id }}" data-place-for-id="store_locator-{{ section.id }}"
+              class="pickup-availability-wrapper {% if block.settings.color_scheme != section.settings.color_scheme %} color-{{ block.settings.color_scheme }} elem-padding-s section-radius{% endif %}"
+              style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};"
+              {{ block.shopify_attributes }}
+            >
+              {%- render 'pickup-availability', block: block, availability: availability -%}
+            </div>
+          {% endunless %}  
+        {% endif %}
+      {%- when 'icons_with_text' -%}
+        {% if forloop.index > second_container_index %}
+            {% liquid 
+            if block.settings.icon_1 != blank or block.settings.image_1 != blank or block.settings.title_1 != blank or block.settings.text_1 != blank or block.settings.page_1 != blank
+                assign item_1 = 1
+                assign inline = true
+            endif
+            if block.settings.icon_2 != blank or block.settings.image_2 != blank or block.settings.title_2 != blank or block.settings.text_2 != blank or block.settings.page_2 != blank
+                assign item_2 = 1
+                assign inline = false
+            endif
+            if block.settings.icon_3 != blank or block.settings.image_3 != blank or block.settings.title_3 != blank or block.settings.text_3 != blank or block.settings.page_3 != blank
+                assign item_3 = 1
+                assign inline = false
+            endif
+            if block.settings.icon_4 != blank or block.settings.image_4 != blank or block.settings.title_4 != blank or block.settings.text_4 != blank or block.settings.page_4 != blank
+                assign item_4 = 1
+                assign inline = false
+            endif
+            if block.settings.icon_5 != blank or block.settings.image_5 != blank or block.settings.title_5 != blank or block.settings.text_5 != blank or block.settings.page_5 != blank
+                assign item_5 = 1
+                assign inline = false
+            endif
+            if block.settings.icon_6 != blank or block.settings.image_6 != blank or block.settings.title_6 != blank or block.settings.text_6 != blank or block.settings.page_6 != blank
+                assign item_6 = 1
+                assign inline = false
+            endif
+            assign total = item_1 | plus: item_2 | plus: item_3 | plus: item_4 | plus: item_5 | plus: item_6
+            %}
+            {%- if total != 0 -%}
+            <div class="icons-with-text icons-with-text--block icons-with-text--{{ block.settings.style }}{% if inline %} icons-with-text--inline{% endif %} icons-with-text--{{ block.id }}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+                {% style %}
+                .icons-with-text--{{ block.id }} {
+                    --media-size: {{ block.settings.icon_or_image_size }}px;
+                    {% if block.settings.image_radius == 'default' %}
+                    --image-radius: {{ settings.images_and_sections_radius }};
+                    {% else %}
+                    --image-radius: {{ block.settings.image_radius }};
+                    {% endif %}
+                }
+                {% if settings.images_loading != 'disable' %}
+                  .icons-with-text--{{ block.id }} .lazy-image{
+                    aspect-ratio: var(--asp-rat);
+                  }
+                {% endif %}
+                {% endstyle %}
+                {% if block.settings.heading != blank %}
+                  {% liquid
+                    assign heading_text = block.settings.heading
+                    assign processed_text = ''
+                    assign split_text = heading_text | split: '['
+
+                    for part in split_text
+                      if part contains ']'
+                        assign split_bracket = part | split: ']'
+                        assign highlight_text = split_bracket[0]
+                        assign after_bracket = split_bracket[1]
+                        assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                      else
+                        assign processed_text = processed_text | append: part
+                      endif
+                    endfor
+
+                    
+                    assign final_text = ''
+                    assign split_text_curly = processed_text | split: '{'
+
+                    for part in split_text_curly
+                      if part contains '}'
+                        assign split_curly = part | split: '}'
+                        assign styled_text = split_curly[0]
+                        assign after_curly = split_curly[1]
+                        assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                      else
+                        assign final_text = final_text | append: part
+                      endif
+                    endfor
+                  %}
+                <h3 class="icons-with-text__heading custom-heading {{ block.settings.heading_style }}{% if block.settings.heading_uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                    {% if block.settings.heading_bolder_font %}<b>{% endif %}{{ final_text }}{% if block.settings.heading_bolder_font %}</b>{% endif %}
+                </h3>
+                {% endif %}
+                <div class="icons-with-text__container {% if block.settings.style == 'vertical' %}grid{% else %}list{% if block.settings.show_horizontal_lines %} show-lines{% endif %}{% endif %}" {% if block.settings.style == 'vertical' %}style="--grid-columns: {% if inline %}1{% else %}{% if total == 1 or total == 2 or total == 4 %}2{% else %}3{% endif %}{% endif %};"{% endif %}>
+                    {% liquid 
+                    if item_1
+                        render 'icon-with-text', icon: block.settings.icon_1, title: block.settings.title_1, text: block.settings.text_1, image: block.settings.image_1, page: block.settings.page_1, page_content_in_popup: block.settings.page_content_in_popup_1, popup_width: block.settings.popup_width_1, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_1, mobile_color: block.settings.mobile_color_1, index: 1, popup_style: block.settings.popup_style_1
+                    endif 
+                    unless block.shopify_attributes contains 'repeat'
+                        if item_2
+                        render 'icon-with-text', icon: block.settings.icon_2, title: block.settings.title_2, text: block.settings.text_2, image: block.settings.image_2, page: block.settings.page_2, page_content_in_popup: block.settings.page_content_in_popup_2, popup_width: block.settings.popup_width_2, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_2, mobile_color: block.settings.mobile_color_2, index: 2, popup_style: block.settings.popup_style_2
+                        endif
+                        if item_3
+                        render 'icon-with-text', icon: block.settings.icon_3, title: block.settings.title_3, text: block.settings.text_3, image: block.settings.image_3, page: block.settings.page_3, page_content_in_popup: block.settings.page_content_in_popup_3, popup_width: block.settings.popup_width_3, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_3, mobile_color: block.settings.mobile_color_3, index: 3, popup_style: block.settings.popup_style_3
+                        endif
+                        if item_4
+                        render 'icon-with-text', icon: block.settings.icon_4, title: block.settings.title_4, text: block.settings.text_4, image: block.settings.image_4, page: block.settings.page_4, page_content_in_popup: block.settings.page_content_in_popup_4, popup_width: block.settings.popup_width_4, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_4, mobile_color: block.settings.mobile_color_4, index: 4, popup_style: block.settings.popup_style_4
+                        endif
+                        if item_5
+                        render 'icon-with-text', icon: block.settings.icon_5, title: block.settings.title_5, text: block.settings.text_5, image: block.settings.image_5, page: block.settings.page_5, page_content_in_popup: block.settings.page_content_in_popup_5, popup_width: block.settings.popup_width_5, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_5, mobile_color: block.settings.mobile_color_5, index: 5, popup_style: block.settings.popup_style_5
+                        endif
+                        if item_6
+                        render 'icon-with-text', icon: block.settings.icon_6, title: block.settings.title_6, text: block.settings.text_6, image: block.settings.image_6, page: block.settings.page_6, page_content_in_popup: block.settings.page_content_in_popup_6, popup_width: block.settings.popup_width_6, loading_images: loading_images, onload_script: onload_script, block: block, color: block.settings.color_6, mobile_color: block.settings.mobile_color_6, index: 6, popup_style: block.settings.popup_style_6
+                        endif
+                    endunless
+                    %}
+                </div>
+            </div>
+            {%- endif -%}
+        {% endif %}
+      {%- when 'variant_picker' -%}
+        {% if forloop.index > second_container_index %}
+            {%- render 'product-variant-picker', 
+            product: product, 
+            block: block,
+            product_template: product_template, from_details: true  -%}
+        {% endif %}
+      {%- when 'inventory_status' -%}
+        {% if forloop.index > second_container_index %}{% render 'inventory-status', block: block, from_details: true %}{% endif %}
+      {%- when 'price' -%}
+        {% if forloop.index > second_container_index %}
+            {%- liquid
+              assign uppercase_text = false
+              if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                  assign uppercase_text = true
+              elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                  assign uppercase_text = true
+              elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                  assign uppercase_text = true
+              elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                  assign uppercase_text = true
+              elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                  assign uppercase_text = true
+              endif
+              assign bold_price = false
+              if block.settings.price_bolder_font == true
+                  assign bold_price = true
+              endif
+
+              assign block_product_price = true
+              assign hide_price = false
+              if block.settings.show_price == false
+                assign hide_price = true
+                assign block_product_price = false
+              endif
+            -%}
+            <div class="price-block {% if hide_price and block.settings.hide_shipping_note %}price-block-hidden{% endif %}{% if hide_price %} price-block-hidden-price{% endif %}{% if hide_price and block.settings.hide_shipping_note and block.settings.show_badges == false %} price-block-hidden-no-badges{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" id="price-{{ section.id }}" data-place-for-id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+            <div class="price-block__price {{ block.settings.price_style }}{% if block.settings.price_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {%- render 'price', product: product, use_variant: true, price_style: true, block: block, show_badges: block.settings.show_badges, bold_price: bold_price, use_accent_color_for_price: settings.use_accent_color_for_price, compare_at_price_color: block.settings.compare_at_price_color, parent_product_card: false, badge_style: block.settings.text_style, uppercase_text: uppercase_text -%}
+            </div>
+            {%- unless block.settings.hide_shipping_note -%}
+            {%- if shop.shipping_policy.body != blank or cart.taxes_included -%}               
+                <div class="product__shipping-policy link-underline {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+                {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                {% if cart.taxes_included %}{{ 'products.product.include_taxes' | t }}&nbsp;{% endif %}{% if shop.shipping_policy.body != blank %}{{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}{% endif %}
+                </div>
+            {%- endif -%}
+            {%- endunless -%}
+            <div class="product__payment-terms {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+                {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
+                {%- form 'product', product, data-productid: product.id, id: product_form_installment_id, class: 'installment caption-large' -%}                   
+                  <input type="hidden" name="id" data-productid="{{ product.id }}" value="{{ product.selected_or_first_available_variant.id }}">
+                {{ form | payment_terms }}
+                {%- endform -%}
+            </div>
+            </div>
+        {% endif %}
+      {%- when 'countdown_timer' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'countdown-timer', block: block, section_id: section.id -%}
+        {% endif %}
+      {%- when 'buy_buttons' -%}
+        {% if forloop.index > second_container_index %}
+          {% if block_product_price == false and block.settings.style == 'price_in_button' %}
+            {% liquid
+              assign bold_price = false
+              if block.settings.use_main_button and settings.bolder_main_buttons_font
+                assign bold_price = true
+              endif
+              if block.settings.use_main_button == false and settings.bolder_secondary_buttons_font
+                assign bold_price = true
+              endif
+            %}
+            <div class="price-block visually-hidden" id="price-{{ section.id }}" role="status" style="position: absolute !important;overflow: clip;width: 1px;height: 1px;margin: -1px;padding: 0;clip: rect(0 0 0 0);word-wrap: normal !important;">
+              <div class="price-block__price {{ block.settings.price_style }}{% if block.settings.price_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {%- render 'price', product: product, use_variant: true, block: block, bold_price: bold_price, use_accent_color_for_price: settings.use_accent_color_for_price, compare_at_price_color: settings.compare_at_price_color, parent_product_card: false -%}
+              </div>
+            </div>
+          {% endif %}
+          {% if settings.disable_shopping == false  %}
+          {% render 'buy-buttons', block: block, product: product, product_form_id: product_form_id, section_id: section.id %}
+          {% endif %}
+        {% endif %}
+      {%- when 'share' -%}
+        {% if forloop.index > second_container_index %}
+            {% liquid
+            assign share_image = product.selected_or_first_available_variant.featured_media.preview_image | default: product.featured_media.preview_image
+            render 'share', block: block, share_title: product.title, share_link: product.url, share_variant_url: product.selected_variant.url, share_image: share_image
+            %}
+        {% endif %}
+      {%- when 'popup' -%}
+        {% if forloop.index > second_container_index %}
+            {% if block.settings.page != blank or block.settings.text != blank %}
+            <div class="popup-block" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+                <modal-opener class="product-popup-modal__opener no-js-hidden quick-add-hidden" data-modal="#PopupModal-{{ block.id }}">
+                    <button id="ProductPopup-{{ block.id }}" class="popup-button button--modal-opener flex--row {{ block.settings.link_text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.link_text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+                        {% if block.settings.icon != blank %}
+                          {% assign color_rgb = block.settings.color | color_to_rgb | strip %}
+                          {% assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip %}
+                            <div class="popup__icon icon--large flex--row popup__icon--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">
+                                {%- liquid
+                                    assign icon_name = block.settings.icon | split: '/'
+                                    if icon_name.size == 3
+                                      assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                    elsif icon_name.size == 2
+                                      assign file_name = icon_name.first
+                                    endif
+                                    assign icon = icon_name.last
+                                    render 'catalog-icons', file_name: file_name, icon: icon
+                                -%}
+                            </div>
+                        {% endif %}
+                        <span class="popup__link-text">{% if block.settings.bolder_font %}<b>{% endif %}{{ block.settings.link_text }}{% if block.settings.bolder_font %}</b>{% endif %}</span>
+                        <div class="popup__arrow flex--row icon--large" tabindex="0">	
+                            {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                        </div>  
+                    </button>
+                </modal-opener>
+            </div>
+            {% endif %}
+        {% endif %}
+      {%- when 'collapsible_tab' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'collapsible-tab', block: block, page: block.settings.page, compact: true, default_open_tab: block.settings.default_open_tab -%}
+        {% else %}
+        {% endif %}
+      {%- when 'custom_liquid' -%}
+        {%- if block.settings.custom_liquid != blank and forloop.index > second_container_index-%}
+          {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+          -%}
+          <div class="custom-liquid {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" 
+            style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            {{ block.settings.custom_liquid }}
+          </div>
+        {%- endif -%}
+      {%- when 'line' -%}
+        {% if forloop.index > second_container_index %}
+          <div class="line-container line-container--product" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+            <span class="line"></span>
+          </div>
+        {% endif %}
+      {%- when 'complementary_products' -%}
+        {% if forloop.index > second_container_index %}{%- render 'complementary-products', block: block, selector_container: selector_container, product: product -%}{% endif %}
+      {% when 'linked_products' %}
+        {% if forloop.index > second_container_index %}{%  render 'linked-products', product: product, block: block %}{% endif %}
+      {% when 'tabs' %}
+        {% if forloop.index > second_container_index %}{%- render 'tabs', block: block, product_block: true, product: product -%}{% endif %}
+      {%- when 'related_collections' -%}
+        {% if forloop.index > second_container_index %}
+            {% if block.settings.heading != blank or block.settings.collection_by_brand or block.settings.shop_by_brand or block.settings.shop_the_collection %}
+            {%- render 'related-collections', related_collections_settings: block.settings, block: block, section_content: false -%}
+            {% endif %}
+        {% endif %}
+      {%- when 'text' -%}
+        {%- if block.settings.text != blank and forloop.index > second_container_index -%}
+          {%- liquid
+            assign uppercase_headings = false
+            if block.settings.richtext_heading_style == 'body-font' and settings.uppercase_body
+              assign uppercase_headings = true
+            elsif block.settings.richtext_heading_style == 'subheading-font' and settings.uppercase_subheadings
+              assign uppercase_headings = true
+            elsif block.settings.richtext_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_headings = true
+            elsif block.settings.richtext_heading_style == 'section-heading' and settings.uppercase_section_headings
+                assign uppercase_headings = true
+            elsif block.settings.richtext_heading_style == 'page-title' and settings.uppercase_page_titles
+                assign uppercase_headings = true
+            endif
+          -%}
+          <div class="section-block{% if block.settings.color_scheme != section.settings.color_scheme %} color-{{ block.settings.color_scheme }} elem-padding-s section-radius{% endif %} richtext heading-style-{{ block.settings.richtext_heading_style }}
+            {% if block.settings.richtext_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+             rte link-underline{% if uppercase_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}
+            {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+          </div>
+        {%- endif -%}
+      {%- when 'empty_space' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'empty-space', block: block -%}
+        {% endif %}
+      {%- when 'ask_question' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'ask-question', block: block -%}
+        {% endif %}
+      {%- when 'more_details' -%}
+        {% if forloop.index > second_container_index %}
+          {% if block.settings.button_label != blank or block.settings.button_icon != blank %}
+            <div class="more-details{% if block.settings.button_label != blank and block.settings.button_icon != blank %} button-block--small-padding{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+                <a class="more-details__link icon-button button link-button button--secondary {{ block.settings.text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}" href="{{ product.url }}">
+                  {% if block.settings.button_icon != blank %}
+                    {%- liquid
+                      assign icon_name = block.settings.button_icon | split: '/'
+                      if icon_name.size == 3
+                          assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                      elsif icon_name.size == 2
+                          assign file_name = icon_name.first
+                      endif
+                      assign icon = icon_name.last
+                    -%}
+                    <span class="icon-accordion flex--row icon--small">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                  {% endif %}
+                  {%- if block.settings.button_label != blank -%}
+                    {% if block.settings.bolder_font %}<b>{% endif %}{{ block.settings.button_label }}{% if block.settings.bolder_font %}</b>{% endif %}
+                    <div class="icon icon--large">
+                      {%- render 'glyphs_arrows', icon: 'arrow-right' -%}
+                    </div>
+                  {%- endif -%}
+                </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      {%- when 'payment_methods' -%}
+        {% if forloop.index > second_container_index %}
+          <div class="section-block flex--row" 
+            style="--spacing: {{ block.settings.top_spacing }}; --mobile-spacing: {{ block.settings.mobile_top_spacing }}; --icon-width: {{ block.settings.icon_width }}px;" {{ block.shopify_attributes }}>
+            <div class="payment">
+                <ul class="payment__list flex--row" role="list">
+                {%- for type in shop.enabled_payment_types -%}
+                    <li class="payment__list-item{% if block.settings.black_and_white %} black-and-white{% endif %}">
+                    {{ type | payment_type_svg_tag }}
+                    </li>
+                {%- endfor -%}
+                </ul>
+            </div>
+          </div>
+        {% endif %}
+      {%- when 'custom_options_pills' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-pills', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_measur' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-measurement', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_checkbox' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-checkbox', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_dropdown' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-dropdown', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_s_line' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-single-line', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_m_line' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-multi-line', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_upload' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-upload', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_date' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-date', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_swatches' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-swatches', block: block, from_details: true -%}
+        {% endif %}
+      {%- when 'custom_options_color' -%}
+        {% if forloop.index > second_container_index %}
+          {%- render 'custom-options-color', block: block, from_details: true -%}
+        {% endif %}
+    {%- endcase -%}
+  {% endfor %}

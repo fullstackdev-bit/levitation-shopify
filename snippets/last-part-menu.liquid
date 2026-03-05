@@ -1,0 +1,166 @@
+{% style %}
+    .last-part-menu.menu--{{ object_type.id }} {
+        justify-content: {{ horizontal_alignment }};
+    }
+{% endstyle %}
+<div class="last-part-menu menu--{{ object_type.id }}">
+    <nav class="menu__nav">
+        <ul class="menu__list flex--row" role="list">
+            {% for link in menu.links offset: first_links_size %}
+                {% assign current_category = false %}
+                {% assign current_metafield_category = false %}
+                {% assign downcased_title = link.handle | downcase %}
+                {%  if template.name == 'collection' %}
+                    {% if collection.metafields.custom.top_level_category.value != blank %}
+                        {% assign downcased_collections_metafield = collection.metafields.custom.top_level_category.value | downcase %}
+                        {% if downcased_collections_metafield == downcased_title and collection.url == request.path %}
+                            {% assign current_metafield_category = true %}
+                            {% assign current_category = true %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                {%  if template.name == 'product' %}
+                    {% if product.metafields.custom.top_level_category.value != blank %}
+                        {% assign downcased_product_metafield = product.metafields.custom.top_level_category.value | downcase %}
+                        {% if downcased_product_metafield == downcased_title and product.url == request.path %}
+                            {% assign current_metafield_category = true %}
+                            {% assign current_category = true %}
+                        {% endif %}
+                    {% else %}
+                        {% for tag in product.tags %}
+                            {% assign downcased_tag = tag | downcase %}
+                            {% assign product_url = product.url %}
+                            {% if settings.enable_breadcrumbs %}
+                                {% assign product_url = product.url | within: collection %}
+                            {% endif %}
+                            {% if downcased_tag == downcased_title and product.url == request.path %}
+                                {% assign current_metafield_category = true %}
+                                {% assign current_category = true %}
+                                {% break %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+                <li class="menu__item">
+                    <details-dropdown is="details-dropdown" trigger="{{ event_type }}">
+                        {%- liquid
+                            assign enable_mega_menu = false
+                            assign link_title_handle = link.title | handle
+                            assign menu_handle = menu.handle
+                            for block in blocks
+                                assign menu_title_handle = block.settings.dropdown_link | handle
+                                assign parent_handle = block.settings.menu_handle 
+                                if parent_handle != blank 
+                                    if menu_title_handle == link_title_handle and menu_handle == parent_handle
+                                        assign enable_mega_menu = true
+                                        assign mega_menu_block = block.settings
+                                        assign mega_menu_block_id = block.id
+                                        assign mega_menu_short = false
+                                        if block.type contains 'short_'
+                                            assign mega_menu_short = true
+                                        endif
+                                    endif
+                                else
+                                    if menu_title_handle == link_title_handle
+                                        assign enable_mega_menu = true
+                                        assign mega_menu_block = block.settings
+                                        assign mega_menu_block_id = block.id
+                                        assign mega_menu_short = false
+                                        if block.type contains 'short_'
+                                            assign mega_menu_short = true
+                                        endif
+                                    endif
+                                endif
+                            endfor
+                            assign enable_keyboard = false
+                            if dropdown_icon == 'disable' and link.links.size > 0 and show_nested
+                                assign enable_keyboard = true
+                            elsif enable_mega_menu and show_nested 
+                                assign enable_keyboard = true
+                            endif
+                        -%}
+                        <summary {% if enable_keyboard %}tabindex="0"{% endif %}>
+                            <div class="menu__item-title flex--row align-center {{ link_style }}{% if uppercase %} uppercase{% endif %}{% if link_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                {% liquid 
+                                    assign downcased_link_title = link.title | downcase
+                                    assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                    for highlighted_item in downcased_highlighted_items
+                                        if highlighted_item == downcased_link_title
+                                            assign highlight_item = true
+                                        endif
+                                    endfor
+                                    assign active_parent_link = false
+                                    if link.url == request.path
+                                        assign active_parent_link = true
+                                    endif
+                                    if current_category and parent_menu
+                                        assign active_parent_link = true
+                                    endif
+                                %}
+                                <a href="{{ link.url }}" class="link-metafield-{{ current_metafield_category }} link-{{ downcased_link_title }} link-{{ downcased_title }} link-{{ link.title | downcase }}{% if active_parent_link %} active-parent-link{% endif %}{% if link.current %} link--current{% endif %}{% if link.links.size <= 0 %} link--single{% endif %}{% if highlight_item and downcased_highlighted_items contains downcased_link_title %} link--highlighted{% endif %}" {% if link.url contains 'http://' or link.url contains 'https://' %}target="_blank"{% endif %}>{% if bolder_font %}<b>{% endif %}{{ link.title }}{% if bolder_font %}</b>{% endif %}</a>
+                                {% if dropdown_icon != 'disable' %}
+                                    {% liquid
+                                        assign show_nested_level = false
+                                        if link.links.size > 0 and show_nested
+                                        assign show_nested_level = true
+                                        elsif enable_mega_menu and show_nested
+                                        assign show_nested_level = true
+                                        endif
+                                    %}
+                                    {% if show_nested_level %}
+                                        <div class="dropdown-icon{% if dropdown_icon == 'plus' %} dropdown-icon--close{% endif %} flex--row" tabindex="0">	
+                                            {% liquid 
+                                                if dropdown_icon == 'chevron'
+                                                    render 'glyphs_arrows', icon: 'chevron-down'
+                                                else
+                                                    render 'glyphs_interface', icon: 'plus'
+                                                endif  
+                                            %}			
+                                        </div>
+                                        {% if dropdown_icon == 'plus' %} 
+                                        <div class="dropdown-icon dropdown-icon--open flex--row" tabindex="0">	
+                                            {% render 'glyphs_interface', icon: 'minus'%}			
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </summary>
+                        {%- if enable_mega_menu -%}
+                            {% render 'mega-menu', link: link, block: mega_menu_block, id: mega_menu_block_id, mega_block: block, short: mega_menu_short  %}
+                        {%- endif -%}
+                        {%- if link.links.size > 0 and enable_mega_menu == false -%}
+                            <ul class="first-nested__list body-font{% if settings.uppercase_body %} uppercase{% endif %} popover flex--column hide-scrollbar{% if settings.modal_enable_shadow %} modal--shadow{% endif %}">
+                                {% for first_nested_link in link.links %}
+                                    <li>
+                                        <details-dropdown is="details-dropdown" trigger="hover" level="child">
+                                            <summary>
+                                                <div class="flex--row align-center{% if settings.show_lines_popovers %} popovers-line{% endif %}">
+                                                    <a href="{{ first_nested_link.url }}" class="{% if first_nested_link.current %}link--underline{% endif %}{% if first_nested_link.current %} link--current{% endif %}">{{ first_nested_link.title }}</a>
+                                                    {% if first_nested_link.links.size > 0 %}
+                                                        <div class="dropdown-icon flex--row" tabindex="0">	
+                                                            {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </summary>
+                                            {% if first_nested_link.links.size > 0 %}
+                                                <ul class="second-nested__list popover flex--column hide-scrollbar{% if settings.modal_enable_shadow %} modal--shadow{% endif %}">
+                                                    {% for second_nested_link in first_nested_link.links %}
+                                                        <li>
+                                                            <a href="{{ second_nested_link.url }}" class="{% if settings.show_lines_popovers %}popovers-line{% endif %}{% if second_nested_link.current %} link--underline{% endif %}{% if second_nested_link.current %} link--current{% endif %}">{{ second_nested_link.title }}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </details-dropdown>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {%- endif -%}
+                    </details-dropdown>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</div>

@@ -1,0 +1,121 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section customer activate-account">
+    <div class="section-container side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+        <div class="customer__wrapper">
+            <div class="template-header">
+                <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                    {{ 'customer.activate_account.title' | t }}
+                </h1>
+            </div>
+            <p class="customer__subheading subheading-font {% if settings.use_heading_font_subheadings %}subheading-heading-font{% endif %} {% if settings.uppercase_subheadings %}uppercase{% endif %}">
+                {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'customer.activate_account.subtext' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+            </p>
+            <form-state class="customer__form-state body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+            {%- form 'activate_customer_password' -%}
+                <div class="fields-wrapper">
+                    <div class="field">
+                        <label class="label" for="password">
+                            {{ 'customer.activate_account.password' | t | append: '*' }}
+                        </label>     
+                        <input
+                        class="input input--text required {% if form.errors contains 'password' %}invalid{% endif %}"
+                        type="password"
+                        required="required"
+                        name="customer[password]"
+                        id="password"
+                        autocomplete="new-password"
+                        {% if form.errors contains 'password' %}
+                            aria-invalid="true"
+                            aria-describedby="password-error"
+                        {% endif %}>
+                        {%- if form.errors contains 'password' -%}
+                        <h2 id="password-error" class="error-color" tabindex="-1" autofocus>
+                            {{ form.errors.translated_fields['password'] | capitalize }} {{ form.errors.messages['password'] }}
+                        </h2>
+                        {%- endif -%}
+                    </div>
+                    <div class="field">
+                        <label class="label" for="password_confirmation">
+                            {{ 'customer.activate_account.password_confirm' | t | append: '*' }}
+                        </label>
+                        <input
+                        class="input input--text required {% if form.errors contains 'password_confirmation' %}invalid{% endif %}"
+                        type="password"
+                        required="required"
+                        name="customer[password_confirmation]"
+                        id="password_confirmation"
+                        autocomplete="new-password"
+                        {% if form.errors contains 'password' %}
+                            aria-invalid="true"
+                            aria-describedby="password_confirmation-error"
+                        {% endif %}>
+                        {%- if form.errors contains 'password_confirmation' -%}
+                        <h2 id="password_confirmation-error" class="error-color" tabindex="-1" autofocus>
+                            {{ form.errors.translated_fields['password_confirmation'] | capitalize }} {{ form.errors.messages['password_confirmation'] }}
+                        </h2>
+                        {%- endif -%}
+                    </div>
+                </div>
+                <button class="button solid-button button--submit body-font button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+                    {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'customer.activate_account.submit' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                </button>
+                <button class="button outlined-button button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}" name="decline">
+                    {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'customer.activate_account.cancel' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                </button>
+            {%- endform -%}
+            </form-state>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-activate-account.name",
+  "settings": [
+    {
+        "type": "checkbox",
+        "id": "show_bottom_line",
+        "default": false,
+        "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+        "type": "checkbox",
+        "id": "center_text",
+        "default": true,
+        "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

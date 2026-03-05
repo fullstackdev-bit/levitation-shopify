@@ -1,0 +1,36 @@
+{% if enable_secondary_grid or enable_preview_grid %}
+  {%- liquid
+    assign is_default_active = false
+    assign is_secondary_active = false
+    assign is_preview_active = false
+
+    assign grid_type = cart.attributes.grid_type | default: 'default'
+
+    case grid_type
+      when 'default'
+        assign is_default_active = true
+      when 'secondary'
+        assign is_default_active = true
+        assign is_secondary_active = true
+      when 'preview'
+        assign is_default_active = true
+        assign is_secondary_active = true
+        assign is_preview_active = true
+      else
+        assign is_default_active = true
+    endcase
+  -%}
+
+  <grid-switcher
+    role="button"
+    class="grid-switcher" 
+    title="{{ 'accessibility.toggle_grid_switcher' | t }}" 
+    aria-label="{{ 'accessibility.toggle_grid_switcher' | t }}"
+    data-grid-type="{{ grid_type }}"
+    tabindex="0"
+  >
+    <div data-grid-type="default" class="grid-switcher__option {% if is_default_active %} grid-switcher__option--active {% endif %}"></div>
+    {% if enable_secondary_grid %} <div data-grid-type="secondary" class="grid-switcher__option {% if is_secondary_active %} grid-switcher__option--active {% endif %}"></div> {% endif %}
+    {% if enable_preview_grid %} <div data-grid-type="preview" class="grid-switcher__option {% if is_preview_active %} grid-switcher__option--active {% endif %}"></div> {% endif %}
+  </grid-switcher>
+{% endif %}

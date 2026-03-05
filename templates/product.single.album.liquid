@@ -144,7 +144,7 @@
                     data-bpm="{{ bpm | escape }}"
                     data-title="{% if track.metafields.track.featured_artist_names %}{{ track.title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track.title | escape }}{% endif %}"
                     data-artist="{{ product.metafields.album.artist_name | escape }}"
-                    data-price="{{ track.price | money }}"
+                    data-price="{{ track.price | money | strip_html }}"
                     data-album-track-count="{{ product.metafields.album.track_count }}"
                     style="display: inline-block"
                   >
@@ -159,7 +159,7 @@
                       data-title="{% if track.metafields.track.featured_artist_names %}{{ track.title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track.title | escape }}{% endif %}"
                       data-artist="{{ product.metafields.album.artist_name | escape }}"
                       data-album-track-count="{{ product.metafields.album.track_count }}"
-                      data-price="{{ track.price | money }}"
+                      data-price="{{ track.price | money | strip_html }}"
                     >
                       <i class="material-icons">play_circle_outline</i>
                     </span>
@@ -225,9 +225,7 @@
           class="single-tracklist"
         >
           {% for track in products %}
-            {% if track.type == 'Digital Track' %}
-              {% include 'single-music-track' with track %}
-            {% endif %}
+            {% include 'single-music-track' with track %}
           {% endfor %}
         </div>
       {% endif %}

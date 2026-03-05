@@ -1,0 +1,54 @@
+<custom-options class="custom-options custom-options--{{ block.id }} flex--column product-form__input" data-type="color-picker" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% style %}
+        .custom-options--{{ block.id }} {
+            --swatches-radius: 2000px;
+            --custom-swatch-width: 36px;
+        }
+    {% endstyle %}
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign default_color = 'black'
+    %}
+    {% if settings.show_label and block.settings.option_label != blank %}
+        <label class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            for="{{ block.id }}-{{ block.settings.option_name }}"
+        >
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ block.settings.option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>
+                {% endif %}
+            </tooltip-component>
+        </label>
+    {% endif %}
+    <div class="form__variants flex--column {{ block.settings.text_style }}
+        {%- if block.settings.text_uppercase %} uppercase{% endif -%}
+        {%- if block.settings.text_bolder_font %} bold {% endif -%}
+        {%- if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif -%}"
+    >
+        <div class="field field--color">          
+            <input 
+                type="color"
+                id="{{ block.id }}-{{ block.settings.option_name }}"
+                name="properties[{{ block.settings.option_name }}]"
+                {% if from_details %}
+                    data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}"
+                    data-place-for-name="properties[{{ block.settings.option_name }}]"
+                    data-form-input="{{ product_form_id }}"
+                {% endif %}
+                form="{{ product_form_id }}"
+                value="#000000"
+                class="input input--text input--color input-style--{{ settings.variant_input_size }}"
+            >
+            <div class="field-color-wrapper flex--row">
+                <div class="color__swatch color__swatch--color" style="--swatch-background: {{ default_color }}; --swatch-background-color: {{ default_color }};">
+                    <span class="color__swatch-dot color__swatch-dot--color"></span>
+                </div>
+                <span class="selected-color-label" data-color-value>#000000</span>
+            </div>
+        </div>
+    </div>
+</custom-options>

@@ -1,0 +1,28 @@
+<modal-opener
+    class="product-popup-modal__opener no-js-hidden popup-block"
+    data-modal="#PopupModal-{{ block.id }}"
+    {{ block.shopify_attributes }}
+    style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" >
+    <button id="ProductPopup-{{ block.id }}" class="popup-button button--modal-opener flex--row {{ block.settings.link_text_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.link_text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+        {% if block.settings.icon != blank %}
+            {% assign color_rgb = block.settings.color | color_to_rgb | strip %}
+            {% assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip %}
+            <div class="popup__icon icon--large flex--row popup__icon--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">
+                {%- liquid
+                    assign icon_name = block.settings.icon | split: '/'
+                    if icon_name.size == 3
+                      assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                    elsif icon_name.size == 2
+                      assign file_name = icon_name.first
+                    endif
+                    assign icon = icon_name.last
+                    render 'catalog-icons', file_name: file_name, icon: icon
+                -%}
+            </div>
+        {% endif %}
+        <span class="popup__link-text">{% if block.settings.bolder_font %}<b>{% endif %}{{ block.settings.link_text }}{% if block.settings.bolder_font %}</b>{% endif %}</span>
+        <div class="popup__arrow flex--row icon--large">	
+          {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+        </div>  
+    </button>
+</modal-opener>

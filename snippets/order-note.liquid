@@ -1,0 +1,96 @@
+{%- liquid
+  assign uppercase_heading = false
+  if object_settings.order_heading_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_heading = true
+  elsif object_settings.order_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_heading = true
+  elsif object_settings.order_heading_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_heading = true
+  elsif object_settings.order_heading_style == 'body-font' and settings.uppercase_body
+    assign uppercase_heading = true
+  elsif object_settings.order_heading_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_heading = true
+  endif
+
+  assign heading_text = object_settings.order_heading
+  assign processed_text = ''
+  assign split_text = heading_text | split: '['
+
+  for part in split_text
+    if part contains ']'
+      assign split_bracket = part | split: ']'
+      assign highlight_text = split_bracket[0]
+      assign after_bracket = split_bracket[1]
+      assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+    else
+      assign processed_text = processed_text | append: part
+    endif
+  endfor
+
+  assign final_text = ''
+  assign split_text_curly = processed_text | split: '{'
+
+  for part in split_text_curly
+    if part contains '}'
+      assign split_curly = part | split: '}'
+      assign styled_text = split_curly[0]
+      assign after_curly = split_curly[1]
+      assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+    else
+      assign final_text = final_text | append: part
+    endif
+  endfor
+-%}
+
+<div class="accordion-order-note accordion-block accordion accordion--compact" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+  <accordion-toggle>
+    <div
+      class="accordion-toggle {% unless object_settings.show_collapsible %}not_collapsible is-open{% endunless %}"
+      {% unless object_settings.show_collapsible %}
+        open
+      {% endunless %}
+    >
+      <div class="accordion__summary" tabindex="0">
+        <div class="summary__title">
+          <div class="summary__title-name custom-heading {{ object_settings.order_heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if object_settings.order_heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            <h3 class="accordion__title">
+              {% if object_settings.order_heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                <b>
+              {%- endif %}
+              {{ final_text }}
+              {% if object_settings.order_heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                </b>
+              {%- endif %}
+            </h3>
+          </div>
+          <span class="icon-accordion icon-accordion--close">
+            {%- render 'glyphs_interface', icon: 'plus' -%}
+          </span>
+          <span class="icon-accordion icon-accordion--open">
+            {%- render 'glyphs_interface', icon: 'minus' -%}
+          </span>
+        </div>
+      </div>
+
+      <div class="accordion__panel hide-scrollbar">
+        <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+          <cart-note class="cart__note flex--column">
+            {% if object_settings.order_label != blank -%}
+              <label class="label" for="{{ textarea_id }}">{{ object_settings.order_label }}</label>
+            {%- else -%}
+              <label class="visually-hidden" for="{{ textarea_id }}">{{ object_settings.order_placeholder | strip_html }}</label>
+            {%- endif %}
+            <textarea
+              class="textarea input"
+              rows="{{ rows }}"
+              name="note"
+              {% if form_id %} form="{{ form_id }}" {% endif %}
+              id="{{ textarea_id }}"
+              placeholder="{{ object_settings.order_placeholder | strip_html }}"
+            >{{ cart.note }}</textarea>
+          </cart-note>
+        </div>
+      </div>
+    </div>
+  </accordion-toggle>
+</div>

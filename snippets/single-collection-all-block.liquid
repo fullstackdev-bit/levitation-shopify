@@ -37,10 +37,24 @@
     .single-video-title {
         margin-top: 0.25em;
         margin-bottom: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
-<div class="single-grid">
+<div class="single-grid single-collection-all-wrapper {% if max_width == 'true' %}page-width{% endif %}">
+    <div class="single-grid-item">
+        <div class="single-col col-4_4">
+            {% if title %}
+                <h2 class="title {{ title_size }}">{{ title }}</h2>
+            {% endif %}
+            {% if sub_title %}
+                <div class="description">{{ sub_title }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% if show_search == 'true' %}
     <div class="single-grid-item">
         <div class="single-col col-4_4">
             <div class="single-header-bar {% unless viewable_content_key_names.size > 0 or content_query %}single-empty-header-bar{% endunless %}">
@@ -55,15 +69,32 @@
                 {% comment %}
                   <!-- Key Selector -->
                 {% endcomment %}
-                {% if viewable_content_key_names.size > 1 %}
-                    <div class="single-dropdown single-key-dropdown-wrap" tabindex="-1">
-                        <div class="single-key-dropdown single-dropdown-button">
-                            <div class="single-dropdown-selected">
+                {% if show_token_dropdown == 'true' %}
+                    {% if viewable_content_key_names.size > 1 %}
+                        <div class="single-dropdown single-key-dropdown-wrap" tabindex="-1">
+                            <div class="single-key-dropdown single-dropdown-button">
+                                <div class="single-dropdown-selected">
+                                    {% for viewable_content_key in viewable_content_key_names %}
+                                        {% assign viewable_content_key_parts = viewable_content_key | split: '|' %}
+                                        <div
+                                                id="single-dropdown-{{ viewable_content_key_parts[1] }}"
+                                                class="single-dropdown-selection{% unless forloop.first %} hidden{% endunless %}"
+                                        >
+                                            <div class="single-dropdown-img"><img
+                                                        src="{{ viewable_content_key_parts[2] }}">
+                                            </div>
+                                            <span>{{ viewable_content_key_parts[0] }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% render 'single-icon-caret' %}
+                            </div>
+                            <div class="single-dropdown-content">
                                 {% for viewable_content_key in viewable_content_key_names %}
                                     {% assign viewable_content_key_parts = viewable_content_key | split: '|' %}
                                     <div
-                                            id="single-dropdown-{{ viewable_content_key_parts[1] }}"
-                                            class="single-dropdown-selection{% unless forloop.first %} hidden{% endunless %}"
+                                            class="single-dropdown-content-row"
+                                            onclick="updateKeySelection('{{ viewable_content_key_parts[1] }}');"
                                     >
                                         <div class="single-dropdown-img"><img src="{{ viewable_content_key_parts[2] }}">
                                         </div>
@@ -71,29 +102,15 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            {% render 'single-icon-caret' %}
                         </div>
-                        <div class="single-dropdown-content">
-                            {% for viewable_content_key in viewable_content_key_names %}
-                                {% assign viewable_content_key_parts = viewable_content_key | split: '|' %}
-                                <div
-                                        class="single-dropdown-content-row"
-                                        onclick="updateKeySelection('{{ viewable_content_key_parts[1] }}');"
-                                >
-                                    <div class="single-dropdown-img"><img src="{{ viewable_content_key_parts[2] }}">
-                                    </div>
-                                    <span>{{ viewable_content_key_parts[0] }}</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% else %}
-                    {% assign viewable_content_key_parts = viewable_content_key_names[0] | split: '|' %}
-                    {% if viewable_content_key_parts[2] %}
-                        <div class="single-dropdown-selection solo-selection">
-                            <div class="single-dropdown-img"><img src="{{ viewable_content_key_parts[2] }}"></div>
-                            <span>{{ viewable_content_key_parts[0] }}</span>
-                        </div>
+                    {% else %}
+                        {% assign viewable_content_key_parts = viewable_content_key_names[0] | split: '|' %}
+                        {% if viewable_content_key_parts[2] %}
+                            <div class="single-dropdown-selection solo-selection">
+                                <div class="single-dropdown-img"><img src="{{ viewable_content_key_parts[2] }}"></div>
+                                <span>{{ viewable_content_key_parts[0] }}</span>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
                 {% comment %}
@@ -111,6 +128,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% comment %}
     <!-- END - Search Bar -->
     {% endcomment %}
@@ -120,6 +138,17 @@
     </div>
 
     <div class="single-hidden-while-loading">
+        {% comment %}
+          <!-- START - Custodial NFTs -->
+        {% endcomment %}
+        <single-collectibles show-collectible-title='true' show-login='false' collectible-title-size='h2'
+                             collectible-title-alignment='left' text-color='#000000' button-background-color='#000000'
+                             button-text-color='#FFFFFF' button-border-color='#000000'
+                             hover-background-color='rgba(0, 0, 0, 0.7)' image-border-color='#000000' max-width='true'
+                             columns='4' image-border-radius='5px' button-border-radius='5px' image-border-width='1px'
+                             button-border-width='1px' horizontal-padding='16px' vertical-padding='20px'>
+        </single-collectibles>
+
         {% comment %}
           <!-- START - Video Collection Grid -->
         {% endcomment %}
@@ -147,23 +176,29 @@
                         {% if row_visible == true %}
                             {% assign section_visible = true %}
                             <section class="single-grid-item {{ row_header[1] | handleize }}">
-                                <div class="single-col col-4_4 {{ row_title_size }}"
-                                     style="margin-bottom: 0;">{{ row_header[1] }}</div>
+                                <div class="single-col col-4_4"
+                                     style="padding-bottom: 0;">
+                                    <h2 class="{{ row_title_size }}"
+                                        style="margin-bottom: 0;">{{ row_header[1] }}</h2>
+                                </div>
                                 {% if row_header[0] == 'PRODUCT' %}
                                     {% for product_input in row_parts offset: 1 %}
                                         {% assign product = all_products[product_input] %}
                                         {% if product and product != blank %}
-                                            <div class="single-col col-2_4">
-                                                {% render 'single-product-card', product_input: product_input,
+                                            <div class="single-col col-1_{{ product_columns }}" style="padding-left: 0">
+                                                {% render 'single-product-card-vertical',
+                                                        product_input: product_input,
                                                         show_title: product_show_title,
                                                         show_description: product_show_description,
-                                                        show_badge: product_show_badge %}
+                                                        show_badge: product_show_badge,
+                                                        show_quick_add: show_quick_add
+                                                %}
                                             </div>
                                         {% endif %}
                                     {% endfor %}
                                 {% elsif row_header[0] == 'VIDEO' %}
                                     {% for video_input in row_parts offset: 1 %}
-                                        <div class="single-col col-1_4">
+                                        <div class="single-col col-1_{{ video_columns }}">
                                             {% render 'single-video-card',
                                                     video_input: video_input,
                                                     show_title: video_show_title,

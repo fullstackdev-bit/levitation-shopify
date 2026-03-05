@@ -1,0 +1,155 @@
+{% if icon != blank or image != blank or text != blank or page != blank or title != blank %}
+    <div class="icons_with_text__item">
+        {% if page != blank and page_content_in_popup %}<modal-opener data-modal="#IconsWithTextModal-{{ block.id }}-{{ index }}">{% endif %}
+            {% if page_content_in_popup == false %}{% if page != blank %}<a class="icons_with_text__link cursor-pointer" href="{{ page.url }}">
+            {% else %}<div class="icons_with_text__link">
+            {% endif %}
+            {% else %}<div class="icons_with_text__wrapper {% if page != blank %}button--modal-opener cursor-pointer{% endif %}" id="IconsWithText-{{ block.id }}-{{ index }}" data-modal-toggle>{% endif %}
+                {% if image or icon != blank %}
+                    <div class="icons_with_text__media {% if block.settings.fill_container %} icons_with_text__media--fill{% endif %}">
+                        {% if image != blank %}
+                            <div class="icons_with_text__image" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                                {%- liquid
+                                    assign widths = '50, 75, 100, 150, 200, 300'
+                                -%}
+                                {%- capture sizes -%}
+                                    calc({{ block.settings.icon_or_image_size }}px * 2)
+                                {%- endcapture -%}
+                                {% if settings.images_loading != 'disable' %}
+                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ image.aspect_ratio }}">
+                                {% endif %}
+                                {{
+                                    image
+                                    | image_url: width: 1100
+                                    | image_tag:
+                                    sizes: sizes,
+                                    widths: widths,
+                                    alt: image.alt,
+                                    draggable: false,
+                                    loading: loading_images,
+                                    onload: onload_script
+                                }}
+                                {% if settings.images_loading != 'disable' %}
+                                    {% if settings.images_loading != 'fade_scale' %}
+                                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                      <img 
+                                      alt="{{ image.alt | escape }}" 
+                                      src="{{ image | image_url: width: 10 }}"
+                                      draggable="false"
+                                      width="10" 
+                                      height="10">
+                                    </div>
+                                    {% endif %}
+                                </figure>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                        {%- liquid
+                                assign icon_name = icon | split: '/'
+                                if icon_name.size == 3
+                                    assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                elsif icon_name.size == 2
+                                    assign file_name = icon_name.first
+                                endif
+                                assign icon = icon_name.last
+                                assign color_rgb = color | color_to_rgb | strip
+                                assign mobile_color_rgb = mobile_color | color_to_rgb | strip
+                            -%}
+                            <div class="icons_with_text__icon icons_with_text__icon--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">{% render 'catalog-icons', file_name: file_name, icon: icon %}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if title != blank or text != blank %}
+                    <div class="icons_with_text__info">
+                        {% if title != blank %}
+                            {% liquid
+                                assign heading_text = title
+                                assign processed_text = ''
+                                assign split_text = heading_text | split: '['
+    
+                                for part in split_text
+                                  if part contains ']'
+                                    assign split_bracket = part | split: ']'
+                                    assign highlight_text = split_bracket[0]
+                                    assign after_bracket = split_bracket[1]
+                                    assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                                  else
+                                    assign processed_text = processed_text | append: part
+                                  endif
+                                endfor
+    
+                                
+                                assign final_text = ''
+                                assign split_text_curly = processed_text | split: '{'
+    
+                                for part in split_text_curly
+                                  if part contains '}'
+                                    assign split_curly = part | split: '}'
+                                    assign styled_text = split_curly[0]
+                                    assign after_curly = split_curly[1]
+                                    assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                                  else
+                                    assign final_text = final_text | append: part
+                                  endif
+                                endfor
+                              %}
+                            <div {% if page != blank and page_content_in_popup %}tabindex="0"{% endif %} class="icons_with_text__title custom-heading {{ block.settings.title_style }}{% if block.settings.title_uppercase %} uppercase{% endif %}{% if block.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                {% if block.settings.title_bolder_font %}<b>{% endif %}{{ final_text }}{% if block.settings.title_bolder_font %}</b>{% endif %}
+                            </div>
+                        {% endif %}
+                        {% if text != blank %}
+                            <div class="icons_with_text__description richtext rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %}
+                                {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                                {% if page_content_in_popup == false %}<object>{% endif %}
+                                    {{ text }}
+                                {% if page_content_in_popup == false %}</object>{% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% if page_content_in_popup == false %}{% if page != blank %}</a>
+            {% else %}</div>{% endif %}
+            {% else %}</div>{% endif %} 
+        {% if page != blank and page_content_in_popup %}</modal-opener>{% endif %}
+        {% if page != blank and page_content_in_popup == true %}
+            <modal-dialog id="IconsWithTextModal-{{ block.id }}-{{ index }}" class="global-popup-modal global-popup-modal--drawer" data-template-id="IconsWithTextModalTemplate-{{ block.id }}-{{ index }}">
+            </modal-dialog>
+            <template id="IconsWithTextModalTemplate-{{ block.id }}-{{ index }}">
+                <div class="{% if popup_style == 'popover' %}popup color-{{ settings.popup_color_scheme }}{% else %}drawer{% if settings.modal_border %} modal--border{% endif %} color-{{ settings.drawer_color_scheme }}{% endif %} modal {{ popup_width }} {% unless popup_style %}popup color-{{ settings.popup_color_scheme }} {{ popup_width }}{% endunless %} {% if settings.modal_enable_shadow %}modal--shadow{% endif %} hide-scrollbar">
+                    {% if popup_style == 'drawer' %}
+                        <div class="button-wrapper">
+                            <button type="button" class="button button-close button--small close-popup  icon--large" id="ModalClose-{{ block.id }}">
+                                {%- render 'glyphs_interface', icon: 'close' -%}
+                            </button>
+                        </div>
+                        {% endif %}
+                    <div class="scroll-area hide-scrollbar">
+                    {% if popup_style == 'popover' %}
+                    <div class="button-wrapper">
+                        <button type="button" class="button button-close button--small close-popup  icon--large" id="ModalClose-{{ block.id }}">
+                            {%- render 'glyphs_interface', icon: 'close' -%}
+                        </button>
+                    </div>
+                    {% endif %}
+                    {% liquid 
+                        assign uppercase_headings = false
+                        if block.settings.rte_heading_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_headings = true
+                        elsif block.settings.rte_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_headings = true
+                        elsif block.settings.rte_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                            assign uppercase_headings = true
+                        elsif block.settings.rte_heading_style == 'section-heading' and settings.uppercase_section_headings
+                            assign uppercase_headings = true
+                        elsif block.settings.rte_heading_style == 'page-title' and settings.uppercase_page_titles
+                            assign uppercase_headings = true
+                        endif
+                    %}
+                    <div class="{% if popup_style == 'popover' %}popup-content{% else %}drawer-wrapper drawer-wrapper--padding{% endif %}{% unless popup_style %}popup-content{% endunless %} heading-style-{{ block.settings.rte_heading_style }} {% if block.settings.rte_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                         page__content rte body-font{% if settings.uppercase_body %} uppercase{% endif %}{% if uppercase_headings %} headings-uppercase{% endif %}">{{ page.content }}</div>
+                    </div>
+                </div>
+            </template>
+        {% endif %}
+    </div>
+{% endif %}

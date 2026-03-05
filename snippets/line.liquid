@@ -1,0 +1,10 @@
+<div class="line-container line-container--{{ block.id }}" id="{{ block.id }}" {{ block.shopify_attributes }}>
+    {% style %}
+        .line-container--{{ block.id }} {
+            --top-spacing: {{ block.settings.top_spacing }};
+            --bottom-spacing: {{ block.settings.bottom_spacing }};
+            padding: calc(var(--block-padding) * var(--top-spacing)) 0 calc(var(--block-padding) * var(--bottom-spacing));
+        }
+    {% endstyle %} 
+    <span class="line"></span>
+</div>

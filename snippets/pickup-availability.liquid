@@ -1,0 +1,45 @@
+{% liquid 
+  if block.settings.store_selection_text != nil
+    assign store_selection_text = block.settings.store_selection_text
+  else 
+    assign store_selection_text = settings.store_selection_text
+  endif
+
+  case availability
+    when 'available'
+      assign pickup_availability_text = 'products.product.pickup_availability.available_to_pickup_at' | t : store_name: cart.attributes['store']
+      assign availability_style = 'available'
+    when 'unavailable'
+      assign pickup_availability_text = 'products.product.pickup_availability.out_of_stock_at' | t : store_name: cart.attributes['store']
+      assign availability_style = 'unavailable'
+    when nil
+      assign pickup_availability_text = store_selection_text
+      assign availability_style = 'unavailable'
+  endcase
+
+  if card_content_style == 'regular'
+    assign pickup_availability_style = settings.pickup_availability_style
+  elsif card_content_style == 'small'
+    assign pickup_availability_style = settings.small_pickup_availability_style
+  elsif block.settings.text_style != nil
+    assign pickup_availability_style = block.settings.text_style
+  endif
+
+  assign use_heading_font_pickup_subheading = false
+  if pickup_availability_style== 'subheading-font' and settings.use_heading_font_subheadings
+    assign use_heading_font_pickup_subheading = true
+  endif
+
+  if block != nil
+    assign parent_tag = 'button'
+  else
+    assign parent_tag = 'div'
+  endif
+%}
+
+<{{ parent_tag }} 
+  class="pickup-availability pickup-availability--{{ availability_style }} {{ pickup_availability_style }} {% if use_heading_font_pickup_subheading %} subheading-heading-font{% endif %}" 
+  {% if parent_tag == 'button' %}data-modal-toggle-store-selector-drawer{% endif %}
+>    
+  <span class="pickup-availability__content"><span class="pickup-availability__icon"></span><span class="pickup-availability__text" data-placeholder="{{ store_selection_text }}">{{ pickup_availability_text }}</span></span>
+</{{ parent_tag }}>

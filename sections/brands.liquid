@@ -1,0 +1,554 @@
+{%- liquid
+  assign disable_max_width = false
+  if section.settings.disable_max_width
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+    assign disable_max_width = true
+  endif
+
+  assign full_width = false
+  if section.settings.full_width
+    assign full_width = true
+  endif
+
+  assign uppercase_heading = false
+  if section.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_heading = true
+  elsif section.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_heading = true
+  elsif section.settings.heading_style == 'page-title' and settings.uppercase_page_titles
+    assign uppercase_heading = true
+  elsif section.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_heading = true
+  elsif section.settings.heading_style == 'body-font' and settings.uppercase_body
+    assign uppercase_heading = true
+  elsif section.settings.heading_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_heading = true
+  endif
+
+  assign uppercase_letter_group = false
+  if section.settings.letter_group_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_letter_group = true
+  elsif section.settings.letter_group_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_letter_group = true
+  elsif section.settings.letter_group_style == 'page-title' and settings.uppercase_page_titles
+    assign uppercase_letter_group = true
+  elsif section.settings.letter_group_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_letter_group = true
+  elsif section.settings.letter_group_style == 'body-font' and settings.uppercase_body
+    assign uppercase_letter_group = true
+  elsif section.settings.letter_group_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_letter_group = true
+  endif
+
+  assign heading_text = section.settings.heading
+  assign processed_text = ''
+  assign split_text = heading_text | split: '['
+
+  for part in split_text
+    if part contains ']'
+      assign split_bracket = part | split: ']'
+      assign highlight_text = split_bracket[0]
+      assign after_bracket = split_bracket[1]
+      assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+    else
+      assign processed_text = processed_text | append: part
+    endif
+  endfor
+
+  assign final_text = ''
+  assign split_text_curly = processed_text | split: '{'
+
+  for part in split_text_curly
+    if part contains '}'
+      assign split_curly = part | split: '}'
+      assign styled_text = split_curly[0]
+      assign after_curly = split_curly[1]
+      assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+    else
+      assign final_text = final_text | append: part
+    endif
+  endfor
+
+  assign section_framing = 'disable'
+-%}
+
+{% capture hidden_brands_stripped %}
+  {%- assign hidden_brands_array = section.settings.hidden_vendors | strip | split: ',' -%}
+  {%- for brand in hidden_brands_array -%}
+    {{ brand | strip }}{%- unless forloop.last %},{% endunless -%}
+  {%- endfor -%}
+{% endcapture %}
+
+{% capture visible_vendors_string %}
+  {%- assign sorted_vendors = shop.vendors | sort_natural -%}
+  {%- for vendor in sorted_vendors -%}
+    {%- unless hidden_brands_stripped contains vendor -%}
+      {{ vendor | strip }}{%- unless forloop.last %},{% endunless -%}
+    {%- endunless -%}
+  {%- endfor -%}
+{% endcapture %}
+
+{% assign visible_vendors = visible_vendors_string | split: ',' %}
+
+{% capture letter_groups_stripped %}
+  {%- assign letter_groups_array = section.settings.letter_groups | strip | split: ',' -%}
+  {%- for letter_group in letter_groups_array -%}
+    {{ letter_group | strip }}{%- unless forloop.last %},{% endunless -%}
+  {%- endfor -%}
+{% endcapture %}
+
+{% assign letter_groups = letter_groups_stripped | split: ',' %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --top-spacing: {{ section.settings.top_spacing }};
+    --bottom-spacing: {{ section.settings.bottom_spacing }};
+    --desktop-columns: {{ section.settings.desktop_columns }};
+    --mobile-columns: {{ section.settings.mobile_columns }};
+    --logo-height: {{ section.settings.logo_height }}px;
+    --logo-background-color: {{ section.settings.logo_background_color }};
+  }
+{% endstyle %}
+
+<div class="section{% if section_framing == 'disable' or full_width %} color-{{ section.settings.color_scheme }}{% endif %}{% unless full_width %} side-margins{% endunless %}">
+  <div class="section-container {% if section.settings.show_bottom_line %} bottom-line{% endif %}{% if full_width == false %}{% if section_framing == 'grid' %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}{% unless section_framing != 'disable' %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endunless %}{% endif %}">
+    {% if section_framing != 'disable' and full_width == false %}
+      <div class="section-radius elem-padding-l color-{{ section.settings.color_scheme }}">
+        <div
+          {% if section_framing != 'grid' %}
+            class="{{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}"
+          {% endif %}
+        >
+    {% endif %}
+
+    {% if section.settings.heading != blank %}
+      <div class="{% if full_width %}side-margins{% endif %}">
+        <div class="template-header">
+          <{{ section.settings.heading_tag }}
+            class="
+              custom-heading {{ section.settings.grid_style }}-grid {% if disable_max_width %}disable-max-width{% endif %}
+              {{ section.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}{% if section.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}
+            "
+          >
+            {% if section.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+              <b>
+            {%- endif -%}
+            {{- final_text -}}
+            {%- if section.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+              </b>
+            {%- endif %}
+          </{{ section.settings.heading_tag }}>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="brands__groups-wrapper {% unless full_width %}{{ section.settings.grid_style }}-grid {% if disable_max_width %}disable-max-width{% endif %}{% endunless %}">
+      {% if section.settings.letter_groups != blank %}
+        {% for letter_group_raw in letter_groups %}
+          {% assign letter_group = letter_group_raw | strip %}
+          {% assign from = letter_group | split: '-' | first | upcase %}
+          {% assign to = letter_group | split: '-' | last | upcase %}
+
+          {% capture group_vendors %}
+            {% for visible_vendor_raw in visible_vendors %}
+              {% assign vendor = visible_vendor_raw | strip %}
+              {% assign first_letter = vendor | slice: 0, 1 | upcase %}
+
+              {% if first_letter == letter_group or first_letter >= from and first_letter <= to %}
+                {{ vendor }}{{ ',' }}
+              {% endif %}
+            {% endfor %}
+          {% endcapture %}
+
+          {% assign group_vendors_array = group_vendors | strip | split: ',' %}
+
+          {% if group_vendors contains ',' %}
+            <div class="brand-group">
+              <h3 class="brand-group__letter-group {{ section.settings.letter_group_style }} 
+                {%- if full_width %} side-margins {% endif -%}
+                {%- if section.settings.center_text %} center {% endif -%}
+                {%- if uppercase_letter_group %} uppercase {% endif -%}
+                {%- if section.settings.letter_group_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}"
+              >
+                {% if section.settings.letter_group_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                <b>
+                {%- endif %}
+                {{ letter_group }}
+                {% if section.settings.letter_group_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                </b>
+                {%- endif %}
+              </h3>
+
+              {% render 'brands-list', vendors: group_vendors_array %}
+            </div>
+          {% endif %}
+        {% endfor %} 
+      {% else %}
+        {% render 'brands-list', vendors: visible_vendors %}
+      {% endif %}
+    </div>
+
+    {% if section_framing != 'disable' and full_width == false %}
+      </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.brands.name",
+  "tag": "section",
+  "class": "brands-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "letter_groups",
+      "label": "t:sections.brands.settings.letter_groups.label",
+      "info": "t:sections.brands.settings.letter_groups.info",
+      "default": "0-9, A, B, C-E, F-Z"
+    },
+    {
+      "type": "text",
+      "id": "hidden_vendors",
+      "label": "t:sections.brands.settings.hidden_vendors.label",
+      "info": "t:sections.brands.settings.hidden_vendors.info"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.all.settings_titles.heading.heading.label",
+      "info": "t:sections.all.settings_titles.heading.heading.info",
+      "default": "Brands"
+    },
+    {
+      "type": "select",
+      "id": "heading_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        },
+        {
+          "value": "page-title",
+          "label": "t:sections.all.headings_style.options__5.label"
+        }
+      ],
+      "default": "section-heading",
+      "label": "t:sections.all.headings_style.heading_style.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "options": [
+        {
+          "value": "h1",
+          "label": "t:sections.all.tag.options__1.label"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.tag.options__2.label"
+        },
+        {
+          "value": "h3",
+          "label": "t:sections.all.tag.options__3.label"
+        },
+        {
+          "value": "h4",
+          "label": "t:sections.all.tag.options__4.label"
+        },
+        {
+          "value": "h5",
+          "label": "t:sections.all.tag.options__5.label"
+        },
+        {
+          "value": "h6",
+          "label": "t:sections.all.tag.options__6.label"
+        },
+        {
+          "value": "div",
+          "label": "t:sections.all.tag.options__7.label"
+        },
+        {
+          "value": "span",
+          "label": "t:sections.all.tag.options__8.label"
+        },
+        {
+          "value": "p",
+          "label": "t:sections.all.tag.options__9.label"
+        }
+      ],
+      "default": "h2",
+      "label": "t:sections.all.tag.heading_tag.label"
+    },
+    {
+      "type": "select",
+      "id": "letter_group_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        }
+      ],
+      "default": "secondary-heading",
+      "label": "t:sections.brands.settings.letter_group_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text",
+      "default": false,
+      "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "select",
+      "id": "desktop_columns",
+      "options": [
+        {
+          "value": "2",
+          "label": "t:sections.all.columns.options__2.label"
+        },
+        {
+          "value": "3",
+          "label": "t:sections.all.columns.options__3.label"
+        },
+        {
+          "value": "4",
+          "label": "t:sections.all.columns.options__4.label"
+        }
+      ],
+      "default": "4",
+      "label": "t:sections.all.columns.desktop_columns.label"
+    },
+    {
+      "type": "select",
+      "id": "mobile_columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.all.columns.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.all.columns.options__2.label"
+        }
+      ],
+      "default": "2",
+      "label": "t:sections.all.columns.mobile_columns.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.brands.settings.vendor_card.content"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "options": [
+        {
+          "value": "logo_and_name",
+          "label": "t:sections.brands.settings.card_style.options__1.label"
+        },
+        {
+          "value": "logo",
+          "label": "t:sections.brands.settings.card_style.options__2.label"
+        },
+        {
+          "value": "name",
+          "label": "t:sections.brands.settings.card_style.options__3.label"
+        }
+      ],
+      "default": "logo_and_name",
+      "label": "t:sections.brands.settings.card_style.label",
+      "info": "t:sections.brands.settings.card_style.info"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "min": 24,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.brands.settings.logo_height.label",
+      "default": 32,
+      "visible_if": "{{ section.settings.card_style != 'name' }}"
+    },
+    {
+      "type": "select",
+      "id": "card_title_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        }
+      ],
+      "default": "secondary-heading",
+      "label": "t:sections.brands.settings.vendor_name_style.label",
+      "visible_if": "{{ section.settings.card_style != 'logo' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "default": true,
+      "label": "t:sections.all.show_frame.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.settings_titles.section_layout_header.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": false,
+      "label": "t:sections.all.full_width.label"
+    },
+    {
+      "type": "select",
+      "id": "grid_style",
+      "options": [
+        {
+          "value": "page",
+          "label": "t:sections.all.grid_style.options__1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:sections.all.grid_style.options__3.label"
+        },
+        {
+          "value": "alternative",
+          "label": "t:sections.all.grid_style.options__2.label"
+        }
+      ],
+      "default": "page",
+      "label": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_max_width",
+      "default": false,
+      "label": "t:sections.all.disable_max_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_grid_gaps",
+      "default": true,
+      "label": "t:sections.all.disable_grid_gaps.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color_scheme",
+      "label": "t:sections.all.colors.card_color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "color",
+      "id": "logo_background_color",
+      "label": "t:sections.brands.settings.logo_background_color.label",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.brands.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["*"]
+  }
+}
+{% endschema %}

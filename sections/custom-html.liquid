@@ -1,0 +1,204 @@
+{% if section.settings.custom_html != blank or request.design_mode %}
+{%- liquid
+    assign disable_max_width = false
+    if section.settings.disable_max_width 
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+      assign disable_max_width = true
+    endif
+
+    assign section_framing = false
+    if section.settings.section_framing != 'disable'
+        assign section_framing = true
+    endif
+
+    assign uppercase_text = false
+    if section.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+      assign uppercase_text = true
+    elsif section.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_text = true
+    elsif section.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'body-font' and settings.uppercase_body
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_text = true
+    endif
+-%}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section{% unless section_framing %} color-{{ section.settings.color_scheme }}{% endunless %} side-margins {% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+    <div class="custom-code section-container{% if section.settings.section_framing == 'grid' %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}{% unless section_framing %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endunless %}
+      {{ section.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if section.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+      {% if section_framing %}<div class="section-radius elem-padding-l color-{{ section.settings.color_scheme }}"><div {% if section.settings.section_framing != 'grid' %}class="{{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}"{% endif %}>{% endif %}
+        {%- if section.settings.custom_html != blank -%}
+          {{ section.settings.custom_html }}
+        {%- else -%}
+            <svg class="code-placeholder" width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="960" height="240"/>
+                <g>
+                <path d="M468.604 104.271L452.875 120L468.604 135.729L469.547 134.786L454.761 120L469.547 105.213L468.604 104.271ZM491.396 104.271L490.453 105.213L505.239 120L490.453 134.786L491.396 135.729L507.125 120L491.396 104.271Z" fill="#232323"/>
+                </g>
+            </svg>
+        {%- endif -%}
+      {% if section_framing %}</div></div>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "t:sections.custom-html.name",
+  "tag": "section",
+  "class": "custom-html",
+  "settings": [
+    {
+      "type": "html",
+      "id": "custom_html",
+      "label": "t:sections.custom-html.settings.custom_html.label"
+    },
+    {
+      "type": "select",
+      "id": "text_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        }
+      ],
+      "default": "body-font",
+      "label": "t:sections.all.headings_style.text_style.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.settings_titles.section_layout_header.content"
+    },
+    {
+      "type": "select",
+      "id": "grid_style",
+      "options": [
+        {
+          "value": "page",
+          "label": "t:sections.all.grid_style.options__1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:sections.all.grid_style.options__3.label"
+        },
+        {
+          "value": "alternative",
+          "label": "t:sections.all.grid_style.options__2.label"
+        }
+      ],
+      "default": "page",
+      "label": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_max_width",
+      "default": false,
+      "label": "t:sections.all.disable_max_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "select",
+      "id": "section_framing",
+      "options": [
+        {
+          "value": "disable",
+          "label": "t:sections.all.section_framing.options__1.label"
+        },
+        {
+          "value": "enable",
+          "label": "t:sections.all.section_framing.options__2.label"
+        },
+        {
+          "value": "grid",
+          "label": "t:sections.all.section_framing.options__3.label"
+        }
+      ],
+      "default": "disable",
+      "label": "t:sections.all.section_framing.label",
+      "info": "t:sections.all.section_framing.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.custom-html.name"
+    }
+  ],
+  "enabled_on": {
+    "templates": [
+      "*"
+    ],
+    "groups": [
+      "*"
+    ]
+  }
+}
+{% endschema %}

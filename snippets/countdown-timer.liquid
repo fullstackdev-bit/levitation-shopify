@@ -1,0 +1,319 @@
+{% liquid
+  if block.settings.countdown_background_gradient == ''
+    assign background_class = 'countdown--solid-bg'
+  else
+    assign background_class = 'countdown--gradient-bg'
+  endif
+
+  if block.settings.countdown_show_background
+    assign delimeter_color = 'var(--layout-text-color)'
+  else
+    assign delimeter_color = block.settings.countdown_text_color
+  endif
+%}
+
+{% liquid
+  case block.settings.countdown_labels_style
+    when "caption-font"
+      assign label_font_size = "var(--caption-font-size)"
+      assign label_line_height = "var(--body-line-height)"
+    when "body-font"
+      assign label_font_size = "var(--body-font-size)"
+      assign label_line_height = "var(--body-line-height)"
+    when "subheading-font"
+      assign label_font_size = "var(--subheadings-font-size)"
+      assign label_line_height = "var(--body-line-height)"
+    when "secondary-heading"
+      assign label_font_size = "var(--secondary-headings-font-size)"
+      assign label_line_height = "var(--secondary-headings-line-height)"
+  endcase
+%}
+
+{%- liquid
+  assign uppercase_labels = false
+  
+  if minimized
+    assign uppercase_labels = true
+  elsif block.settings.countdown_labels_style
+    if block.settings.countdown_labels_style == 'caption-font' and settings.uppercase_caption 
+        assign uppercase_labels = true
+    elsif block.settings.countdown_labels_style == 'body-font' and settings.uppercase_body
+        assign uppercase_labels = true
+    elsif block.settings.countdown_labels_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_labels = true
+    elsif block.settings.countdown_labels_style == 'secondary-heading' and settings.uppercase_secondary_headings
+        assign uppercase_labels = true
+    endif
+  elsif section.settings.text_style
+    if section.settings.text_style == 'caption-font' and settings.uppercase_caption 
+      assign uppercase_labels = true
+    elsif section.settings.text_style == 'body-font' and settings.uppercase_body
+      assign uppercase_labels = true
+    elsif section.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_labels = true
+    elsif section.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_labels = true
+    endif
+  endif
+
+  if uppercase_labels == false and block.settings.countdown_make_labels_uppercase
+    assign uppercase_labels = true
+  endif
+-%}
+
+{%- liquid 
+  assign labels_style = block.settings.countdown_labels_style | default: section.settings.text_style
+
+  if labels_style == 'subheading-font' and settings.use_heading_font_subheadings
+    assign labels_style = labels_style | append: ' subheading-heading-font'
+  endif
+-%}
+
+{% liquid
+  assign current_time = 'now' | date: "%Y-%m-%d %H:%M"
+
+  assign end_date = block.settings.countdown_end_date
+  assign date_parts = end_date | split: "-"
+
+  assign end_time = block.settings.countdown_end_time | default: "00:00"
+  assign time_parts = end_time | split: ":"
+
+  if date_parts.size == 3
+    if date_parts[0].size == 4
+      assign is_year_valid = true
+    endif
+
+    if date_parts[1].size == 2 
+      assign month = date_parts[1] | times: 1
+
+      if month >= 1 and month <= 12
+        assign is_month_valid = true
+      endif
+    endif
+
+    if date_parts[2].size == 2 
+      assign day = date_parts[2] | times: 1
+
+      if day >= 1 and day <= 31
+        assign is_day_valid = true
+      endif
+    endif
+
+    if is_year_valid and is_month_valid and is_day_valid
+      assign is_valid_date = true
+    endif
+  endif
+
+  if time_parts.size == 2
+    if time_parts[0].size == 2
+      assign hours = time_parts[0] | times: 1
+      
+      if hours >= 0 and hours <= 23
+        assign is_hours_valid = true
+      endif
+    endif
+
+    if time_parts[1].size == 2
+      assign minutes = time_parts[1] | times: 1
+      
+      if minutes >= 0 and minutes <= 59
+        assign is_minutes_valid = true
+      endif
+    endif
+
+    if is_hours_valid and is_minutes_valid
+      assign is_valid_time = true
+    endif
+  endif
+
+  if is_valid_date and is_valid_time
+    assign end_datetime = end_date | append: " " | append: end_time 
+  elsif request.design_mode == false and product_handle == nil
+    assign is_timer_invalid = true
+  endif
+
+  if end_datetime 
+    if end_datetime <= current_time
+      assign timer_expired = true
+    endif
+  endif
+
+  assign show_timer = false
+  unless is_timer_invalid or timer_expired and block.settings.countdown_expiration_action == 'hide_timer' or block.settings.countdown_expiration_action == 'show_message' and block.settings.countdown_complete_message == empty
+    assign show_timer = true
+  endunless
+%}
+
+<div class="countdown-timer-wrapper 
+  {%- unless is_part_of_block %} section-block {% endunless -%} 
+  {%- unless show_timer %} countdown-timer-wrapper--hidden {% endunless -%}" 
+  {% if block.settings.top_spacing %} style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {% endif %}
+  {{ block.shopify_attributes }}
+>
+  {% style %}
+    .countdown--{{ block.id }} {
+      .countdown__number-wrapper {
+        color: {{ block.settings.countdown_text_color }};
+        border-radius: {{ block.settings.countdown_corner_radius }}px;
+
+        .countdown--solid-bg & {
+          background: {{ block.settings.countdown_background_color }};
+        }
+
+        .countdown--gradient-bg & {
+          background: {{ block.settings.countdown_background_gradient }};
+        }
+
+        .countdown--with-outline & {
+          border: 1px solid {{ block.settings.countdown_outline_color }};
+        }
+      }
+
+      .countdown__label {
+        color: {{ block.settings.countdown_labels_color }};
+      }
+
+      .countdown__delimeter {
+        color: {{ delimeter_color }};
+
+        .countdown:not(.countdown--minimized) .countdown__pair-of-numbers-wrapper:has(.countdown__label:not([hidden])) + & {
+          margin-bottom: calc({{ label_font_size }} * {{ label_line_height }} + var(--countdown-label-gap));
+        } 
+      }
+    }
+  {% endstyle %}
+
+  <countdown-timer
+    end-date="{{ block.settings.countdown_end_date }}"
+    end-time="{{ block.settings.countdown_end_time }}"
+    complete-message="{{ block.settings.countdown_complete_message }}"
+    timezone-offset="{{ "now" | date: "%z" }}"
+    enable-animation="{{ block.settings.countdown_enable_animation}}"
+    expiration-action="{{ block.settings.countdown_expiration_action }}"
+    section-id="{{ section_id }}"
+    {%- if product_handle %} product-handle="{{ product_handle }}" {% endif -%}
+    class="countdown countdown--{{ block.id }}  
+      {%- if timer_expired %}countdown--visible{% endif %}
+      {%- if minimized %}countdown--minimized{% endif %}     
+      {%- if block.settings.countdown_show_background %}{{ background_class }}{% endif %}
+      {%- if block.settings.countdown_show_outline %}countdown--with-outline{% endif %}"
+    role="timer"
+  >
+    {%- if show_timer %}
+      {% unless timer_expired and block.settings.countdown_expiration_action == 'show_message' %}
+        <div class="countdown__timer {{ block.settings.countdown_timer_style | default: section.settings.text_style }} {% if block.settings.countdown_make_timer_font_bolder %}bold{% endif %}" dir="ltr">
+          <div class="countdown__pair-of-numbers-wrapper">
+            <div class="countdown__pair-of-numbers">
+              <div class="countdown__number-wrapper countdown-days-tens">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+              <div class="countdown__number-wrapper countdown-days-ones">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+            </div>
+            <span
+              class="countdown__label {{ labels_style -}}
+              {%- if uppercase_labels %} uppercase{% endif %}
+              {%- if block.settings.countdown_make_labels_font_bolder %} bold{% endif %}" 
+              {%- unless block.settings.countdown_show_labels %}hidden{% endunless %}
+            >
+              {% if minimized %}
+                {{- 'blocks.countdown_timer.days_minimized' | t -}}
+              {% else %}
+                {{- 'blocks.countdown_timer.days' | t -}}
+              {% endif %}
+            </span>
+          </div>
+          <div class="countdown__delimeter">:</div>
+          <div class="countdown__pair-of-numbers-wrapper">
+            <div class="countdown__pair-of-numbers">
+              <div class="countdown__number-wrapper countdown-hours-tens">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+              <div class="countdown__number-wrapper countdown-hours-ones">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+            </div>
+            <span
+              class="countdown__label {{ labels_style -}}
+              {%- if uppercase_labels %} uppercase{% endif %}
+              {%- if block.settings.countdown_make_labels_font_bolder %} bold{% endif %}" 
+              {%- unless block.settings.countdown_show_labels %}hidden{% endunless %}
+            >
+              {% if minimized %}
+                {{- 'blocks.countdown_timer.hours_minimized' | t -}}
+              {% else %}
+                {{- 'blocks.countdown_timer.hours' | t -}}
+              {% endif %}
+            </span>
+          </div>
+          <div class="countdown__delimeter">:</div>
+          <div class="countdown__pair-of-numbers-wrapper">
+            <div class="countdown__pair-of-numbers">
+              <div class="countdown__number-wrapper countdown-minutes-tens">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+              <div class="countdown__number-wrapper countdown-minutes-ones">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+            </div>
+            <span
+              class="countdown__label {{ labels_style -}}
+              {%- if uppercase_labels %} uppercase{% endif %}
+              {%- if block.settings.countdown_make_labels_font_bolder %} bold{% endif %}" 
+              {%- unless block.settings.countdown_show_labels %}hidden{% endunless %}
+            >
+              {% if minimized %}
+                {{- 'blocks.countdown_timer.minutes_minimized' | t -}}
+              {% else %}
+                {{- 'blocks.countdown_timer.minutes' | t -}}
+              {% endif %}
+            </span>
+          </div>
+          <div class="countdown__delimeter">:</div>
+          <div class="countdown__pair-of-numbers-wrapper">
+            <div class="countdown__pair-of-numbers">
+              <div class="countdown__number-wrapper countdown-seconds-tens">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+              <div class="countdown__number-wrapper countdown-seconds-ones">
+                <span class="countdown__number countdown__number--current">0</span>
+                <span class="countdown__number countdown__number--previous">0</span>
+              </div>
+            </div>
+            <span
+              class="countdown__label {{ labels_style -}}
+              {%- if uppercase_labels %} uppercase{% endif %}
+              {%- if block.settings.countdown_make_labels_font_bolder %} bold{% endif %}" 
+              {%- unless block.settings.countdown_show_labels %}hidden{% endunless %}
+            >
+              {% if minimized %}
+                {{- 'blocks.countdown_timer.seconds_minimized' | t -}}
+              {% else %}
+                {{- 'blocks.countdown_timer.seconds' | t -}}
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      {% endunless %}
+      
+      {% if block.settings.countdown_complete_message != empty and block.settings.countdown_expiration_action == 'show_message' or block.settings.countdown_expiration_action == 'show_zeros_and_message'  %}
+        <div
+          class="countdown__complete-message countdown-complete-message richtext {{ labels_style }} 
+          {% if uppercase_labels %} uppercase{% endif %} 
+          {% if block.settings.countdown_make_labels_font_bolder %} bold{% endif %}"
+          {% unless timer_expired %}hidden{% endunless %}
+        > 
+          {{ block.settings.countdown_complete_message }}    
+        </div>
+      {% endif %}
+    {% endif -%}
+  </countdown-timer>
+</div>

@@ -1,0 +1,101 @@
+
+  {%- liquid 
+    assign aspect_ratio = card_product.featured_image.aspect_ratio
+    if card_product.featured_media.media_type != 'image' 
+        assign aspect_ratio = card_product.featured_media.preview_image.aspect_ratio
+    endif
+
+    assign uppercase_product_price = false
+    assign subheading_heading_font_price = false
+    if card_content_style == 'regular'
+        if settings.product_price_uppercase
+            assign uppercase_product_price = true
+        endif
+        if settings.product_price_style == 'subheading-font' and settings.use_heading_font_subheadings
+            assign subheading_heading_font_price = true
+        endif
+    else
+        if settings.small_product_price_uppercase
+            assign uppercase_product_price = true
+        endif
+        if settings.small_product_price_style == 'subheading-font' and settings.use_heading_font_subheadings
+            assign subheading_heading_font_price = false
+        endif
+    endif
+  -%}
+
+<div class="card-product{% if full_width %} card-product--full-width{% endif %} color-{{ product_card_color_scheme }} 
+    {% if show_product_card_border %}with-border{% endif %} {% if product_card_color_scheme != parent_color_scheme %}with-color{% endif %}">
+    <a id="card-product-{{ index }}" class="card hover_behavior-{{ hover_behavior }} flex--column {% if quick_buy == 'on_desktop' or quick_buy == 'enable' %}card-quick-view{% endif %}" href="{{ card_product.selected_or_first_available_variant.url }}" draggable="false">
+            <div class="card-product__media-wrapper {% if settings.fit_product_media %}card-product__media-wrapper--fit{% endif %}" style="--total-slides: {{ card_product.media.size }}; --speed: {{ autoplay_speed }}s;">
+                    <div class="card__product-media card__product-image aspect-ratio {% if settings.fit_product_media %}card__product-media--fit{% endif %} {% if hover_behavior == 'second_image' %}card__product-media--show-second-img{% endif %}" 
+                        {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+                        style="aspect-ratio: {% if settings.product_media_ratio == 'auto' %}{{ aspect_ratio }}{% else %}{{ settings.product_media_ratio }}{% endif %}; --focal-point: {{ settings.product_focal_point }};">
+                        {%- assign placeholder_name = 'product-' | append: index_placeholder -%}
+                        {{ placeholder_name | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+            </div>
+        <div class="card-product__content flex--column body-font {% if settings.center_product_card_content and card_content_style == 'regular' %} center{% endif %}{% if settings.center_small_product_card_content and card_content_style == 'small' %} center{% endif %}">
+            <div class="card__price {% if accent_price %}price--bold{% endif %} {% if use_accent_color_for_price %}color-price--accent{% endif %} {% if use_sale_color_for_new_price %}color-price--sale{% endif %} color-sale-price--{{ compare_at_price_color }}  card__price--{{ price_position }} {% if card_content_style == 'regular' %}{{ settings.product_price_style }}{% else %}{{ settings.small_product_price_style }}{% endif %}{% if uppercase_product_price %} uppercase{% endif %}{% if subheading_heading_font_price %} subheading-heading-font{% endif %}">
+            {% render 'price', product: card_product, accent_price: accent_price, show_badges: true, use_accent_color_for_price: use_accent_color_for_price, compare_at_price_color: compare_at_price_color %}
+            </div>
+            <div class="card__info">
+                <div class="card__product-info flex--column">
+                    {% if show_vendor != 'disable' %}
+                        <p class="card__vendor">{{ 'products.product.vendor_placeholder' | t }}</p>
+                    {% endif %}
+                    {% if show_title %}
+                        <div class="card-product__title-wrapper" {% if max_product_name_characters > 0 %}data-name-characters="{{ max_product_name_characters }}"{% endif %}>
+                            {% liquid
+                                assign product_title = card_product.title
+                                if max_product_name_characters != blank and max_product_name_characters > 0
+                                    assign product_title = card_product.title | truncate: max_product_name_characters, ''
+                                    if max_product_name_characters < card_product.title.size
+                                        assign product_title = product_title | append: '...'
+                                    endif
+                                endif 
+
+                                assign uppercase_product_title = false
+                                assign subheading_heading_font = false
+                                assign product_card_bolder_accent = false
+                                assign accent_color_for_title = false
+                                if card_content_style == 'regular'
+                                    if settings.product_titles_uppercase
+                                        assign uppercase_product_title = true
+                                    endif
+                                    if settings.product_titles_style == 'subheading-font' and settings.use_heading_font_subheadings
+                                        assign subheading_heading_font = true
+                                    endif
+                                    if settings.bolder_product_titles
+                                        assign product_card_bolder_accent = true
+                                    endif
+                                    if settings.use_accent_color_for_title
+                                        assign accent_color_for_title = true
+                                    endif
+                                else
+                                    if settings.small_product_titles_uppercase
+                                        assign uppercase_product_title = true
+                                    endif
+                                    if settings.small_product_titles_style == 'subheading-font' and settings.use_heading_font_subheadings
+                                        assign subheading_heading_font = true
+                                    endif
+                                    if settings.small_bolder_product_titles
+                                        assign product_card_bolder_accent = true
+                                    endif
+                                    if settings.small_use_accent_color_for_title
+                                        assign accent_color_for_title = true
+                                    endif
+                                endif
+                            %}
+                            <p class="card-product__title card__title-js {% if card_content_style == 'regular' %}{{ settings.product_titles_style }}{% else %}{{ settings.small_product_titles_style }}{% endif %}{% if uppercase_product_title %} uppercase{% endif %}{% if subheading_heading_font %} subheading-heading-font{% endif %}{% if accent_color_for_title %} color-accent{% endif %}">
+                                {% if product_card_bolder_accent %}<b>{% endif %}
+                                {{ 'products.product.title_placeholder' | t }}
+                                {% if product_card_bolder_accent %}</b>{% endif %}
+                            </p>   
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </a>
+</div>

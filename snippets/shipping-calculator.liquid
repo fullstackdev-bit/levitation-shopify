@@ -1,76 +1,142 @@
-{%- comment -%}
-https://docs.shopify.com/manual/configuration/store-customization/page-specific/cart-page/add-shipping-rates-calculator
-{%- endcomment -%}
+{%- liquid
+  assign uppercase_heading = false
+  if object_settings.shipping_heading_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_heading = true
+  elsif object_settings.shipping_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_heading = true
+  elsif object_settings.shipping_heading_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_heading = true
+  elsif object_settings.shipping_heading_style == 'body-font' and settings.uppercase_body
+    assign uppercase_heading = true
+  elsif object_settings.shipping_heading_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_heading = true
+  endif
 
-  {%- assign def_text = 'Zip/Postal Code' -%}
-  {%- capture all_text -%}value="{{ def_text }}" onblur="if (this.value == '') {this.value = '{{ def_text }}';}" onfocus="if(this.value == '{{ def_text }}') {this.value = '';}"{%- endcapture -%}
+  assign heading_text = object_settings.shipping_heading
+  assign processed_text = ''
+  assign split_text = heading_text | split: '['
 
-  {%- if shop.customer_accounts_enabled and customer -%} 
-      {%- if customer.default_address.zip -%}
-          {%- assign customer_zip = 'value="' | append: customer.default_address.zip | append: '"' -%}
-      {%- else -%}
-          {%- assign customer_zip = all_text -%}
-      {%- endif -%}
-  {%- endif -%}
+  for part in split_text
+    if part contains ']'
+      assign split_bracket = part | split: ']'
+      assign highlight_text = split_bracket[0]
+      assign after_bracket = split_bracket[1]
+      assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+    else
+      assign processed_text = processed_text | append: part
+    endif
+  endfor
 
-  <h4 class="tt-title">{{ 'cart.general.shipping_heading' | t }}</h4>
-  <p>{{ 'cart.general.shipping_description' | t }}</p>
-  <div class="form-default shipping-form-offset">
-    <div class="form-group">
-      <label for="address_country">{{ 'cart.general.shipping_country' | t }} <span class="color-base">*</span></label>
-      <select id="address_country" name="address[country]" class="form-control"  data-style="select--ys"  data-width="100%" data-default="{% if shop.customer_accounts_enabled and customer %}{{ customer.default_address.country }}{% elsif item.shipping_calculator_default_country != '' %}{{ item.shipping_calculator_default_country }}{% endif %}">{{ country_option_tags }}</select>
+  assign final_text = ''
+  assign split_text_curly = processed_text | split: '{'
+
+  for part in split_text_curly
+    if part contains '}'
+      assign split_curly = part | split: '}'
+      assign styled_text = split_curly[0]
+      assign after_curly = split_curly[1]
+      assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+    else
+      assign final_text = final_text | append: part
+    endif
+  endfor
+-%}
+
+<div class="accordion-shipping-calculator accordion-block accordion accordion--compact" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+  <accordion-toggle>
+    <div class="accordion-toggle">
+      <div class="accordion__summary" tabindex="0">
+        <div class="summary__title">
+          <div class="summary__title-name custom-heading {{ object_settings.shipping_heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if object_settings.shipping_heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            <h3 class="accordion__title">
+              {% if object_settings.shipping_heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                <b>
+              {%- endif -%}
+              {{- final_text }}
+              {% if object_settings.shipping_heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                </b>
+              {%- endif %}
+            </h3>
+          </div>
+          <span class="icon-accordion icon-accordion--close">
+            {%- render 'glyphs_interface', icon: 'plus' -%}
+          </span>
+          <span class="icon-accordion icon-accordion--open">
+            {%- render 'glyphs_interface', icon: 'minus' -%}
+          </span>
+        </div>
+      </div>
+
+      <div class="accordion__panel hide-scrollbar">
+        <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+          <shipping-calculator>
+            <form-state class="fields-wrapper">
+              <div class="field">
+                <label class="label" for="ShippingCalculatorCountry">
+                  {{- 'cart.shipping_country' | t | append: '*' -}}
+                </label>
+                <div class="select flex--row align-center">
+                  <select
+                    id="ShippingCalculatorCountry"
+                    class="input"
+                    data-default="{% if shop.customer_accounts_enabled and customer %}{{ customer.default_address.country }}{% elsif object_settings.shipping_country != '' %}{{ object_settings.shipping_country }}{% endif %}"
+                    autocomplete="country"
+                    data-empty="---"
+                    required
+                  >
+                    {{ country_option_tags }}
+                  </select>
+                  <div class="select-icon flex--row align-center">
+                    {%- render 'glyphs_arrows', icon: 'chevron-down' -%}
+                  </div>
+                </div>
+              </div>
+              <div class="field" id="ShippingCalculatorProvinceContainer" style="display: none">
+                <label class="label" for="ShippingCalculatorProvince">{{ 'cart.shipping_state' | t }}</label>
+                <div class="select flex--row align-center">
+                  <select
+                    id="ShippingCalculatorProvince"
+                    class="input"
+                    data-default="{% if shop.customer_accounts_enabled and customer and customer.default_address.province != '' %}{{ customer.default_address.province }}{% endif %}"
+                    autocomplete="address-level1"
+                  ></select>
+                  <div class="select-icon flex--row align-center">
+                    {%- render 'glyphs_arrows', icon: 'chevron-down' -%}
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="label" for="ShippingCalculatorZip">{{ 'cart.zip' | t }}</label>
+                <input
+                  id="ShippingCalculatorZip"
+                  class="input input--text input-style--big"
+                  type="text"
+                  {% if shop.customer_accounts_enabled and customer %}
+                    value="{{ customer.default_address.zip }}"
+                  {% endif %}
+                  autocapitalize="characters"
+                  autocomplete="postal-code"
+                  placeholder="{{ 'cart.zip_placeholder' | t }}"
+                >
+              </div>
+              <div class="field form__message errors hidden error-color" id="ShippingCalculatorErrors">
+                <div class="errors"></div>
+              </div>
+              <div class="shipping-button">
+                <button
+                  class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %} button--submit"
+                  type="button"
+                >
+                  {% if settings.bolder_secondary_buttons_font %}<b>{% endif -%}
+                  {{- 'cart.estimate' | t -}}
+                  {%- if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                </button>
+              </div>
+            </form-state>
+            <div class="field form__message hidden" id="ShippingCalculatorSuccess"></div>
+          </shipping-calculator>
+        </div>
+      </div>
     </div>
-    <div class="form-group" id="address_province_container" style="display:none;">
-      <label  for="address_province">{{ 'cart.general.shipping_state' | t }} <sup>*</sup></label>
-      <select  id="address_province" name="address[province]" class="form-control "  data-style="select--ys"  data-width="100%" data-default="{% if shop.customer_accounts_enabled and customer and customer.default_address.province != '' %}{{ customer.default_address.province }}{% endif %}"></select>
-    </div>
-    <div class="form-group">
-      <label for="address_zip">{{ 'cart.general.shipping_zip' | t }}</label>
-      <input type="text" name="address[zip]" class="form-control" id="address_zip" {% if shop.customer_accounts_enabled and customer %} {{ customer_zip }}{% else %} {{ all_text }}{%endif%}/>
-    </div>
-    <button class="btn btn-border get-rates">{{ 'cart.general.shipping_button' | t }}</button>
-    <div id="wrapper-response" style="display:none"></div>
-  </div>
-
-  {% comment %} INFORMATION BLOK {% endcomment %}
-
-<script id="shipping-calculator-response-template" type="text/template">
-  <p id="shipping-rates-feedback" <% if (success) { %> class="success" <% } else { %> class="error" <% } %>>
-  <% if (success) { %>
-    <% if (rates.length > 1) { %> 
-    {{ 'cart.shipping.there_are' | t }}<%= rates.length %>{{ 'cart.shipping.shipping_rates' | t }}<%= address %>{{ 'cart.shipping.starting_at' | t }}<%= rates[0].price %>.
-    <% } else if (rates.length == 1) { %>
-    {{ 'cart.shipping.one_shipping_rate' | t }}<%= address %>.
-    <% } else { %>
-    {{ 'cart.shipping.do_not_ship' | t }}
-    <% } %>
-  <% } else { %>
-    <%= errorFeedback %>
-  <% } %>
-  </p>
-  <ul id="shipping-rates">
-    <% for (var i=0; i<rates.length; i++) { %>
-    <li><%= rates[i].name %> at <%= rates[i].price %></li>
-    <% } %>
-  </ul> 
-</script>
-
-<!--[if lte IE 8]> 
-<style> #shipping-calculator { display: none; } </style> 
-<![endif]--> 
-
-<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js" defer="defer"></script>
-<script src="/services/javascripts/countries.js" defer="defer"></script>
-<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
-<script src="{{ 'jquery.cart.min.js' | asset_url }}" defer="defer"></script>
-
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-Shopify.Cart.ShippingCalculator.show( {
-  submitButton: {{ settings.shipping_calculator_submit_button_label | default: 'Calculate shipping' | json }}, 
-  submitButtonDisabled: {{ settings.shipping_calculator_submit_button_label_disabled | default: 'Calculating...' | json }}{% if customer %},
-  customerIsLoggedIn: true{% endif %},
-  moneyFormat: {{ shop.money_with_currency_format | json }}
-});
-});
-</script>
+  </accordion-toggle>
+</div>

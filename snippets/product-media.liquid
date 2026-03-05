@@ -1,0 +1,149 @@
+{% if style == 'slideshow' %}
+  <li id="Slide-{{ section.id }}-zoom" class="slider__grid-item {% if settings.enable_blending %}enable-blending{% endif %} snap-align aspect-ratio{% if style == 'slideshow' and section.settings.enable_slideshow_zoom_in %} container-magnify-hover{% endif %}
+    {% if for_loop.first or first %}is-active{% endif %}">
+{% endif %}
+{%- if media.media_type == 'image' -%}
+  {% if settings.images_loading != 'disable' %}
+    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ media.preview_image.aspect_ratio }}">
+  {% endif %}
+  <img
+    class="global-media-settings aspect-ratio global-media-settings--no-shadow {% if variant_image %}product__media-item--variant{% endif %}{% if current_variant_alt %} product__media-item--variant-alt{% endif %}{% unless hide_images %} product__media-item--variant-show{% endunless %} 
+    {% if style == 'slideshow' and section.settings.enable_slideshow_zoom_in %} image-magnify-hover{% endif %}"
+    srcset="{%- if media.preview_image.width >= 550 -%}{{ media.preview_image | image_url: width: 550 }} 550w,{%- endif -%}
+            {%- if media.preview_image.width >= 1100 -%}{{ media.preview_image | image_url: width: 1100 }} 1100w,{%- endif -%}
+            {%- if media.preview_image.width >= 1445 -%}{{ media.preview_image | image_url: width: 1445 }} 1445w,{%- endif -%}
+            {%- if media.preview_image.width >= 1680 -%}{{ media.preview_image | image_url: width: 1680 }} 1680w,{%- endif -%}
+            {%- if media.preview_image.width >= 2048 -%}{{ media.preview_image | image_url: width: 2048 }} 2048w,{%- endif -%}
+            {%- if media.preview_image.width >= 2200 -%}{{ media.preview_image | image_url: width: 2200 }} 2200w,{%- endif -%}
+            {%- if media.preview_image.width >= 2890 -%}{{ media.preview_image | image_url: width: 2890 }} 2890w,{%- endif -%}
+            {%- if media.preview_image.width >= 4096 -%}{{ media.preview_image | image_url: width: 4096 }} 4096w,{%- endif -%}
+            {{ media.preview_image | image_url }} {{ media.preview_image.width }}w"
+    sizes="100vw"
+    src="{{ media.preview_image | image_url: width: 1445 }}"
+    alt="{{ media.alt | escape }}"
+    loading="lazy"
+    draggable="false"
+    width="3200"
+    height="{{ 3200 | divided_by: media.preview_image.aspect_ratio | ceil }}"
+    {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+    data-media-id="{{ media.id }}"
+    data-media-alt="{{ media_alt }}"
+    {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+  >
+    {% if settings.images_loading != 'disable' %}
+      {% if settings.images_loading != 'fade_scale' %}
+      <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+        <img 
+        alt="{{ media.preview_image.alt | escape }}" 
+        src="{{ media.preview_image | image_url: width: 10 }}"
+        class="lazy-image__preloader-image"
+        draggable="false"
+        width="10" 
+        height="10">
+      </div>
+      {% endif %}
+  </figure>
+  {% endif %}
+    {% if style == 'slideshow' and section.settings.enable_slideshow_zoom_in %}
+      <div class="image-zoom-icon zoom">
+        
+        <div class="icon-zoom-in">
+          <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-in' -%}</span>
+        </div>
+        <div class="icon-zoom-out">
+          <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-out' -%}</span>
+        </div>
+      </div>
+    {% endif %}
+{%- else -%}
+  {%- if media.media_type == 'model' -%}
+    <div 
+      class="product-media-modal__model" data-media-id="{{ media.id }}"
+      {% if use_original_media_ratio %} style="--aspect-ratio: {{ media.aspect_ratio }}" {% endif %}
+    >
+      <product-model class="deferred-media {% if settings.enable_blending %}enable-blending{% endif %} media aspect-ratio media--transparent global-media-settings global-media-settings--no-shadow" style="padding-top: min(calc(100vh - 12rem), 100%)">
+  {%- else -%}
+    <deferred-media 
+      class="deferred-media {% if settings.enable_blending %}enable-blending{% endif %} media aspect-ratio none-autoplay global-media-settings global-media-settings--no-shadow" 
+      style="padding-top: min(calc(100vh - 12rem), {{ 1 | divided_by: media.aspect_ratio | times: 100 }}%); {% if use_original_media_ratio %} --aspect-ratio: {{ media.aspect_ratio }};{% endif %}" 
+      data-enable-autoplay="{{ autoplay }}" 
+      data-media-id="{{ media.id }}"
+    >
+  {%- endif -%}
+
+    <button id="Deferred-Poster-Modal-{{ media.id }}" class="deferred-media__poster" type="button">
+      <span class="deferred-media__poster-button motion-reduce">
+        {%- if media.media_type == 'model' -%}
+          {%- render 'glyphs_signs', icon: '3d' -%}        
+        {%- else -%}
+        {%- render 'glyphs_interface', icon: 'play' -%}  
+        {%- endif -%}
+      </span>
+      {% if settings.images_loading != 'disable' %}
+        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ media.preview_image.aspect_ratio }}">
+      {% endif %}
+      <img
+        srcset="{% if media.preview_image.width >= 288 %}{{ media.preview_image | image_url: width: 288 }} 288w,{% endif %}
+                {% if media.preview_image.width >= 600 %}{{ media.preview_image | image_url: width: 600 }} 600w,{% endif %}
+                {% if media.preview_image.width >= 713 %}{{ media.preview_image | image_url: width: 713 }} 713w,{% endif %}
+                {% if media.preview_image.width >= 823 %}{{ media.preview_image | image_url: width: 823 }} 823w,{% endif %}
+                {% if media.preview_image.width >= 990 %}{{ media.preview_image | image_url: width: 990 }} 990w,{% endif %}
+                {% if media.preview_image.width >= 1100 %}{{ media.preview_image | image_url: width: 1100 }} 1100w,{% endif %}
+                {% if media.preview_image.width >= 1206 %}{{ media.preview_image | image_url: width: 1206 }} 1206w,{% endif %}
+                {% if media.preview_image.width >= 1346 %}{{ media.preview_image | image_url: width: 1346 }} 1346w,{% endif %}
+                {% if media.preview_image.width >= 1426 %}{{ media.preview_image | image_url: width: 1426 }} 1426w,{% endif %}
+                {% if media.preview_image.width >= 1646 %}{{ media.preview_image | image_url: width: 1646 }} 1646w,{% endif %}
+                {% if media.preview_image.width >= 1946 %}{{ media.preview_image | image_url: width: 1946 }} 1946w,{% endif %}
+                {{ media.preview_image | image_url }} {{ media.preview_image.width }}w"
+        src="{{ media | image_url: width: 1500, height: 1500 }}"
+        sizes="100vw"
+        loading="lazy"
+        draggable="false"
+        width="576"
+        class="product__media-item--show {% if section.settings.show_media_attached_to_variant %}product__media-item--variant-alt{% endif %}"
+        {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+        height="{{ 576 | divided_by: media.preview_image.aspect_ratio }}"
+        alt="{{ media.preview_image.alt | escape }}"
+        {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+      >
+        {% if settings.images_loading != 'disable' %}
+          {% if settings.images_loading != 'fade_scale' %}
+          <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+            <img 
+            alt="{{ media.preview_image.alt | escape }}" 
+            src="{{ media.preview_image | image_url: width: 10 }}"
+            class="lazy-image__preloader-image"
+            draggable="false"
+            width="10" 
+            height="10">
+          </div>
+          {% endif %}
+      </figure>
+      {% endif %}
+    </button>
+    <template>
+      {%- case media.media_type -%}
+      {%- when 'external_video' -%}
+        {%- assign video_class = 'js-' | append: media.host -%}
+        {%- if media.host == 'youtube' -%}
+          {{ media | external_video_url: autoplay: true, loop: loop, playlist: media.external_id | external_video_tag: class: video_class, loading: "lazy" }}
+        {%- else -%}
+          {{ media | external_video_url: autoplay: true, loop: loop | external_video_tag: class: video_class, loading: "lazy" }}
+        {%- endif -%}
+      {%- when 'video' -%}
+        {{ media | media_tag: image_size: "2048x", autoplay: true, loop: loop, controls: true, preload: "none" }}
+      {%- when 'model' -%}
+        {{ media | media_tag: image_size: "2048x", toggleable: true }}
+      {%- endcase -%}
+    </template>
+
+  {%- if media.media_type == 'model' -%}
+      </product-model>
+    </div>
+  {%- else -%}
+    </deferred-media>
+  {%- endif -%}
+{%- endif -%}
+{% if style == 'slideshow' %}
+</li>
+{% endif %}

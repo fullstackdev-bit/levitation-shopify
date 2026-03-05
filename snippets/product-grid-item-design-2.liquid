@@ -1,6 +1,6 @@
 <div class="respimgsize element-item product-parent options-js{% if masonrydoublesize == 'double-size' %} double-size{% endif %}">
   <div class="tt-product-design02{% if settings.center_product_information %} thumbprod-center{% endif %}">
-    <div class="tt-image-box">
+    <div class="tt-image-box" 02>
       <a href="{{ product.url | within: collection }}" title="View {{ product.title }}">
         <span class="tt-img">
           {%- if template == "collection.ajax" -%}
@@ -44,10 +44,10 @@
         <div class="tt-row">
           {%- if settings.show_product_vendor or settings.show_product_type -%}
           <ul class="tt-add-info">
-            {%- if settings.show_product_vendor -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.vendor={{ product.vendor | downcase | excape | replace: ' ','+' }}" 
+            {%- if settings.show_product_vendor -%}<li><a href="{{ routes.collections_url }}/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.vendor={{ product.vendor | downcase | excape | replace: ' ','+' }}" 
                                                           class="text-uppercase"
                                                           >{{ product.vendor }}</a></li>{%- endif -%}
-            {%- if settings.show_product_type -%}<li><a href="/collections/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.product_type={{ product.type | downcase | excape | replace: ' ','+' }}"
+            {%- if settings.show_product_type -%}<li><a href="{{ routes.collections_url }}/{% if collection == blank %}all{% else %}{{ collection.handle }}{% endif %}?filter.p.product_type={{ product.type | downcase | excape | replace: ' ','+' }}"
                                                         class="text-uppercase"
                                                         >{{ product.type }}</a></li>{%- endif -%}
           </ul>
@@ -102,7 +102,7 @@
         {%- if product.available -%}
         {%- if settings.product_item_show_cart -%}
         <div class="tt-row-btn">
-          <form action="/cart/add" method="post" enctype="multipart/form-data">
+          <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="id" value="{{ pr_variant.id }}">
             <button class="tt-btn-addtocart{% if settings.ajax_addtocart %} addtocart-item-js{% endif %}{% unless pr_variant.available %} disable{% endunless %}"
                     {%- if settings.show_addtocart_popup_related -%}{%- unless product.metafields.description.related_collection == blank -%}data-relatedcollection="{{ product.metafields.description.related_collection }}"{%- endunless -%}{%- endif -%}

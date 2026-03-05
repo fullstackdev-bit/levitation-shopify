@@ -1,0 +1,192 @@
+{%- liquid
+    assign disable_max_width = false
+    if section.settings.disable_max_width 
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+      assign disable_max_width = true
+    elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+      assign disable_max_width = true
+    endif
+
+    assign uppercase_text = false
+    if section.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'body-font' and settings.uppercase_body
+        assign uppercase_text = true
+    elsif section.settings.text_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_text = true
+    endif
+-%}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section color-{{ section.settings.color_scheme }}">
+    <div class="section-container side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+    <div class="legal-container {{ section.settings.text_style }} {% if uppercase_text %} uppercase{% endif %} {% if section.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}
+        {{ section.settings.grid_style }}-grid
+        {% if disable_max_width %}disable-max-width{% endif %}">
+        <div class="legal flex--row legal--{{ section.settings.style }}">
+            <div class="footer__copyright{% if section.settings.style == 'stacked' %} center{% endif %}">
+                <p class="copyright__content link-underline">Copyright &copy; {{ 'now' | date: "%Y" }}, {{ shop.name | link_to: routes.root_url }} </p>
+                <p class="copyright__content link-underline">{{ powered_by_link }}</p>
+            </div>
+            {% if section.settings.enable_back_to_top %}
+                <a class="back-to-top flex--row align-center" href="#body" tabindex="0" aria-label="{{ 'general.back_to_top' | t }}">
+                    {% if section.settings.show_label_on_desktop %}<span class="back-to-top__title">{{ 'general.back_to_top' | t }}</span>{% endif %}
+                    <span class="back-to-top__icon flex--row icon--small">{%- render 'glyphs_arrows', icon: 'arrow-up' -%}</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+</div>
+
+{% schema %}
+    {
+        "name": "t:sections.legal.name",
+        "tag": "section",
+        "settings": [
+            {
+                "type": "select",
+                "id": "style",
+                "options": [
+                    {
+                        "value": "stretched",
+                        "label": "t:sections.legal.settings.style.options__1.label"
+                    },
+                    {
+                        "value": "stacked",
+                        "label": "t:sections.legal.settings.style.options__2.label"
+                    },
+                    {
+                        "value": "centered",
+                        "label": "t:sections.legal.settings.style.options__3.label"
+                    }
+                ],
+                "default": "stretched",
+                "label": "t:sections.legal.settings.style.label"
+            },
+            {
+                "type": "select",
+                "id": "text_style",
+                "options": [
+                    {
+                        "value": "caption-font",
+                        "label": "t:sections.all.headings_style.options__6.label"
+                    },
+                    {
+                        "value": "body-font",
+                        "label": "t:sections.all.headings_style.options__1.label"
+                    },
+                    {
+                        "value": "subheading-font",
+                        "label": "t:sections.all.headings_style.options__2.label"
+                    },
+                    {
+                        "value": "secondary-heading",
+                        "label": "t:sections.all.headings_style.options__3.label"
+                    },
+                    {
+                        "value": "section-heading",
+                        "label": "t:sections.all.headings_style.options__4.label"
+                    }
+                ],
+                "default": "subheading-font",
+                "label": "t:sections.all.headings_style.text_style.label"
+            },
+            {
+                "type": "checkbox",
+                "id": "enable_back_to_top",
+                "default": false,
+                "label": "t:sections.legal.settings.enable_back_to_top.label"
+            },
+            {
+                "type": "checkbox",
+                "id": "show_label_on_desktop",
+                "default": true,
+                "label": "t:sections.legal.settings.show_label_on_desktop.label"
+            },
+            {
+                "type": "header",
+                "content": "t:sections.all.settings_titles.section_layout_header.content"
+            },
+            {
+                "type": "select",
+                "id": "grid_style",
+                "options": [
+                {
+                    "value": "page",
+                    "label": "t:sections.all.grid_style.options__1.label"
+                },
+                {
+                    "value": "secondary",
+                    "label": "t:sections.all.grid_style.options__3.label"
+                },
+                {
+                    "value": "alternative",
+                    "label": "t:sections.all.grid_style.options__2.label"
+                }
+                ],
+                "default": "page",
+                "label": "t:sections.all.grid_style.label"
+            },
+            {
+                "type": "checkbox",
+                "id": "disable_max_width",
+                "default": false,
+                "label": "t:sections.all.disable_max_width.label"
+            },
+            {
+                "type": "checkbox",
+                "id": "show_bottom_line",
+                "default": false,
+                "label": "t:sections.all.show_bottom_line.label"
+            },
+            {
+                "type": "header",
+                "content": "t:sections.all.colors.header.content"
+            },
+            {
+                "type": "color_scheme",
+                "id": "color_scheme",
+                "label": "t:sections.all.colors.color_scheme.label",
+                "default": "background-1"
+            },
+            {
+                "type": "header",
+                "content": "t:sections.all.spacing.header.content"
+            },
+            {
+                "type": "range",
+                "id": "top_spacing",
+                "min": 0,
+                "max": 2,
+                "step": 0.1,
+                "unit": "x",
+                "label": "t:sections.all.spacing.top_spacing.label",
+                "default": 1
+            },
+            {
+                "type": "range",
+                "id": "bottom_spacing",
+                "min": 0,
+                "max": 2,
+                "step": 0.1,
+                "unit": "x",
+                "label": "t:sections.all.spacing.bottom_spacing.label",
+                "default": 1
+            }
+        ]
+    }
+{% endschema %}

@@ -1,0 +1,219 @@
+{%- liquid
+  unless color_location
+    assign color_location = location
+  endunless
+  assign onload_script = ''
+    assign loading_images = ''
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+        assign loading_images = 'lazy'
+    elsif section.index > 2
+      assign loading_images = 'lazy'
+    endif
+-%}
+<{% if location.settings.info_card_link != blank %}a href="{{ location.settings.info_card_link }}"{% if location.settings.info_card_target_blank %} target="_blank"{% endif %}{% else %}div{% endif %} class="info-card{% if location.settings.info_card_video_load != blank or location.settings.info_card_image != blank %} with-media{%if media_ratio %} aspect-ratio{% endif %}{% endif %}{% if block_style %} info-card--{{ location.id }}{% endif %} color-{{ color_location.settings.info_card_color_scheme }}{% if color_location.settings.info_card_color_scheme != parent_color_scheme %} with-color{% endif %}{% if full_width %} info-card--full-width{% endif %}">
+  {% if block_style %}
+    {% style %}
+      .info-card--{{ location.id }} {
+        {%- if location.settings.info_card_button_radius == 'default' -%}
+          --info-button-border-radius: {{ settings.buttons_radius }};
+        {%- else -%}
+          --info-button-border-radius: {{ location.settings.info_card_button_radius }};
+        {%- endif -%}
+        --info-card-overlay-opacity: {{ location.settings.info_card_overlay_opacity | divided_by: 100.0 }};
+        --info-card-focal-point: {{ location.settings.info_card_focal_point }};
+      }
+    {% endstyle %}
+  {% endif %}
+  {% if location.settings.info_card_video_load != blank or location.settings.info_card_image != blank %}
+    <div class="info-card__media" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+      {%- if location.settings.info_card_video_load != blank -%}
+        {% if settings.images_loading == 'disable' %}
+          {{ location.settings.info_card_video_load | video_tag: image_size: "500x", autoplay: false, preload: 'none', loop: true, muted: true, controls: false, alt: location.settings.info_card_video_load.alt }}
+        {% else %}
+          <figure class="lazy-video lazy-image--{{ settings.images_loading }}">
+            {{ location.settings.info_card_video_load | video_tag: image_size: "500x", autoplay: false, preload: 'none', loop: true, muted: true, controls: false, alt: location.settings.info_card_video_load.alt, oncanplay: 'this.parentNode.classList.add("lazyloaded");' }}
+            {% if settings.images_loading != 'fade_scale' %}
+            <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true" >
+                <img 
+                    alt="{{ location.settings.info_card_video_load.alt | escape }}" 
+                    src="{{ location.settings.info_card_video_load.preview_image | image_url: width: 10 }}"
+                    draggable="false"
+                    width="10" 
+                    height="10">
+            </div>
+            {% endif %}
+        </figure>
+        {% endif %}
+      {%- else -%}
+        {%- if location.settings.info_card_image != blank -%}
+          {%- liquid
+              assign widths = '50, 75, 100, 150, 200, 300, 400, 600, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+              assign img_class = "info-card__image"
+          -%}
+          {% if settings.images_loading != 'disable' %}
+            <figure class="lazy-image lazy-image--{{ settings.images_loading }}" {% if media_ratio == 'auto' %} style="--asp-rat: {{ location.settings.info_card_image.aspect_ratio }};"{% endif %}>
+          {% endif %}
+          {%- capture sizes -%}
+            {% if with_products %}
+              {% if disable_grid_gaps %}
+                {% if disable_max_width or full_width %}
+                  (max-width: 768px) {{ mobile_width }}px, {{ max_width | divided_by: desktop_columns }}vw
+                {% else %}
+                  (max-width: 768px) {{ mobile_width }}px, {{ max_width | divided_by: desktop_columns }}px
+                {% endif %}
+              {% else %}
+                {% if disable_max_width or full_width %}
+                  (max-width: 768px) {{ mobile_width }}px, (max-width: 1024px) calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap | divided_by: 4 }}px)) / {{ desktop_columns }}), calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap }}px)) / {{ desktop_columns }})
+                {% else %}
+                  (max-width: 768px) {{ mobile_width }}px, (max-width: 1024px) calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap | divided_by: 4 }}px)) / {{ desktop_columns }}), calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap }}px)) / {{ desktop_columns }})
+                {% endif %}
+              {% endif %}
+            {% elsif with_collections %}
+              {% if disable_max_width or full_width %}
+                (max-width: 768px) calc(100vw / {{ mobile_columns }}), {{ max_width | divided_by: desktop_columns }}vw
+              {% else %}
+                (max-width: 768px) calc(100vw / {{ mobile_columns }}), {{ max_width | divided_by: desktop_columns }}px
+              {% endif %}
+            {% else %}
+              {% if disable_max_width %}
+                  (max-width: 768px) calc(100vw / {{ mobile_item_size }}), {{ max_width | divided_by: desktop_item_size }}vw
+              {% else %}
+                  (max-width: 768px) calc(100vw / {{ mobile_item_size }}), {{ max_width | divided_by: desktop_item_size }}px
+              {% endif %}
+            {% endif %}
+          {%- endcapture -%}
+          {{
+            location.settings.info_card_image
+              | image_url: width: 1700
+              | image_tag:
+              sizes: sizes,
+              widths: widths,
+              class: img_class,
+              alt: location.settings.info_card_image.alt,
+              draggable: false,
+              loading: loading_images,
+              onload: onload_script
+          }}
+          {% if settings.images_loading != 'disable' %}
+              {% if settings.images_loading != 'fade_scale' %}
+              <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                <img 
+                alt="{{ location.settings.info_card_image.alt | escape }}" 
+                src="{{ location.settings.info_card_image | image_url: width: 10 }}"
+                draggable="false"
+                width="10" 
+                height="10">
+              </div>
+              {% endif %}
+          </figure>
+          {% endif %}
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  {% endif %}
+    <div class="info-card__wrapper {% if block_style %} info-card__wrapper--{{ location.id }}{% endif %} flex--column{% if location.settings.info_card_center_text %} center{% else %} left{% endif %}">
+        {%- if location.settings.info_card_heading != blank or location.settings.info_card_subheading != blank or location.settings.info_card_text != blank -%}
+        
+        <div class="info-card__header flex--column">
+            {%- if location.settings.info_card_subheading != blank -%}
+                {%- liquid
+                  assign uppercase_subheading = false
+                  if location.settings.info_card_subheading_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_subheading = true
+                  elsif location.settings.info_card_subheading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                    assign uppercase_subheading = true
+                  elsif location.settings.info_card_subheading_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_subheading = true
+                  elsif location.settings.info_card_subheading_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_subheading = true
+                  elsif location.settings.info_card_subheading_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_subheading = true
+                  endif
+                -%}
+                <{{ location.settings.info_card_subheading_tag }} class="info-card__subheading {{ location.settings.info_card_subheading_style }}{% if uppercase_subheading %} uppercase{% endif %}{% if location.settings.info_card_subheading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                  {% if location.settings.info_card_subheading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ location.settings.info_card_subheading }}{% if location.settings.info_card_subheading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                </{{ location.settings.info_card_subheading_tag }}>
+            {%- endif -%}
+            {%- if location.settings.info_card_heading != blank -%}
+            {%- liquid
+                assign uppercase_heading = false
+                if location.settings.info_card_heading_style == 'caption-font' and settings.uppercase_caption
+                    assign uppercase_heading = true
+                elsif location.settings.info_card_heading_style == 'body-font' and settings.uppercase_body
+                    assign uppercase_heading = true
+                elsif location.settings.info_card_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                    assign uppercase_heading = true
+                elsif location.settings.info_card_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                    assign uppercase_heading = true
+                elsif location.settings.info_card_heading_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_heading = true
+                elsif location.settings.info_card_heading_style == 'page-title' and settings.uppercase_page_titles
+                    assign uppercase_heading = true
+                endif
+
+                assign heading_text = location.settings.info_card_heading   
+                assign processed_text = ''
+                assign split_text = heading_text | split: '['
+
+                for part in split_text
+                  if part contains ']'
+                    assign split_bracket = part | split: ']'
+                    assign highlight_text = split_bracket[0]
+                    assign after_bracket = split_bracket[1]
+                    assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                  else
+                    assign processed_text = processed_text | append: part
+                  endif
+                endfor
+
+                assign final_text = ''
+                assign split_text_curly = processed_text | split: '{'
+
+                for part in split_text_curly
+                  if part contains '}'
+                    assign split_curly = part | split: '}'
+                    assign styled_text = split_curly[0]
+                    assign after_curly = split_curly[1]
+                    assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                  else
+                    assign final_text = final_text | append: part
+                  endif
+                endfor
+              -%}
+              <{{ location.settings.info_card_heading_tag }} class="info-card__heading custom-heading {{ location.settings.info_card_heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if location.settings.info_card_heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if location.settings.info_card_heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ final_text }}{% if location.settings.info_card_heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+              </{{ location.settings.info_card_heading_tag }}>                      
+            {%- endif -%}
+            {% if location.settings.info_card_text != blank %}
+                {%- liquid
+                  assign uppercase_text = false
+                  if location.settings.info_card_text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                    assign uppercase_text = true
+                  elsif location.settings.info_card_text_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_text = true
+                  elsif location.settings.info_card_text_style == 'page-title' and settings.uppercase_page_titles
+                    assign uppercase_text = true
+                  elsif location.settings.info_card_text_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_text = true
+                  elsif location.settings.info_card_text_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_text = true
+                  elsif location.settings.info_card_text_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_text = true
+                  endif
+                -%}
+                <div class="info-card__text richtext rte link-underline {{ location.settings.info_card_text_style }}
+                  {% if location.settings.info_card_text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.uppercase_subheadings %} uppercase{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}
+                  {% else %}{% if uppercase_text %} uppercase{% endif %}{% endif %}">
+                  <object>{{ location.settings.info_card_text }}</object>
+                </div>
+              {% endif %}
+        </div>
+        {%- endif -%}
+        {%- if location.settings.info_card_link != blank -%}
+            <object class="info-card__button-wrapper"><a href="{{ location.settings.info_card_link }}" {% if location.settings.info_card_target_blank %} target="_blank"{% endif %} class="button info-card__button button--small {{ location.settings.info_card_button_style }}-button icon icon--large">
+                {%- render 'glyphs_arrows', icon: 'arrow-right' -%}
+            </a></object>
+        {%- endif -%}
+    </div>
+<{% if location.settings.info_card_link != blank %}/a{% else %}/div{% endif %}>

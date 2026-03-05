@@ -1,0 +1,206 @@
+{%- liquid
+  if object_settings.discount_code_heading_style != nil
+    assign heading_style = object_settings.discount_code_heading_style
+  else
+    assign heading_style = object_settings.heading_style
+  endif
+
+  if object_settings.discount_code_heading != nil
+    assign heading = object_settings.discount_code_heading
+  else
+    assign heading = object_settings.heading
+  endif
+
+  if object_settings.discount_code_show_collapsible != nil
+    assign show_collapsible = object_settings.discount_code_show_collapsible
+  else
+    assign show_collapsible = object_settings.show_collapsible
+  endif
+
+  if object_settings.discount_code_label != nil
+    assign label = object_settings.discount_code_label
+  else
+    assign label = object_settings.label
+  endif
+
+  assign uppercase_heading = false
+  if heading_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_heading = true
+  elsif heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_heading = true
+  elsif heading_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_heading = true
+  elsif heading_style == 'body-font' and settings.uppercase_body
+    assign uppercase_heading = true
+  elsif heading_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_heading = true
+  endif
+
+  assign heading_text = heading
+  assign processed_text = ''
+  assign split_text = heading_text | split: '['
+
+  for part in split_text
+    if part contains ']'
+      assign split_bracket = part | split: ']'
+      assign highlight_text = split_bracket[0]
+      assign after_bracket = split_bracket[1]
+      assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+    else
+      assign processed_text = processed_text | append: part
+    endif
+  endfor
+
+  assign final_text = ''
+  assign split_text_curly = processed_text | split: '{'
+
+  for part in split_text_curly
+    if part contains '}'
+      assign split_curly = part | split: '}'
+      assign styled_text = split_curly[0]
+      assign after_curly = split_curly[1]
+      assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+    else
+      assign final_text = final_text | append: part
+    endif
+  endfor
+-%}
+
+{% liquid
+  assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+
+  for item in cart.items
+    for allocation in item.line_level_discount_allocations
+      if allocation.discount_application.type == 'discount_code'
+        assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+      endif
+    endfor
+  endfor
+
+  assign discount_codes = discount_codes | uniq
+%}
+
+<div
+  class="accordion-discount-code accordion-block accordion accordion--compact"
+  {% if block %}
+    {{- block.shopify_attributes }}
+  {% endif %}
+>
+  <accordion-toggle>
+    <div
+      class="accordion-toggle {% unless show_collapsible %}not_collapsible is-open{% endunless %}"
+      {% unless show_collapsible %}
+        open
+      {% endunless %}
+    >
+      {% if show_collapsible or heading != blank %}
+        <div class="accordion__summary" tabindex="0">
+          <div class="summary__title">
+            <div class="summary__title-name custom-heading {{ heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+              <h3 class="accordion__title">
+                {% if heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                  <b>
+                {%- endif %}
+                  {{ final_text }}
+                {% if heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                  </b>
+                {%- endif %}
+              </h3>
+            </div>
+            <span class="icon-accordion icon-accordion--close">
+              {%- render 'glyphs_interface', icon: 'plus' -%}
+            </span>
+            <span class="icon-accordion icon-accordion--open">
+              {%- render 'glyphs_interface', icon: 'minus' -%}
+            </span>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="accordion__panel hide-scrollbar">
+        <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+          <cart-discount-component
+            data-section-id="{{ section_id }}"
+          >
+            <div class="cart-discount">
+              <div class="cart-discount__content">
+                <form
+                  class="cart-discount__form"
+                >
+                  <label
+                    for="cart-discount"
+                    class="{% if label != blank %} cart-discount__label label {% else %} visually-hidden {% endif %}"
+                  >
+                    {%- if label != blank -%}
+                      {{ label }}
+                    {%- else -%}
+                      {{ 'accessibility.discount' | t }}
+                    {%- endif -%}
+                  </label>
+
+                  <div class="cart-discount__input-wrapper">
+                    <input
+                      id="cart-discount"
+                      class="cart-discount__input input input--text input-style--big"
+                      type="text"
+                      name="discount"
+                      placeholder="{{ 'cart.discount_code.enter_discount_code' | t }}"
+                    >
+                    <button
+                      type="submit"
+                      class="cart-discount__button button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %} button--submit"
+                    >
+                      <span class="cart-discount__button-text">
+                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif -%}
+                          {{ 'cart.discount_code.apply' | t }}
+                        {%- if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                      </span>
+
+                      <div class="loading-overlay__spinner hidden">
+                        <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                          <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                        </svg>
+                      </div>
+                    </button>
+                  </div>
+
+                  <div
+                    class="cart-discount__error hidden error-color"
+                    role="alert"
+                    data-discount-code-error="{{ 'cart.discount_code.discount_code_error' | t }}" 
+                    data-existing-discount-code-error="{{ 'cart.discount_code.existing_discount_code_error' | t }}" 
+                    data-shipping-discount-code-warning="{{ 'cart.discount_code.shipping_discount_code_warning' | t }}" 
+                  >
+                    <small class="cart-discount__error-text"></small>
+                  </div>
+                </form>
+              </div>
+
+              <ul class="cart-discount__codes">
+                {% for discount_code in discount_codes %}
+                  <li
+                    class="cart-discount__pill active-facets__button"
+                    data-discount-code="{{ discount_code }}"
+                    aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
+                  >
+                    <button
+                      type="button"
+                      class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
+                      aria-label="{{ 'cart.discount_code.remove_discount' | t: code: discount_code }}"
+                    >
+                      {%- render 'glyphs_interface', icon: 'close' -%}
+                    </button>
+
+                    <p class="cart-discount__pill-code">
+                      {{ discount_code }}
+                    </p>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </cart-discount-component>
+        </div>
+      </div>
+    </div>
+  </accordion-toggle>
+</div>

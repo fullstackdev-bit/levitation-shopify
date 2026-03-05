@@ -1,0 +1,137 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section customer account">
+    <div class="section-container side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+        <div class="template-header customer-top flex--column page-grid {% if settings.full_width_page_grid %}disable-max-width{% endif %}">
+            <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                {{ 'customer.account.title' | t }}
+            </h1>
+            <a class="button link-button body-font {% if settings.use_heading_font_secondary_buttons %}heading-font-style{% endif %} {% if settings.uppercase_secondary_buttons %}uppercase{% endif %}" href="{{ routes.account_logout_url }}">
+                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'customer.log_out' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+            </a>
+        </div>
+        <div class="customer-info page-grid {% if settings.full_width_page_grid %}disable-max-width{% endif %}">
+            <div class="customer-info__block customer-info__block--order">
+                <h2 class="customer-info__heading secondary-heading {% if settings.uppercase_secondary_headings %}uppercase{% endif %}">
+                    {{ 'customer.orders.title' | t }}
+                </h2>
+                {% paginate customer.orders by 20 %}
+                {%- if customer.orders.size > 0 -%}
+                    <div class="table-wrapper">
+                        <table role="table" class="order-table body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+                            <caption class="visually-hidden">{{ 'customer.orders.title' | t }}</caption>
+                            <thead role="rowgroup">
+                            <tr role="row">
+                                <th id="ColumnOrder" scope="col" role="columnheader">{{ 'customer.orders.order_number' | t }}</th>
+                                <th id="ColumnDate" scope="col" role="columnheader">{{ 'customer.orders.date' | t }}</th>
+                                <th id="ColumnPayment" scope="col" role="columnheader">{{ 'customer.orders.payment_status' | t }}</th>
+                                <th id="ColumnFulfillment" scope="col" role="columnheader">{{ 'customer.orders.fulfillment_status' | t }}</th>
+                                <th id="ColumnTotal" scope="col" role="columnheader">{{ 'customer.orders.total' | t }}</th>
+                            </tr>
+                            </thead>
+                            <tbody role="rowgroup">
+                            {%- for order in customer.orders -%}
+                                <tr role="row">
+                                <td
+                                    id="RowOrder"
+                                    role="cell"
+                                    headers="ColumnOrder"
+                                    data-label="{{ 'customer.orders.order_number' | t }}">
+                                    <a class="link-underline" href="{{ order.customer_url }}" aria-label="{{ 'customer.orders.order_number_link' | t: number: order.name }}">
+                                    {{ order.name }}
+                                    </a>
+                                </td>
+                                <td headers="RowOrder ColumnDate" role="cell" data-label="{{ 'customer.orders.date' | t }}">
+                                    {{ order.created_at | time_tag: format: 'date' }}
+                                </td>
+                                <td headers="RowOrder ColumnPayment" role="cell" data-label="{{ 'customer.orders.payment_status' | t }}">
+                                    {{ order.financial_status_label }}
+                                </td>
+                                <td headers="RowOrder ColumnFulfillment" role="cell" data-label="{{ 'customer.orders.fulfillment_status' | t }}">
+                                    {{ order.fulfillment_status_label }}
+                                </td>
+                                <td headers="RowOrder ColumnTotal" role="cell" data-label="{{ 'customer.orders.total' | t }}">
+                                    {{ order.total_price | money_with_currency }}</td>
+                                </tr>
+                            {%- endfor -%}
+                            </tbody>
+                        </table>
+                    </div>
+                {%- else -%}
+                    <p class="body-font {% if settings.uppercase_body %}uppercase{% endif %}">{{ 'customer.orders.none' | t }}</p>
+                {%- endif -%}
+                {%- if paginate.pages > 1 -%}
+                {% render 'pagination', paginate: paginate, anchor: '', pagination_type: section.settings.pagination %}
+                {%- endif -%}
+                {% endpaginate %}
+            </div>
+            <div class="customer-info__block customer-info__block--details">
+                <h2 class="customer-info__heading secondary-heading {% if settings.uppercase_secondary_headings %}uppercase{% endif %}">
+                    {{ 'customer.account.details' | t }}
+                </h2>
+                <div class="body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+                    {{ customer.default_address | format_address }}
+                </div>
+                <a href="{{ routes.account_addresses_url }}" class="button outlined-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                    {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}
+                    {{ 'customer.addresses.view' | t }}
+                    {% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                    <span class="addresses-count">
+                        <div class="addresses-count__wrapper">{{ customer.addresses_count }}</div>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-account.name",
+  "settings": [
+    {
+        "type": "checkbox",
+        "id": "show_bottom_line",
+        "default": false,
+        "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+        "type": "checkbox",
+        "id": "center_text",
+        "default": true,
+        "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

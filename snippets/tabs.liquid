@@ -1,0 +1,135 @@
+{%- liquid
+    assign uppercase_page = false
+    if block.settings.page_style == 'section-heading' and settings.uppercase_section_headings
+      assign uppercase_page = true
+    elsif block.settings.page_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_page = true
+    elsif block.settings.page_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_page = true
+    elsif block.settings.page_style == 'body-font' and settings.uppercase_body
+        assign uppercase_page = true
+    elsif block.settings.page_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_page = true
+    endif
+    assign total_sliders = 0
+    if product.description != blank and block.settings.custom_heading_1 != blank and product_block
+        assign total_sliders = total_sliders | plus: 1
+    endif
+    if block.settings.page_2 != blank or block.settings.custom_heading_2 != blank and block.settings.text_2 != blank
+        assign total_sliders = total_sliders | plus: 1
+    endif
+    if block.settings.page_3 != blank or block.settings.custom_heading_3 != blank and block.settings.text_3 != blank
+        assign total_sliders = total_sliders | plus: 1
+    endif
+    if block.settings.page_4 != blank or block.settings.custom_heading_4 != blank and block.settings.text_4 != blank
+        assign total_sliders = total_sliders | plus: 1
+    endif
+    if block.settings.page_5 != blank or block.settings.custom_heading_5 != blank and block.settings.text_5 != blank
+        assign total_sliders = total_sliders | plus: 1
+    endif
+  -%}
+<div class="tabs-block tabs-container-js{% if product_block %} tabs-block--block{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    <slider-swiper class="swiper swiper-tabs" style="--total-slides: {{ total_sliders }};" data-autoplay="false">
+        <component-tabs class="swiper-wrapper tabs-block__tabs component-tabs__wrapper flex--row body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+            {%- if product.description != blank and block.settings.custom_heading_1 != blank and product_block -%}
+                <p id="block-1--{{ block.id }}" class="swiper-slide tabs-block__heading component-tabs__tab  tab-js active" tabindex="0" data-hover="{{ block.settings.custom_heading_1 }}">
+                    <span class="tabs-block__heading-wrapper">{{ block.settings.custom_heading_1 }}</span>
+                </p>
+            {%- endif -%}
+            {%- if block.settings.page_2 != blank or block.settings.custom_heading_2 != blank and block.settings.text_2 != blank -%}
+                <p id="block-2--{{ block.id }}" class="swiper-slide tabs-block__heading component-tabs__tab  tab-js" tabindex="0" data-hover="{% if block.settings.custom_heading_2 != blank %}{{ block.settings.custom_heading_2 }}{% else %}{{ block.settings.page_2.title | escape }}{% endif %}">
+                    <span class="tabs-block__heading-wrapper">{% if block.settings.custom_heading_2 != blank %}{{ block.settings.custom_heading_2 }}{% else %}{{ block.settings.page_2.title | escape }}{% endif %}</span>
+                </p>
+            {%- endif -%}
+            {%- if block.settings.page_3 != blank or block.settings.custom_heading_3 != blank and block.settings.text_3 != blank -%}
+                <p id="block-3--{{ block.id }}" class="swiper-slide tabs-block__heading component-tabs__tab  tab-js" tabindex="0" data-hover="{% if block.settings.custom_heading_3 != blank %}{{ block.settings.custom_heading_3 }}{% else %}{{ block.settings.page_3.title | escape }}{% endif %}">
+                    <span class="tabs-block__heading-wrapper">{% if block.settings.custom_heading_3 != blank %}{{ block.settings.custom_heading_3 }}{% else %}{{ block.settings.page_3.title | escape }}{% endif %}</span>
+                </p>
+            {%- endif -%}
+            {%- if block.settings.page_4 != blank or block.settings.custom_heading_4 != blank and block.settings.text_4 != blank -%}
+                <p id="block-4--{{ block.id }}" class="swiper-slide tabs-block__heading component-tabs__tab  tab-js" tabindex="0" data-hover="{% if block.settings.custom_heading_4 != blank %}{{ block.settings.custom_heading_4 }}{% else %}{{ block.settings.page_4.title | escape }}{% endif %}">
+                    <span class="tabs-block__heading-wrapper">{% if block.settings.custom_heading_4 != blank %}{{ block.settings.custom_heading_4 }}{% else %}{{ block.settings.page_4.title | escape }}{% endif %}</span>
+                </p>
+            {%- endif -%}
+            {%- if block.settings.page_5 != blank or block.settings.custom_heading_5 != blank and block.settings.text_5 != blank -%}
+                <p id="block-5--{{ block.id }}" class="swiper-slide tabs-block__heading component-tabs__tab  tab-js" tabindex="0" data-hover="{% if block.settings.custom_heading_5 != blank %}{{ block.settings.custom_heading_5 }}{% else %}{{ block.settings.page_5.title | escape }}{% endif %}">
+                    <span class="tabs-block__heading-wrapper">{% if block.settings.custom_heading_5 != blank %}{{ block.settings.custom_heading_5 }}{% else %}{{ block.settings.page_5.title | escape }}{% endif %}</span>
+                </p>
+            {%- endif -%}
+        </component-tabs>
+    </slider-swiper>
+    <div class="tabs-block__results">
+        {%- if product.description != blank and block.settings.custom_heading_1 != blank and product_block  -%}
+            <div id="content-block-1--{{ block.id }}" class="tab-content-js component-tabs__content active">
+                <div class="product__description rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %} 
+                    {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                        {{ product.description }}
+                </div>
+            </div>
+        {%- endif -%}
+        {%- if block.settings.page_2 != blank or block.settings.custom_heading_2 != blank and block.settings.text_2 != blank  -%}
+            <div id="content-block-2--{{ block.id }}" class="tab-content-js component-tabs__content">
+                {% if block.settings.text_2 != blank %}
+                    <div class="richtext rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %} 
+                        {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                            <object>{{ block.settings.text_2 }}</object>
+                    </div>
+                {% endif %}
+                {% if block.settings.page_2 != blank %}
+                    <div class="page__content rte {{ block.settings.page_style }}{% if uppercase_page %} uppercase{% endif %}{% if settings.uppercase_section_headings %} headings-uppercase{% endif %}
+                        {% if block.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                        {{ block.settings.page_2.content }}
+                    </div>
+                {% endif %}
+            </div>
+        {%- endif -%}
+        {%- if block.settings.page_3 != blank or block.settings.custom_heading_3 != blank and block.settings.text_3 != blank  -%}
+            <div id="content-block-3--{{ block.id }}" class="tab-content-js component-tabs__content">
+                {% if block.settings.text_3 != blank %}
+                    <div class="richtext rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %} 
+                        {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                            <object>{{ block.settings.text_3 }}</object>
+                    </div>
+                {% endif %}
+                {% if block.settings.page_3 != blank %}
+                    <div class="page__content rte {{ block.settings.page_style }}{% if uppercase_page %} uppercase{% endif %}{% if settings.uppercase_section_headings %} headings-uppercase{% endif %}
+                        {% if block.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                        {{ block.settings.page_3.content }}
+                    </div>
+                {% endif %}
+            </div>
+        {%- endif -%}
+        {%- if block.settings.page_4 != blank or block.settings.custom_heading_4 != blank and block.settings.text_4 != blank  -%}
+            <div id="content-block-4--{{ block.id }}" class="tab-content-js component-tabs__content">
+                {% if block.settings.text_4 != blank %}
+                    <div class="richtext rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %} 
+                        {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                            <object>{{ block.settings.text_4 }}</object>
+                    </div>
+                {% endif %}
+                {% if block.settings.page_4 != blank %}
+                    <div class="page__content rte {{ block.settings.page_style }}{% if uppercase_page %} uppercase{% endif %}{% if settings.uppercase_section_headings %} headings-uppercase{% endif %}
+                        {% if block.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                        {{ block.settings.page_4.content }}
+                    </div>
+                {% endif %}
+            </div>
+        {%- endif -%}
+        {%- if block.settings.page_5 != blank or block.settings.custom_heading_5 != blank and block.settings.text_5 != blank  -%}
+            <div id="content-block-5--{{ block.id }}" class="tab-content-js component-tabs__content">
+                {% if block.settings.text_5 != blank %}
+                    <div class="richtext rte link-underline {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %} 
+                        {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if block.settings.text_bolder_font %} bold{% endif %}">
+                            <object>{{ block.settings.text_5 }}</object>
+                    </div>
+                {% endif %}
+                {% if block.settings.page_5 != blank %}
+                    <div class="page__content rte {{ block.settings.page_style }}{% if uppercase_page %} uppercase{% endif %}{% if settings.uppercase_section_headings %} headings-uppercase{% endif %}
+                        {% if block.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                        {{ block.settings.page_5.content }}
+                    </div>
+                {% endif %}
+            </div>
+        {%- endif -%}
+    </div>
+</div>

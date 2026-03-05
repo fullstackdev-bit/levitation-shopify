@@ -4,7 +4,7 @@
 <section class="single-content-section {% if display_type == 'grid' and max_width == 'true' %}page-width{% endif %}">
   <h2 class="title {{ title_size }} video-collection-title">{{ section_title }}</h2>
   {% if section_description %}
-    <p class="video-collection-description">{{ section_description }}</p>
+    <div class="video-collection-description">{{ section_description }}</div>
   {% endif %}
   {% if display_type == 'grid' %}
     <div class="single-grid video-grid">
@@ -69,13 +69,13 @@
 
 <script>
   if (typeof SingleVideoBarSlider === 'undefined') {
-      let scriptUrl = "{{ 'single-video-bar.js' | asset_url }}";
-      let videoBarScript = document.createElement('script');
-      videoBarScript.setAttribute('src', scriptUrl);
-      videoBarScript.setAttribute('async', false);
-      document.head.appendChild(videoBarScript);
-      videoBarScript.addEventListener('load', () => new SingleVideoBarSlider({{ row_id | json }}));
+    let scriptUrl = "{{ 'single-video-bar.js' | asset_url }}";
+    let videoBarScript = document.createElement('script');
+    videoBarScript.setAttribute('src', scriptUrl);
+    videoBarScript.setAttribute('async', false);
+    document.head.appendChild(videoBarScript);
+    videoBarScript.addEventListener('load', () => new SingleVideoBarSlider({{ row_id | json }}, {{ column_count }}));
   } else {
-      new SingleVideoBarSlider({{ row_id | json }});
+    new SingleVideoBarSlider({{ row_id | json }}, {{ column_count }});
   }
 </script>

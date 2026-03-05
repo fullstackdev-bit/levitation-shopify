@@ -17,19 +17,21 @@
         {{ video_pieces[1] | date: '%b %d • %I:%M %P %Z' }}
       </div>
     {% endif %}
+    {% if show_date == 'true' and video_pieces[6] != 'Live' %}
+      <div class="single-video-time">
+        {{ video_pieces[8] }}
+      </div>
+    {% endif %}
   </div>
-  {% if show_title == 'true' or show_artist == 'true' or show_date == 'true' %}
+  {% if show_title == 'true' or show_artist == 'true' %}
     <div class="single-video-info">
       {% if show_title == 'true' %}
         <h4 class="single-video-title">{{ video_pieces[0] }}</h4>
       {% endif %}
-      {% if show_artist == 'true' or show_date == 'true' %}
+      {% if show_artist == 'true' %}
         <h6 class="single-video-description">
-          {% if show_artist == 'true' %}{{ video_pieces[5] }}{% endif %}
+         {{ video_pieces[5] }}
         </h6>
-      {% endif %}
-      {% if show_artist == 'true' and video_pieces[5] == blank %}
-        <h6 class="single-video-description">&nbsp;</h6>
       {% endif %}
     </div>
   {% endif %}

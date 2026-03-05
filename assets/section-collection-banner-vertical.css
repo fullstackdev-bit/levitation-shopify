@@ -1,0 +1,94 @@
+.section-collection-banner-vertical {
+    --buttons-gap: 16px;
+}
+.collection-banner-vertical.center {
+    align-items: center;
+}
+
+.collection__image.under-heading:not(:only-child):not(:empty) {
+    order: 2;
+    margin-top: var(--template-header-padding);
+}
+
+.collection__image:not(.under-heading):not(:empty) + .collection__content,
+.subcollections-gallery {
+    margin-top: var(--template-header-padding);
+}
+
+.collection-banner-vertical:empty + .subcollections-gallery {
+    margin-top: 0;
+}
+
+.collection__image {
+    max-width: 100%;
+    width: var(--image-width);
+}
+
+.collection__image:empty {
+    display: none;
+}
+
+.collection__heading + .collection__products {
+    margin-top: var(--block-padding-s);
+}
+
+.subcollections__wrapper {
+    display: block;
+    margin-top: calc(var(--template-header-padding) - var(--block-padding));
+}
+
+.collection-banner-vertical:empty + .subcollections__wrapper {
+    margin-top: calc(0px - var(--block-padding));
+}
+
+.subcollections__wrapper:has( .button-block) {
+    font-size: 0;
+}
+
+.subcollections-gallery .banner-gallery__card--wrapper {
+    height: 100%;
+}
+
+.subcollections-gallery .banner-gallery__card {
+    cursor: pointer;
+}
+
+.section-collection-banner-vertical .button-block {
+    margin-inline-end: var(--buttons-gap);
+    margin-inline-start: 0;
+    vertical-align: baseline;
+}
+
+.section-collection-banner-vertical .center .button-block {
+    margin-inline-start: calc(var(--buttons-gap) / 2);
+    margin-inline-end: calc(var(--buttons-gap) / 2);
+}
+
+.section-collection-banner-vertical .rte table {
+    width: max-content !important;
+    height: fit-content!important;
+}
+
+.section-collection-banner-vertical .rte table td,
+.section-collection-banner-vertical .rte table th {
+    width: max-content !important;
+    height: fit-content!important;
+    word-break: keep-all;
+}
+
+.section-collection-banner-vertical .center .rte table {
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+}
+
+@media screen and (max-width: 768px) {
+    .collection__content {
+        flex-direction: column;
+    }
+    .collection__content > * {
+        min-width: 100%;
+    }
+    .section-collection-banner-vertical {
+        --buttons-gap: 12px;
+    }
+}

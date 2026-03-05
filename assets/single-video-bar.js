@@ -1,6 +1,7 @@
 class SingleVideoBarSlider {
-  constructor(id) {
+  constructor(id, colCount = 4) {
     this.cardRow = document.getElementById(id);
+    this.colCount = colCount;
     this.videoSlider = this.cardRow.querySelector('.single-video-slider');
     this.cardVideos = this.cardRow.querySelectorAll('.single-card-video');
     this.cardImage = this.cardRow.querySelector('.single-card-image-wide');
@@ -34,7 +35,7 @@ class SingleVideoBarSlider {
     if (window.innerWidth <= 768) {
       return 2.5; // Show 3 covers on mobile
     } else {
-      return 4.5; // Show 4 covers on desktop
+      return this.colCount + 0.5; // Show 4 covers on desktop
     }
   }
 

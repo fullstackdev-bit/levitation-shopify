@@ -1,0 +1,1521 @@
+{% style %}
+    .menu--{{ object_type.id }} {
+        --hor-menu-alignment: {{ horizontal_alignment }};
+        {% if section.settings.image_radius == 'default' %}
+            --image-border-radius: {{ settings.images_and_sections_radius }};
+        {% else %}
+            --image-border-radius: {{ section.settings.image_radius }};
+        {% endif %}
+        --aspect-ratio: {{ section.settings.media_ratio }};
+    }
+    {% if settings.images_loading != 'disable' and section.settings.media_ratio == 'auto' %}
+      #shopify-section-{{ section.id }} .menu__item-image .lazy-image {
+        aspect-ratio: var(--asp-rat);
+      }
+    {% endif %}
+{% endstyle %}
+{%- liquid
+    assign uppercase_title = false
+    if section.settings.title_style == 'secondary-heading' and settings.uppercase_secondary_headings
+        assign uppercase_title = true
+    elsif section.settings.title_style == 'section-heading' and settings.uppercase_section_headings
+        assign uppercase_title = true
+    elsif section.settings.title_style == 'page-title' and settings.uppercase_page_titles
+        assign uppercase_title = true
+    elsif section.settings.title_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_title = true
+    elsif section.settings.title_style == 'body-font' and settings.uppercase_body
+        assign uppercase_title = true
+    elsif section.settings.title_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_title = true
+    endif
+
+    assign onload_script = ''
+    assign loading_images = 'lazy'
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+    endif
+    assign show_item_image_1 = false
+    assign show_item_image_2 = false
+    if section.settings.show_collection_image and child_menu
+        assign show_item_image_1 = true
+    endif
+    if section.settings.show_collection_image and parent_menu == false
+        assign show_item_image_2 = true
+    endif
+-%}
+<div class="menu menu-{{ menu.handle }} {% if child_menu %}menu--child{% endif %} {% if parent_menu %}menu--parent{% endif %} menu--{{ object_type.id }} {{ link_style }}{% if uppercase %} uppercase{% endif %}{% if link_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-handle="{{ menu.handle }}">
+    <nav class="menu__nav">
+        <ul class="menu__list {% if parent_menu %}flex--row{% else %}flex--column{% endif %}" role="list">
+            {% for link in menu.links %}
+                {% assign current_category = false %}
+                {% assign current_metafield_category = false %}
+                {%  if template.name == 'collection' %}
+                    {% assign downcased_title = link.handle | downcase %}
+                    {% if collection.metafields.custom.top_level_category.value != blank %}
+                        {% assign downcased_collections_metafield = collection.metafields.custom.top_level_category.value | downcase %}
+                        {% if downcased_collections_metafield == downcased_title and collection.url == request.path %}
+                            {% assign current_metafield_category = true %}
+                            {% assign current_category = true %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                {%  if template.name == 'product' %}
+                    {% assign downcased_title = link.handle | downcase %}
+                    {% if product.metafields.custom.top_level_category.value != blank %}
+                        {% assign downcased_product_metafield = product.metafields.custom.top_level_category.value | downcase %}
+                        {% if downcased_product_metafield == downcased_title and product.url == request.path %}
+                            {% assign current_metafield_category = true %}
+                            {% assign current_category = true %}
+                        {% endif %}
+                    {% else %}
+                        {% for tag in product.tags %}
+                            {% assign downcased_tag = tag | downcase %}
+                            {% assign product_url = product.url %}
+                            {% if settings.enable_breadcrumbs %}
+                                {% assign product_url = product.url | within: collection %}
+                            {% endif %}
+                            {% if downcased_tag == downcased_title and product_url == request.path %}
+                                {% assign current_metafield_category = true %}
+                                {% assign current_category = true %}
+                                {% break %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+
+                <li class="menu__item">
+                    <drawer-menu trigger="click" {% if parent_menu %}data-status="parent"{% endif %}>
+                        {%- liquid
+                            assign enable_nested_menu = false
+                            assign link_title_handle = link.title | handle
+                            assign downcased_link_title = link.title | downcase
+                            for block in blocks
+                                assign menu_item_handle = block.settings.menu_dropdown_link | handle
+                                if menu_item_handle == link_title_handle and link.links.size == 0 and parent_menu == false
+                                    assign enable_nested_menu = true
+                                    assign downcased_nested_highlighted_items = block.settings.nested_highlight_menu_item | downcase | split: ", "
+                                    assign nested_menu_block_id = block.id
+                                    assign image_ratio = block.settings.media_ratio
+                                    assign image_radius = block.settings.image_radius
+                                    assign item_style = block.settings.item_style
+                                    assign item_heading_1 = block.settings.heading_1
+                                    assign item_img_1 = block.settings.image_1
+                                    assign item_link_1 = block.settings.link_1
+                                    assign item_heading_2 = block.settings.heading_2
+                                    assign item_img_2 = block.settings.image_2
+                                    assign item_link_2 = block.settings.link_2
+                                    assign item_heading_3 = block.settings.heading_3
+                                    assign item_img_3 = block.settings.image_3
+                                    assign item_link_3 = block.settings.link_3
+                                    assign item_heading_4 = block.settings.heading_4
+                                    assign item_img_4 = block.settings.image_4
+                                    assign item_link_4 = block.settings.link_4
+                                    assign item_heading_5 = block.settings.heading_5
+                                    assign item_img_5 = block.settings.image_5
+                                    assign item_link_5 = block.settings.link_5
+                                    assign item_heading_6 = block.settings.heading_6
+                                    assign item_img_6 = block.settings.image_6
+                                    assign item_link_6 = block.settings.link_6
+                                    assign item_heading_7 = block.settings.heading_7
+                                    assign item_img_7 = block.settings.image_7
+                                    assign item_link_7 = block.settings.link_7
+                                    assign item_heading_8 = block.settings.heading_8
+                                    assign item_img_8 = block.settings.image_8
+                                    assign item_link_8 = block.settings.link_8
+                                    assign item_heading_9 = block.settings.heading_9
+                                    assign item_img_9 = block.settings.image_9
+                                    assign item_link_9 = block.settings.link_9
+                                    assign item_heading_10 = block.settings.heading_10
+                                    assign item_img_10 = block.settings.image_10
+                                    assign item_link_10 = block.settings.link_10
+                                endif
+                            endfor
+                        -%}
+                        <summary class="top-level-item" open="false">
+                            <div class="menu__item-title flex--row align-center">
+                                {% liquid 
+                                    assign downcased_link_title = link.title | downcase
+                                    assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                    assign highlight_item = false
+                                    for highlighted_item in downcased_highlighted_items
+                                        if highlighted_item == downcased_link_title
+                                            assign highlight_item = true
+                                        endif
+                                    endfor
+                                %}
+                                {% if show_item_image_1 or show_item_image_2 %}
+                                    {% for collection in collections %}
+                                    {% if collection.url == link.url and collection.image %}
+                                        <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                            {% if settings.images_loading != 'disable' %}
+                                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                            {% endif %}
+                                            <img srcset="{%- if collection.image.width >= 165 -%}{{ collection.image | image_url: width: 165 }} 165w,{%- endif -%}
+                                            {%- if collection.image.width >= 375 -%}{{ collection.image | image_url: width: 375 }} 375w,{%- endif -%}
+                                            {%- if collection.image.width >= 550 -%}{{ collection.image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                {{ collection.image | image_url: height: collection.image.height }}"
+                                                src="{{ collection.image | image_url: height: collection.image.height }}"
+                                                loading="lazy"
+                                                {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                draggable="false"
+                                                sizes="calc(40px * 1)"
+                                                width="{{ collection.image.width }}"
+                                                height="{{ collection.image.height }}"
+                                                alt="{{ collection.image.alt | default: collection.title | escape }}"
+                                                style="--focal-point: {{ section.settings.focal_point }}"
+                                            />
+                                            {% if settings.images_loading != 'disable' %}
+                                                {% if settings.images_loading != 'fade_scale' %}
+                                                <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                  <img 
+                                                  alt="{{ collection.image.alt | escape }}" 
+                                                  src="{{ collection.image | image_url: width: 10 }}"
+                                                  draggable="false"
+                                                  width="10" 
+                                                  height="10">
+                                                </div>
+                                                {% endif %}
+                                            </figure>
+                                            {% endif %}
+                                        </div> 
+                                    {% elsif collection.url == link.url and collection.products.first.featured_image %}
+                                        <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                            {% if settings.images_loading != 'disable' %}
+                                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.products.first.featured_image.aspect_ratio }}">
+                                            {% endif %}
+                                            <img srcset="{%- if collection.products.first.featured_image.width >= 165 -%}{{ collection.products.first.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                            {%- if collection.products.first.featured_image.width >= 375 -%}{{ collection.products.first.featured_image | image_url: width: 375 }} 375w,{%- endif -%}
+                                            {%- if collection.products.first.featured_image.width >= 550 -%}{{ collection.products.first.featured_image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                {{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                src="{{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                loading="lazy"
+                                                draggable="false"
+                                                {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                sizes="calc(40px * 1)"
+                                                width="{{ collection.products.first.featured_image.width }}"
+                                                height="{{ collection.products.first.featured_image.height }}"
+                                                alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                                                style="--focal-point: {{ section.settings.focal_point }}"
+                                            />
+                                            {% if settings.images_loading != 'disable' %}
+                                                {% if settings.images_loading != 'fade_scale' %}
+                                                <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                  <img 
+                                                  alt="{{ collection.products.first.featured_image.alt | escape }}" 
+                                                  src="{{ collection.products.first.featured_image | image_url: width: 10 }}"
+                                                  draggable="false"
+                                                  width="10" 
+                                                  height="10">
+                                                </div>
+                                                {% endif %}
+                                            </figure>
+                                            {% endif %}
+                                        </div> 
+                                    {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                <a href="{{ link.url }}" data-title="{{ link.title | split: '<' | first | strip }}" class="{% if link.url == request.path or current_category %} active-item active-parent-link{% endif %} link-{{ link.handle }} link-{{ downcased_link_title | split: '<' | first | strip }} link-{{ downcased_title }}{% if link.current and parent_menu == false %} link--current{% endif %}{% if highlight_item %} link--highlighted{% endif %} link--single" {% if link.url contains 'http://' or link.url contains 'https://' %}target="_blank"{% endif %}>{% if bolder_font %}<b>{% endif %}{{ link.title }}{% if bolder_font %}</b>{% endif %}</a>
+                                {% if enable_nested_menu or link.links.size > 0 and show_nested %}
+                                    <button class="dropdown-icon flex--row" aria-label="{{ 'accessibility.click_to_open' | t }}">
+                                        {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                                    </button> 
+                                {% endif %}
+                            </div>
+                        </summary>
+                        {% if enable_nested_menu %}
+                            <div class="nested-submenu scroll-area hide-scrollbar nested-submenu-second-level">
+                                <div class="menu-drawer__header">
+                                    <button class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} flex--row align-center{% if uppercase %} uppercase{% endif %}" tabindex="-1">
+                                        <span class="icon icon--large">{% render 'glyphs_arrows', icon: 'arrow-left' %}</span>
+                                        {% if bolder_font %}<b>{% endif %}{{ section.settings.heading }}{% if bolder_font %}</b>{% endif %}</button>
+                                </div>
+                                {%- liquid
+                                    assign enable_menu_img = false
+                                    assign link_title_handle = link.title | handle
+                                    for block in blocks
+                                        assign menu_title_handle = block.settings.dropdown_link | handle
+                                        if menu_title_handle == link_title_handle
+                                            assign enable_menu_img = true
+                                            assign menu_img = block.settings.image
+                                            assign mega_menu_block_id = block.id
+                                            assign media_ratio = block.settings.media_ratio
+                                            assign color_scheme = block.settings.color_scheme
+                                            assign overlay_opacity = block.settings.overlay_opacity
+                                        endif
+                                    endfor
+                                -%}
+                                {%- if enable_menu_img and menu_img -%}
+                                    <a href="{{ link.url }}" class="menu-collection-banner menu-collection-banner--{{ mega_menu_block_id }} gradient color-{{ color_scheme }}" tabindex="-1">
+                                        {%- liquid
+                                            assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                        -%}
+                                        {%- capture sizes -%}
+                                            (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                        {%- endcapture -%}
+                                        <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                            {% style %}
+                                                .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img {
+                                                    --aspect-ratio: {% if media_ratio == 'auto' %}{{ menu_img.aspect_ratio }}{% else %}{{ media_ratio }}{% endif %};
+                                                    --banner-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+                                                    --layout-bg-color: {{ color_scheme.settings.layout_background_color.red }},{{ color_scheme.settings.layout_background_color.green }},{{ color_scheme.settings.layout_background_color.blue }};
+                                                    --layout-text-color: {{ color_scheme.settings.layout_text_color.red }},{{ color_scheme.settings.layout_text_color.green }},{{ color_scheme.settings.layout_text_color.blue }};
+                                                    {% if color_scheme.settings.overlay_gradient != empty %}
+                                                        --banner-overlay-background: {{ color_scheme.settings.overlay_gradient }};
+                                                    {% else %}
+                                                        --banner-overlay-background: {{ color_scheme.settings.overlay_color }};
+                                                    {% endif %}
+                                                }
+                                                {% if settings.images_loading != 'disable' and media_ratio == 'auto' %}
+                                                    .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img .lazy-image {
+                                                        aspect-ratio: var(--asp-rat);
+                                                    }
+                                                {% endif %}
+                                            {% endstyle %}
+                                            {% if settings.images_loading != 'disable' %}
+                                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ menu_img.aspect_ratio }}">
+                                            {% endif %}
+                                            {{
+                                                menu_img
+                                                | image_url: width: 3200
+                                                | image_tag:
+                                                sizes: sizes,
+                                                widths: widths,
+                                                class: img_class,
+                                                alt: collection.image.alt,
+                                                draggable: false,
+                                                loading: 'lazy',
+                                                fetchpriority: 'low',
+                                                onload: onload_script
+                                            }} 
+                                            {% if settings.images_loading != 'disable' %}
+                                                {% if settings.images_loading != 'fade_scale' %}
+                                                <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                  <img 
+                                                  alt="{{ menu_img.alt | escape }}" 
+                                                  src="{{ menu_img | image_url: width: 10 }}"
+                                                  draggable="false"
+                                                  width="10" 
+                                                  height="10">
+                                                </div>
+                                                {% endif %}
+                                            </figure>
+                                            {% endif %}
+                                            <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                            </p>
+                                        </div>
+                                    </a>
+                                {% elsif section.settings.show_collection_banner %}
+                                    {% for collection in collections %}
+                                        {% if collection.url == link.url and collection.image %}
+                                            <a href="{{ link.url }}" class="menu-collection-banner gradient color-{{ section.settings.banner_color_scheme }}" tabindex="-1">
+                                                    {%- liquid
+                                                        assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                    -%}
+                                                    {%- capture sizes -%}
+                                                        (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                    {%- endcapture -%}
+                                                    <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                        {% style %}
+                                                            .menu-collection-img {
+                                                                --aspect-ratio: {% if section.settings.banner_media_ratio == 'auto' %}{{ collection.image.aspect_ratio }}{% else %}{{ section.settings.banner_media_ratio }}{% endif %};
+                                                                --focal-point: {{ section.settings.banner_focal_point }};
+                                                                --banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+                                                                --layout-bg-color: {{ section.settings.banner_color_scheme.settings.layout_background_color.red }},{{ section.settings.banner_color_scheme.settings.layout_background_color.green }},{{ section.settings.banner_color_scheme.settings.layout_background_color.blue }};
+                                                                --layout-text-color: {{ section.settings.banner_color_scheme.settings.layout_text_color.red }},{{ section.settings.banner_color_scheme.settings.layout_text_color.green }},{{ section.settings.banner_color_scheme.settings.layout_text_color.blue }};
+                                                                {% if section.settings.banner_color_scheme.settings.overlay_gradient != empty %}
+                                                                    --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_gradient }};
+                                                                {% else %}
+                                                                    --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_color }};
+                                                                {% endif %}
+                                                            }
+                                                            {% if settings.images_loading != 'disable' and section.settings.banner_media_ratio == 'auto' %}
+                                                                .menu-collection-img .lazy-image {
+                                                                    aspect-ratio: var(--asp-rat);
+                                                                }
+                                                            {% endif %}
+                                                        {% endstyle %}
+                                                        {% if settings.images_loading != 'disable' %}
+                                                            <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                        {% endif %}
+                                                        {{
+                                                            collection.image
+                                                            | image_url: width: 3200
+                                                            | image_tag:
+                                                            sizes: sizes,
+                                                            widths: widths,
+                                                            class: img_class,
+                                                            alt: collection.image.alt,
+                                                            draggable: false,
+                                                            draggable: false,
+                                                            loading: 'lazy',
+                                                            fetchpriority: 'low',
+                                                            onload: onload_script
+                                                        }} 
+                                                        {% if settings.images_loading != 'disable' %}
+                                                            {% if settings.images_loading != 'fade_scale' %}
+                                                            <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                              <img 
+                                                              alt="{{ collection.image.alt | escape }}" 
+                                                              src="{{ collection.image | image_url: width: 10 }}"
+                                                              draggable="false"
+                                                              width="10" 
+                                                              height="10">
+                                                            </div>
+                                                            {% endif %}
+                                                        </figure>
+                                                        {% endif %}
+                                                        <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                            {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                        </p>
+                                                    </div>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                    {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                </p>
+                                {% style %}
+                                    .block-nested-menu--{{ nested_menu_block_id }} {
+                                        --aspect-ratio: {{ image_ratio }};
+                                        {% if image_radius == 'default' %}
+                                            --image-border-radius: {{ settings.images_and_sections_radius }};;
+                                        {% else %}
+                                            --image-border-radius: {{ image_radius }};
+                                        {% endif %}
+                                    }
+                                    {% if settings.images_loading != 'disable' and image_ratio == 'auto' %}
+                                        .block-nested-menu--{{ nested_menu_block_id }} .menu__item-image .lazy-image {
+                                            aspect-ratio: var(--asp-rat);
+                                        }
+                                    {% endif %}
+                                {% endstyle %}
+                                <ul class="first-nested__list flex--column hide-scrollbar block-nested-menu--{{ nested_menu_block_id }}">
+                                    {% if item_img_1 != blank or item_heading_1 != blank and item_link_1 != blank %}
+                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_1, item_image: item_img_1, item_link: item_link_1, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_2 != blank or item_heading_2 != blank and item_link_2 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_2, item_image: item_img_2, item_link: item_link_2, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_3 != blank or item_heading_3 != blank and item_link_3 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_3, item_image: item_img_3, item_link: item_link_3, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_4 != blank or item_heading_4 != blank and item_link_4 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_4, item_image: item_img_4, item_link: item_link_4, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_5 != blank or item_heading_5 != blank and item_link_5 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_5, item_image: item_img_5, item_link: item_link_5, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_6 != blank or item_heading_6 != blank and item_link_6 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_6, item_image: item_img_6, item_link: item_link_6, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_7 != blank or item_heading_7 != blank and item_link_7 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_7, item_image: item_img_7, item_link: item_link_7, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_8 != blank or item_heading_8 != blank and item_link_8 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_8, item_image: item_img_8, item_link: item_link_8, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_9 != blank or item_heading_9 != blank and item_link_9 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_9, item_image: item_img_9, item_link: item_link_9, onload_script: onload_script -%}
+                                    {% endif %}
+                                    {% if item_img_10 != blank or item_heading_10 != blank and item_link_10 != blank %}
+                                        {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                            downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'second', item_heading: item_heading_10, item_image: item_img_10, item_link: item_link_10, onload_script: onload_script -%}
+                                    {% endif %}
+                                </ul>
+                                {% for collection in collections %}
+                                    {% if collection.url == link.url %}
+                                        <div class="button-block block__button collection-button">
+                                            <a href="{{ link.url }}"  tabindex="-1" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'collection.shop_all' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class='animation-item second-level'></span>
+                        {% endif %}
+                        {% if link.links.size > 0 %}
+                            <div class="nested-submenu scroll-area hide-scrollbar nested-submenu-second-level">
+                                <div class="menu-drawer__header">
+                                    <button class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} flex--row align-center{% if uppercase %} uppercase{% endif %}" tabindex="-1">
+                                        <span class="icon icon--large">{% render 'glyphs_arrows', icon: 'arrow-left' %}</span>
+                                        {% if bolder_font %}<b>{% endif %}{{ section.settings.heading }}{% if bolder_font %}</b>{% endif %}</button>
+                                </div>
+                                {%- liquid
+                                    assign enable_menu_img = false
+                                    assign link_title_handle = link.title | handle
+                                    for block in blocks
+                                        assign menu_title_handle = block.settings.dropdown_link | handle
+                                        if menu_title_handle == link_title_handle
+                                            assign enable_menu_img = true
+                                            assign menu_img = block.settings.image
+                                            assign mega_menu_block_id = block.id
+                                            assign media_ratio = block.settings.media_ratio
+                                            assign color_scheme = block.settings.color_scheme
+                                            assign overlay_opacity = block.settings.overlay_opacity
+                                        endif
+                                    endfor
+                                -%}
+                                {%- if enable_menu_img and menu_img -%}
+                                    <a href="{{ link.url }}" class="menu-collection-banner menu-collection-banner--{{ mega_menu_block_id }} gradient color-{{ color_scheme }}" tabindex="-1">
+                                        {%- liquid
+                                            assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                        -%}
+                                        {%- capture sizes -%}
+                                            (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                        {%- endcapture -%}
+                                            <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                {% style %}
+                                                    .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img {
+                                                        --aspect-ratio: {% if media_ratio == 'auto' %}{{ menu_img.aspect_ratio }}{% else %}{{ media_ratio }}{% endif %};
+                                                        --banner-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+                                                        --layout-bg-color: {{ color_scheme.settings.layout_background_color.red }},{{ color_scheme.settings.layout_background_color.green }},{{ color_scheme.settings.layout_background_color.blue }};
+                                                        --layout-text-color: {{ color_scheme.settings.layout_text_color.red }},{{ color_scheme.settings.layout_text_color.green }},{{ color_scheme.settings.layout_text_color.blue }};
+                                                        {% if color_scheme.settings.overlay_gradient != empty %}
+                                                            --banner-overlay-background: {{ color_scheme.settings.overlay_gradient }};
+                                                        {% else %}
+                                                            --banner-overlay-background: {{ color_scheme.settings.overlay_color }};
+                                                        {% endif %}
+                                                    }
+                                                    {% if settings.images_loading != 'disable' and media_ratio == 'auto' %}
+                                                        .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img .lazy-image {
+                                                            aspect-ratio: var(--asp-rat);
+                                                        }
+                                                    {% endif %}
+                                                {% endstyle %}
+                                                {% if settings.images_loading != 'disable' %}
+                                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ menu_img.aspect_ratio }}">
+                                                {% endif %}
+                                                {{
+                                                    menu_img
+                                                    | image_url: width: 3200
+                                                    | image_tag:
+                                                    sizes: sizes,
+                                                    widths: widths,
+                                                    class: img_class,
+                                                    alt: menu_img.alt,
+                                                    draggable: false,
+                                                    loading: 'lazy',
+                                                    fetchpriority: 'low',
+                                                    onload: onload_script
+                                                }} 
+                                                {% if settings.images_loading != 'disable' %}
+                                                    {% if settings.images_loading != 'fade_scale' %}
+                                                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                      <img 
+                                                      alt="{{ menu_img.alt | escape }}" 
+                                                      src="{{ menu_img | image_url: width: 10 }}"
+                                                      draggable="false"
+                                                      width="10" 
+                                                      height="10">
+                                                    </div>
+                                                    {% endif %}
+                                                </figure>
+                                                {% endif %}
+                                                <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                    {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                </p>
+                                            </div>
+                                    </a>
+                                {% elsif section.settings.show_collection_banner %}
+                                    {% for collection in collections %}
+                                        {% if collection.url == link.url and collection.image %}
+                                            <a href="{{ link.url }}" class="menu-collection-banner gradient color-{{ section.settings.banner_color_scheme }}" tabindex="-1">
+                                                    {%- liquid
+                                                        assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                    -%}
+                                                    {%- capture sizes -%}
+                                                        (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                    {%- endcapture -%}
+                                                        <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                            {% style %}
+                                                                .menu-collection-img {
+                                                                    --aspect-ratio: {% if section.settings.banner_media_ratio == 'auto' %}{{ collection.image.aspect_ratio }}{% else %}{{ section.settings.banner_media_ratio }}{% endif %};
+                                                                    --focal-point: {{ section.settings.banner_focal_point }};
+                                                                    --banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+                                                                    --layout-bg-color: {{ section.settings.banner_color_scheme.settings.layout_background_color.red }},{{ section.settings.banner_color_scheme.settings.layout_background_color.green }},{{ section.settings.banner_color_scheme.settings.layout_background_color.blue }};
+                                                                    --layout-text-color: {{ section.settings.banner_color_scheme.settings.layout_text_color.red }},{{ section.settings.banner_color_scheme.settings.layout_text_color.green }},{{ section.settings.banner_color_scheme.settings.layout_text_color.blue }};
+                                                                    {% if section.settings.banner_color_scheme.settings.overlay_gradient != empty %}
+                                                                        --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_gradient }};
+                                                                    {% else %}
+                                                                        --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_color }};
+                                                                    {% endif %}
+                                                                }
+                                                                {% if settings.images_loading != 'disable' and section.settings.banner_media_ratio == 'auto' %}
+                                                                    .menu-collection-img .lazy-image {
+                                                                        aspect-ratio: var(--asp-rat);
+                                                                    }
+                                                                {% endif %}
+                                                            {% endstyle %}
+                                                            {% if settings.images_loading != 'disable' %}
+                                                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                            {% endif %}
+                                                            {{
+                                                                collection.image
+                                                                | image_url: width: 3200
+                                                                | image_tag:
+                                                                sizes: sizes,
+                                                                widths: widths,
+                                                                class: img_class,
+                                                                alt: collection.image.alt,
+                                                                draggable: false,
+                                                                draggable: false,
+                                                                loading: 'lazy',
+                                                                fetchpriority: 'low',
+                                                                onload: onload_script
+                                                            }} 
+                                                            {% if settings.images_loading != 'disable' %}
+                                                                {% if settings.images_loading != 'fade_scale' %}
+                                                                <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                  <img 
+                                                                  alt="{{ collection.image.alt | escape }}" 
+                                                                  src="{{ collection.image | image_url: width: 10 }}"
+                                                                  draggable="false"
+                                                                  width="10" 
+                                                                  height="10">
+                                                                </div>
+                                                                {% endif %}
+                                                            </figure>
+                                                            {% endif %}
+                                                            <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                            </p>
+                                                        </div>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                    <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                        {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                    </p>
+                              
+                                <ul class="first-nested__list flex--column hide-scrollbar">
+                                    {% for first_nested_link in link.links %}
+                                        <li>
+                                            {%- liquid
+                                                assign enable_nested_menu = false
+                                                assign link_title_handle = first_nested_link.title | handle
+                                                assign downcased_link_title = first_nested_link.title | downcase
+                                                for block in blocks
+                                                    assign menu_item_handle = block.settings.menu_dropdown_link | handle
+                                                    if menu_item_handle == link_title_handle and first_nested_link.links.size == 0 and parent_menu == false
+                                                        assign enable_nested_menu = true
+                                                        assign downcased_nested_highlighted_items = block.settings.nested_highlight_menu_item | downcase | split: ", "
+                                                        assign nested_menu_block_id = block.id
+                                                        assign image_ratio = block.settings.media_ratio
+                                                        assign image_radius = block.settings.image_radius
+                                                        assign item_style = block.settings.item_style
+                                                        assign item_heading_1 = block.settings.heading_1
+                                                        assign item_img_1 = block.settings.image_1
+                                                        assign item_link_1 = block.settings.link_1
+                                                        assign item_heading_2 = block.settings.heading_2
+                                                        assign item_img_2 = block.settings.image_2
+                                                        assign item_link_2 = block.settings.link_2
+                                                        assign item_heading_3 = block.settings.heading_3
+                                                        assign item_img_3 = block.settings.image_3
+                                                        assign item_link_3 = block.settings.link_3
+                                                        assign item_heading_4 = block.settings.heading_4
+                                                        assign item_img_4 = block.settings.image_4
+                                                        assign item_link_4 = block.settings.link_4
+                                                        assign item_heading_5 = block.settings.heading_5
+                                                        assign item_img_5 = block.settings.image_5
+                                                        assign item_link_5 = block.settings.link_5
+                                                        assign item_heading_6 = block.settings.heading_6
+                                                        assign item_img_6 = block.settings.image_6
+                                                        assign item_link_6 = block.settings.link_6
+                                                        assign item_heading_7 = block.settings.heading_7
+                                                        assign item_img_7 = block.settings.image_7
+                                                        assign item_link_7 = block.settings.link_7
+                                                        assign item_heading_8 = block.settings.heading_8
+                                                        assign item_img_8 = block.settings.image_8
+                                                        assign item_link_8 = block.settings.link_8
+                                                        assign item_heading_9 = block.settings.heading_9
+                                                        assign item_img_9 = block.settings.image_9
+                                                        assign item_link_9 = block.settings.link_9
+                                                        assign item_heading_10 = block.settings.heading_10
+                                                        assign item_img_10 = block.settings.image_10
+                                                        assign item_link_10 = block.settings.link_10
+                                                    endif
+                                                endfor
+                                            -%}
+                                            <drawer-menu trigger="click" level="child">
+                                                <summary class="second-level-item" open="false">
+                                                    <div class="menu__item-title flex--row align-center">
+                                                        {% liquid 
+                                                            assign downcased_link_title = first_nested_link.title | downcase
+                                                            assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                                            assign highlight_item = false
+                                                            for highlighted_item in downcased_highlighted_items
+                                                                if highlighted_item == downcased_link_title
+                                                                    assign highlight_item = true
+                                                                endif
+                                                            endfor
+                                                        %}
+                                                        {% if show_item_image_1 or show_item_image_2 %}
+                                                            {% for collection in collections %}
+                                                            {% if collection.url == first_nested_link.url and collection.image %}
+                                                                <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                                    {% endif %}
+                                                                    <img srcset="{%- if collection.image.width >= 165 -%}{{ collection.image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                    {%- if collection.image.width >= 375 -%}{{ collection.image | image_url: width: 375 }} 375w,{%- endif -%}
+                                                                    {%- if collection.image.width >= 550 -%}{{ collection.image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                                        {{ collection.image | image_url: height: collection.image.height }}"
+                                                                        src="{{ collection.image | image_url: height: collection.image.height }}"
+                                                                        loading="lazy"
+                                                                        draggable="false"
+                                                                        sizes="calc(40px * 1)"
+                                                                        width="{{ collection.image.width }}"
+                                                                        height="{{ collection.image.height }}"
+                                                                        {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                                        alt="{{ collection.image.alt | default: collection.title | escape }}"
+                                                                        style="--focal-point: {{ section.settings.focal_point }}"
+                                                                    />
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        {% if settings.images_loading != 'fade_scale' %}
+                                                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                          <img 
+                                                                          alt="{{ collection.image.alt | escape }}" 
+                                                                          src="{{ collection.image | image_url: width: 10 }}"
+                                                                          draggable="false"
+                                                                          width="10" 
+                                                                          height="10">
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </figure>
+                                                                    {% endif %}
+                                                                </div> 
+                                                            {% elsif collection.url == first_nested_link.url and collection.products.first.featured_image %}
+                                                                <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.products.first.featured_image.aspect_ratio }}">
+                                                                    {% endif %}
+                                                                    <img srcset="{%- if collection.products.first.featured_image.width >= 165 -%}{{ collection.products.first.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                    {%- if collection.products.first.featured_image.width >= 375 -%}{{ collection.products.first.featured_image | image_url: width: 375 }} 375w,{%- endif -%}
+                                                                    {%- if collection.products.first.featured_image.width >= 550 -%}{{ collection.products.first.featured_image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                                        {{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                                        src="{{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                                        loading="lazy"
+                                                                        draggable="false"
+                                                                        sizes="calc(40px * 1)"
+                                                                        {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                                        width="{{ collection.products.first.featured_image.width }}"
+                                                                        height="{{ collection.products.first.featured_image.height }}"
+                                                                        alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                                                                        style="--focal-point: {{ section.settings.focal_point }}"
+                                                                    />
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        {% if settings.images_loading != 'fade_scale' %}
+                                                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                          <img 
+                                                                          alt="{{ collection.products.first.featured_image.alt | escape }}" 
+                                                                          src="{{ collection.products.first.featured_image | image_url: width: 10 }}"
+                                                                          draggable="false"
+                                                                          width="10" 
+                                                                          height="10">
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </figure>
+                                                                    {% endif %}
+                                                                </div> 
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <a href="{{ first_nested_link.url }}"  tabindex="-1" class="{% if highlight_item %} link--highlighted{% endif %} link--single">{% if bolder_font %}<b>{% endif %}{{ first_nested_link.title }}{% if bolder_font %}</b>{% endif %}</a>
+                                                        {% if first_nested_link.links.size > 0 or enable_nested_menu %}
+                                                            <button class="dropdown-icon flex--row" tabindex="-1" aria-label="{{ 'accessibility.click_to_open' | t }}">	
+                                                                {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                                                            </button>  
+                                                        {% endif %}
+                                                    </div>
+                                                </summary>
+                                                {% if enable_nested_menu %}
+                                                    <div class="nested-submenu scroll-area hide-scrollbar nested-submenu-third-level">
+                                                        <div class="menu-drawer__header">
+                                                            <button tabindex="-1" class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} flex--row align-center{% if uppercase %} uppercase{% endif %}">
+                                                                <span class="icon icon--large">{% render 'glyphs_arrows', icon: 'arrow-left' %}</span>
+                                                                {% if bolder_font %}<b>{% endif %}{{ link.title }}{% if bolder_font %}</b>{% endif %}</button>
+                                                        </div>
+                                                        {%- liquid
+                                                            assign enable_menu_img = false
+                                                            assign link_title_handle = first_nested_link.title | handle
+                                                            for block in blocks
+                                                                assign menu_title_handle = block.settings.dropdown_link | handle
+                                                                if menu_title_handle == link_title_handle
+                                                                    assign enable_menu_img = true
+                                                                    assign menu_img = block.settings.image
+                                                                    assign mega_menu_block_id = block.id
+                                                                    assign media_ratio = block.settings.media_ratio
+                                                                    assign color_scheme = block.settings.color_scheme
+                                                                    assign overlay_opacity = block.settings.overlay_opacity
+                                                                endif
+                                                            endfor
+                                                        -%}
+                                                        {%- if enable_menu_img and menu_img -%}
+                                                            <a href="{{ first_nested_link.url }}" class="menu-collection-banner menu-collection-banner--{{ mega_menu_block_id }} gradient color-{{ color_scheme }}" tabindex="-1">
+                                                                {%- liquid
+                                                                    assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                -%}
+                                                                {%- capture sizes -%}
+                                                                    (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                {%- endcapture -%}
+                                                                <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                    {% style %}
+                                                                        .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img {
+                                                                            --aspect-ratio: {% if media_ratio == 'auto' %}{{ menu_img.aspect_ratio }}{% else %}{{ media_ratio }}{% endif %};
+                                                                            --banner-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+                                                                            --layout-bg-color: {{ color_scheme.settings.layout_background_color.red }},{{ color_scheme.settings.layout_background_color.green }},{{ color_scheme.settings.layout_background_color.blue }};
+                                                                            --layout-text-color: {{ color_scheme.settings.layout_text_color.red }},{{ color_scheme.settings.layout_text_color.green }},{{ color_scheme.settings.layout_text_color.blue }};
+                                                                            {% if color_scheme.settings.overlay_gradient != empty %}
+                                                                                --banner-overlay-background: {{ color_scheme.settings.overlay_gradient }};
+                                                                            {% else %}
+                                                                                --banner-overlay-background: {{ color_scheme.settings.overlay_color }};
+                                                                            {% endif %}
+                                                                        }
+                                                                        {% if settings.images_loading != 'disable' and media_ratio == 'auto' %}
+                                                                            .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img .lazy-image {
+                                                                                aspect-ratio: var(--asp-rat);
+                                                                            }
+                                                                        {% endif %}
+                                                                    {% endstyle %}
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ menu_img.aspect_ratio }}">
+                                                                    {% endif %}
+                                                                    {{
+                                                                        menu_img
+                                                                        | image_url: width: 3200
+                                                                        | image_tag:
+                                                                        sizes: sizes,
+                                                                        widths: widths,
+                                                                        class: img_class,
+                                                                        alt: collection.image.alt,
+                                                                        draggable: false,
+                                                                        loading: 'lazy',
+                                                                        fetchpriority: 'low',
+                                                                        onload: onload_script
+                                                                    }} 
+                                                                    {% if settings.images_loading != 'disable' %}
+                                                                        {% if settings.images_loading != 'fade_scale' %}
+                                                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                          <img 
+                                                                          alt="{{ menu_img.alt | escape }}" 
+                                                                          src="{{ menu_img | image_url: width: 10 }}"
+                                                                          draggable="false"
+                                                                          width="10" 
+                                                                          height="10">
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </figure>
+                                                                    {% endif %}
+                                                                    <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                        {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                    </p>
+                                                                </div>
+                                                            </a>
+                                                        {% elsif block.settings.show_collection_banner %}
+                                                            {% for collection in collections %}
+                                                                {% if collection.url == first_nested_link.url and collection.image %}
+                                                                    <a href="{{ first_nested_link.url }}" class="menu-collection-banner gradient color-{{ section.settings.banner_color_scheme }}" tabindex="-1">
+                                                                            {%- liquid
+                                                                                assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                            -%}
+                                                                            {%- capture sizes -%}
+                                                                                (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                            {%- endcapture -%}
+                                                                            <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                {% style %}
+                                                                                    .menu-collection-img {
+                                                                                        --aspect-ratio: {% if section.settings.banner_media_ratio == 'auto' %}{{ collection.image.aspect_ratio }}{% else %}{{ section.settings.banner_media_ratio }}{% endif %};
+                                                                                        --focal-point: {{ section.settings.banner_focal_point }};
+                                                                                        --banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+                                                                                        --layout-bg-color: {{ section.settings.banner_color_scheme.settings.layout_background_color.red }},{{ section.settings.banner_color_scheme.settings.layout_background_color.green }},{{ section.settings.banner_color_scheme.settings.layout_background_color.blue }};
+                                                                                        --layout-text-color: {{ section.settings.banner_color_scheme.settings.layout_text_color.red }},{{ section.settings.banner_color_scheme.settings.layout_text_color.green }},{{ section.settings.banner_color_scheme.settings.layout_text_color.blue }};
+                                                                                        {% if section.settings.banner_color_scheme.settings.overlay_gradient != empty %}
+                                                                                            --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_gradient }};
+                                                                                        {% else %}
+                                                                                            --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_color }};
+                                                                                        {% endif %}
+                                                                                    }
+                                                                                    {% if settings.images_loading != 'disable' and section.settings.banner_media_ratio == 'auto' %}
+                                                                                        .menu-collection-img .lazy-image {
+                                                                                            aspect-ratio: var(--asp-rat);
+                                                                                        }
+                                                                                    {% endif %}
+                                                                                {% endstyle %}
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                                                {% endif %}
+                                                                                {{
+                                                                                    collection.image
+                                                                                    | image_url: width: 3200
+                                                                                    | image_tag:
+                                                                                    sizes: sizes,
+                                                                                    widths: widths,
+                                                                                    class: img_class,
+                                                                                    alt: collection.image.alt,
+                                                                                    draggable: false,
+                                                                                    loading: 'lazy',
+                                                                                    fetchpriority: 'low',
+                                                                                    onload: onload_script
+                                                                                }} 
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    {% if settings.images_loading != 'fade_scale' %}
+                                                                                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                      <img 
+                                                                                      alt="{{ collection.image.alt | escape }}" 
+                                                                                      src="{{ collection.image | image_url: width: 10 }}"
+                                                                                      draggable="false"
+                                                                                      width="10" 
+                                                                                      height="10">
+                                                                                    </div>
+                                                                                    {% endif %}
+                                                                                </figure>
+                                                                                {% endif %}
+                                                                                <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                                    {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                                </p>
+                                                                            </div>
+                                                                    </a>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                            {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                        </p>
+                                                        {% style %}
+                                                            .block-nested-menu--{{ nested_menu_block_id }} {
+                                                                --aspect-ratio: {{ image_ratio }};
+                                                                {% if image_radius == 'default' %}
+                                                                    --image-border-radius: {{ settings.images_and_sections_radius }};;
+                                                                {% else %}
+                                                                    --image-border-radius: {{ image_radius }};
+                                                                {% endif %}
+                                                            }
+                                                            {% if settings.images_loading != 'disable' and image_ratio == 'auto' %}
+                                                                .block-nested-menu--{{ nested_menu_block_id }} .menu__item-image .lazy-image {
+                                                                    aspect-ratio: var(--asp-rat);
+                                                                }
+                                                            {% endif %}
+                                                        {% endstyle %}
+                                                        <ul class="second-nested__list flex--column hide-scrollbar block-nested-menu--{{ nested_menu_block_id }}">
+                                                            {% if item_img_1 != blank or item_heading_1 != blank and item_link_1 != blank %}
+                                                            {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_1, item_image: item_img_1, item_link: item_link_1, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_2 != blank or item_heading_2 != blank and item_link_2 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_2, item_image: item_img_2, item_link: item_link_2, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_3 != blank or item_heading_3 != blank and item_link_3 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_3, item_image: item_img_3, item_link: item_link_3, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_4 != blank or item_heading_4 != blank and item_link_4 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_4, item_image: item_img_4, item_link: item_link_4, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_5 != blank or item_heading_5 != blank and item_link_5 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_5, item_image: item_img_5, item_link: item_link_5, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_6 != blank or item_heading_6 != blank and item_link_6 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_6, item_image: item_img_6, item_link: item_link_6, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_7 != blank or item_heading_7 != blank and item_link_7 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_7, item_image: item_img_7, item_link: item_link_7, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_8 != blank or item_heading_8 != blank and item_link_8 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_8, item_image: item_img_8, item_link: item_link_8, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_9 != blank or item_heading_9 != blank and item_link_9 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_9, item_image: item_img_9, item_link: item_link_9, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                            {% if item_img_10 != blank or item_heading_10 != blank and item_link_10 != blank %}
+                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'third', item_heading: item_heading_10, item_image: item_img_10, item_link: item_link_10, onload_script: onload_script -%}
+                                                            {% endif %}
+                                                        </ul>
+                                                        {% for collection in collections %}
+                                                            {% if collection.url == first_nested_link.url %}
+                                                                <div class="button-block block__button collection-button">
+                                                                    <a href="{{ first_nested_link.url }}"  tabindex="-1" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                                                                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'collection.shop_all' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                                    </a>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <span class='animation-item third-level'></span>
+                                                {% endif %}
+                                                {% if first_nested_link.links.size > 0 %}
+                                                    <div class="nested-submenu scroll-area hide-scrollbar nested-submenu-third-level">
+                                                        <div class="menu-drawer__header">
+                                                            <button tabindex="-1" class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} flex--row align-center{% if uppercase %} uppercase{% endif %}">
+                                                                <span class="icon icon--large">{% render 'glyphs_arrows', icon: 'arrow-left' %}</span>
+                                                                {% if bolder_font %}<b>{% endif %}{{ link.title }}{% if bolder_font %}</b>{% endif %}</button>
+                                                        </div>
+                                                        {%- liquid
+                                                            assign enable_menu_img = false
+                                                            assign link_title_handle = first_nested_link.title | handle
+                                                            for block in blocks
+                                                                assign menu_title_handle = block.settings.dropdown_link | handle
+                                                                if menu_title_handle == link_title_handle
+                                                                    assign enable_menu_img = true
+                                                                    assign menu_img = block.settings.image
+                                                                    assign mega_menu_block_id = block.id
+                                                                    assign media_ratio = block.settings.media_ratio
+                                                                    assign color_scheme = block.settings.color_scheme
+                                                                    assign overlay_opacity = block.settings.overlay_opacity
+                                                                endif
+                                                            endfor
+                                                        -%}
+                                                        {%- if enable_menu_img and menu_img -%}
+                                                            <a href="{{ first_nested_link.url }}" tabindex="-1" class="menu-collection-banner menu-collection-banner--{{ mega_menu_block_id }} gradient color-{{ color_scheme }}">
+                                                                {%- liquid
+                                                                    assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                -%}
+                                                                {%- capture sizes -%}
+                                                                    (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                {%- endcapture -%}
+                                                                    <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                        {% style %}
+                                                                            .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img {
+                                                                                --aspect-ratio: {% if media_ratio == 'auto' %}{{ menu_img.aspect_ratio }}{% else %}{{ media_ratio }}{% endif %};
+                                                                                --banner-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+                                                                                --layout-bg-color: {{ color_scheme.settings.layout_background_color.red }},{{ color_scheme.settings.layout_background_color.green }},{{ color_scheme.settings.layout_background_color.blue }};
+                                                                                --layout-text-color: {{ color_scheme.settings.layout_text_color.red }},{{ color_scheme.settings.layout_text_color.green }},{{ color_scheme.settings.layout_text_color.blue }};
+                                                                                {% if color_scheme.settings.overlay_gradient != empty %}
+                                                                                    --banner-overlay-background: {{ color_scheme.settings.overlay_gradient }};
+                                                                                {% else %}
+                                                                                    --banner-overlay-background: {{ color_scheme.settings.overlay_color }};
+                                                                                {% endif %}
+                                                                            }
+                                                                            {% if settings.images_loading != 'disable' and media_ratio == 'auto' %}
+                                                                                .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img .lazy-image {
+                                                                                    aspect-ratio: var(--asp-rat);
+                                                                                }
+                                                                            {% endif %}
+                                                                        {% endstyle %}
+                                                                        {% if settings.images_loading != 'disable' %}
+                                                                            <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ menu_img.aspect_ratio }}">
+                                                                        {% endif %}
+                                                                        {{
+                                                                            menu_img
+                                                                            | image_url: width: 3200
+                                                                            | image_tag:
+                                                                            sizes: sizes,
+                                                                            widths: widths,
+                                                                            class: img_class,
+                                                                            alt: collection.image.alt,
+                                                                            draggable: false,
+                                                                            loading: 'lazy',
+                                                                            fetchpriority: 'low',
+                                                                            onload: onload_script
+                                                                        }} 
+                                                                        {% if settings.images_loading != 'disable' %}
+                                                                            {% if settings.images_loading != 'fade_scale' %}
+                                                                            <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                              <img 
+                                                                              alt="{{ menu_img.alt | escape }}" 
+                                                                              src="{{ menu_img | image_url: width: 10 }}"
+                                                                              draggable="false"
+                                                                              width="10" 
+                                                                              height="10">
+                                                                            </div>
+                                                                            {% endif %}
+                                                                        </figure>
+                                                                        {% endif %}
+                                                                        <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                            {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                        </p>
+                                                                    </div>
+                                                            </a>
+                                                        {% elsif section.settings.show_collection_banner %}
+                                                            {% for collection in collections %}
+                                                                {% if collection.url == first_nested_link.url and collection.image %}
+                                                                    <a href="{{ first_nested_link.url }}" tabindex="-1" class="menu-collection-banner gradient color-{{ section.settings.banner_color_scheme }}">
+                                                                            {%- liquid
+                                                                                assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                            -%}
+                                                                            {%- capture sizes -%}
+                                                                                (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                            {%- endcapture -%}
+                                                                                <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                    {% style %}
+                                                                                        .menu-collection-img {
+                                                                                            --aspect-ratio: {% if section.settings.banner_media_ratio == 'auto' %}{{ collection.image.aspect_ratio }}{% else %}{{ section.settings.banner_media_ratio }}{% endif %};
+                                                                                            --focal-point: {{ section.settings.banner_focal_point }};
+                                                                                            --banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+                                                                                            --layout-bg-color: {{ section.settings.banner_color_scheme.settings.layout_background_color.red }},{{ section.settings.banner_color_scheme.settings.layout_background_color.green }},{{ section.settings.banner_color_scheme.settings.layout_background_color.blue }};
+                                                                                            --layout-text-color: {{ section.settings.banner_color_scheme.settings.layout_text_color.red }},{{ section.settings.banner_color_scheme.settings.layout_text_color.green }},{{ section.settings.banner_color_scheme.settings.layout_text_color.blue }};
+                                                                                            {% if section.settings.banner_color_scheme.settings.overlay_gradient != empty %}
+                                                                                                --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_gradient }};
+                                                                                            {% else %}
+                                                                                                --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_color }};
+                                                                                            {% endif %}
+                                                                                        }
+                                                                                        {% if settings.images_loading != 'disable' and section.settings.banner_media_ratio == 'auto' %}
+                                                                                            .menu-collection-img .lazy-image {
+                                                                                                aspect-ratio: var(--asp-rat);
+                                                                                            }
+                                                                                        {% endif %}
+                                                                                    {% endstyle %}
+                                                                                    {% if settings.images_loading != 'disable' %}
+                                                                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                                                    {% endif %}
+                                                                                    {{
+                                                                                        collection.image
+                                                                                        | image_url: width: 3200
+                                                                                        | image_tag:
+                                                                                        sizes: sizes,
+                                                                                        widths: widths,
+                                                                                        class: img_class,
+                                                                                        alt: collection.image.alt,
+                                                                                        draggable: false,
+                                                                                        loading: 'lazy',
+                                                                                        fetchpriority: 'low',
+                                                                                        onload: onload_script
+                                                                                    }} 
+                                                                                    {% if settings.images_loading != 'disable' %}
+                                                                                        {% if settings.images_loading != 'fade_scale' %}
+                                                                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                          <img 
+                                                                                          alt="{{ collection.image.alt | escape }}" 
+                                                                                          src="{{ collection.image | image_url: width: 10 }}"
+                                                                                          draggable="false"
+                                                                                          width="10" 
+                                                                                          height="10">
+                                                                                        </div>
+                                                                                        {% endif %}
+                                                                                    </figure>
+                                                                                    {% endif %}
+                                                                                    <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                                        {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                                    </p>
+                                                                                </div>
+                                                                    </a>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                            <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ first_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                            </p>
+                                                        
+                                                        <ul class="second-nested__list flex--column hide-scrollbar">
+                                                            {% for second_nested_link in first_nested_link.links %}
+                                                                <li>
+                                                                    {%- liquid
+                                                                        assign enable_nested_menu = false
+                                                                        assign link_title_handle = second_nested_link.title | handle
+                                                                        assign downcased_link_title = second_nested_link.title | downcase
+                                                                        for block in blocks
+                                                                            assign menu_item_handle = block.settings.menu_dropdown_link | handle
+                                                                            if menu_item_handle == link_title_handle and second_nested_link.links.size == 0 and parent_menu == false
+                                                                                assign enable_nested_menu = true
+                                                                                assign downcased_nested_highlighted_items = block.settings.nested_highlight_menu_item | downcase | split: ", "
+                                                                                assign nested_menu_block_id = block.id
+                                                                                assign image_ratio = block.settings.media_ratio
+                                                                                assign image_radius = block.settings.image_radius
+                                                                                assign item_style = block.settings.item_style
+                                                                                assign item_heading_1 = block.settings.heading_1
+                                                                                assign item_img_1 = block.settings.image_1
+                                                                                assign item_link_1 = block.settings.link_1
+                                                                                assign item_heading_2 = block.settings.heading_2
+                                                                                assign item_img_2 = block.settings.image_2
+                                                                                assign item_link_2 = block.settings.link_2
+                                                                                assign item_heading_3 = block.settings.heading_3
+                                                                                assign item_img_3 = block.settings.image_3
+                                                                                assign item_link_3 = block.settings.link_3
+                                                                                assign item_heading_4 = block.settings.heading_4
+                                                                                assign item_img_4 = block.settings.image_4
+                                                                                assign item_link_4 = block.settings.link_4
+                                                                                assign item_heading_5 = block.settings.heading_5
+                                                                                assign item_img_5 = block.settings.image_5
+                                                                                assign item_link_5 = block.settings.link_5
+                                                                                assign item_heading_6 = block.settings.heading_6
+                                                                                assign item_img_6 = block.settings.image_6
+                                                                                assign item_link_6 = block.settings.link_6
+                                                                                assign item_heading_7 = block.settings.heading_7
+                                                                                assign item_img_7 = block.settings.image_7
+                                                                                assign item_link_7 = block.settings.link_7
+                                                                                assign item_heading_8 = block.settings.heading_8
+                                                                                assign item_img_8 = block.settings.image_8
+                                                                                assign item_link_8 = block.settings.link_8
+                                                                                assign item_heading_9 = block.settings.heading_9
+                                                                                assign item_img_9 = block.settings.image_9
+                                                                                assign item_link_9 = block.settings.link_9
+                                                                                assign item_heading_10 = block.settings.heading_10
+                                                                                assign item_img_10 = block.settings.image_10
+                                                                                assign item_link_10 = block.settings.link_10
+                                                                            endif
+                                                                        endfor
+                                                                    -%}
+                                                                    <drawer-menu trigger="click" level="child">
+                                                                    <summary class="third-level-item" open="false">
+                                                                        <div class="menu__item-title flex--row align-center">
+                                                                    {% liquid 
+                                                                        assign downcased_link_title = second_nested_link.title | downcase
+                                                                        assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                                                        assign highlight_item = false
+                                                                        for highlighted_item in downcased_highlighted_items
+                                                                            if highlighted_item == downcased_link_title
+                                                                                assign highlight_item = true
+                                                                            endif
+                                                                        endfor
+                                                                    %}
+                                                                    {% if show_item_image_1 or show_item_image_2 %}
+                                                                        {% for collection in collections %}
+                                                                        {% if collection.url == second_nested_link.url and collection.image %}
+                                                                            <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                                                {% endif %}
+                                                                                <img srcset="{%- if collection.image.width >= 165 -%}{{ collection.image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                                {%- if collection.image.width >= 375 -%}{{ collection.image | image_url: width: 375 }} 375w,{%- endif -%}
+                                                                                {%- if collection.image.width >= 550 -%}{{ collection.image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                                                    {{ collection.image | image_url: height: collection.image.height }}"
+                                                                                    src="{{ collection.image | image_url: height: collection.image.height }}"
+                                                                                    loading="lazy"
+                                                                                    draggable="false"
+                                                                                    sizes="calc(40px * 1)"
+                                                                                    width="{{ collection.image.width }}"
+                                                                                    height="{{ collection.image.height }}"
+                                                                                    {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                                                    alt="{{ collection.image.alt | default: collection.title | escape }}"
+                                                                                    style="--focal-point: {{ section.settings.focal_point }}"
+                                                                                />
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    {% if settings.images_loading != 'fade_scale' %}
+                                                                                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                      <img 
+                                                                                      alt="{{ collection.image.alt | escape }}" 
+                                                                                      src="{{ collection.image | image_url: width: 10 }}"
+                                                                                      draggable="false"
+                                                                                      width="10" 
+                                                                                      height="10">
+                                                                                    </div>
+                                                                                    {% endif %}
+                                                                                </figure>
+                                                                                {% endif %}
+                                                                            </div> 
+                                                                        {% elsif collection.url == second_nested_link.url and collection.products.first.featured_image %}
+                                                                            <div class="menu__item-image aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.products.first.featured_image.aspect_ratio }}">
+                                                                                {% endif %}
+                                                                                <img srcset="{%- if collection.products.first.featured_image.width >= 165 -%}{{ collection.products.first.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                                                                {%- if collection.products.first.featured_image.width >= 375 -%}{{ collection.products.first.featured_image | image_url: width: 375 }} 375w,{%- endif -%}
+                                                                                {%- if collection.products.first.featured_image.width >= 550 -%}{{ collection.products.first.featured_image | image_url: width: 550 }} 550w,{%- endif -%}
+                                                                                    {{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                                                    src="{{ collection.products.first.featured_image | image_url: height: collection.products.first.featured_image.height }}"
+                                                                                    loading="lazy"
+                                                                                    draggable="false"
+                                                                                    sizes="calc(40px * 1)"
+                                                                                    width="{{ collection.products.first.featured_image.width }}"
+                                                                                    height="{{ collection.products.first.featured_image.height }}"
+                                                                                    {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                                                                                    alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                                                                                    style="--focal-point: {{ section.settings.focal_point }}"
+                                                                                />
+                                                                                {% if settings.images_loading != 'disable' %}
+                                                                                    {% if settings.images_loading != 'fade_scale' %}
+                                                                                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                      <img 
+                                                                                      alt="{{ collection.products.first.featured_image.alt | escape }}" 
+                                                                                      src="{{ collection.products.first.featured_image | image_url: width: 10 }}"
+                                                                                      draggable="false"
+                                                                                      width="10" 
+                                                                                      height="10">
+                                                                                    </div>
+                                                                                    {% endif %}
+                                                                                </figure>
+                                                                                {% endif %}
+                                                                            </div> 
+                                                                        {% endif %}
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                    <a href="{{ second_nested_link.url }}" tabindex="-1" class="link--single {% if highlight_item %} link--highlighted{% endif %}">{% if bolder_font %}<b>{% endif %}{{ second_nested_link.title }}{% if bolder_font %}</b>{% endif %}</a>
+                                                                    {% if second_nested_link.links.size > 0 or enable_nested_menu %}
+                                                                        <button class="dropdown-icon flex--row" tabindex="-1">	
+                                                                            {% render 'glyphs_arrows', icon: 'chevron-right' %}			
+                                                                        </button>  
+                                                                    {% endif %}
+                                                                    </div>
+                                                                    </summary>
+                                                                    {% if enable_nested_menu %}
+                                                                        <div class="nested-submenu scroll-area hide-scrollbar nested-submenu-fourth-level">
+                                                                            <div class="menu-drawer__header">
+                                                                                <button tabindex="-1" class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} flex--row align-center{% if uppercase %} uppercase{% endif %}">
+                                                                                    <span class="icon icon--large">{% render 'glyphs_arrows', icon: 'arrow-left' %}</span>
+                                                                                    {% if bolder_font %}<b>{% endif %}{{ first_nested_link.title }}{% if bolder_font %}</b>{% endif %}</button>
+                                                                            </div>
+                                                                            {%- liquid
+                                                                                assign enable_menu_img = false
+                                                                                assign link_title_handle = second_nested_link.title | handle
+                                                                                for block in blocks
+                                                                                    assign menu_title_handle = block.settings.dropdown_link | handle
+                                                                                    if menu_title_handle == link_title_handle
+                                                                                        assign enable_menu_img = true
+                                                                                        assign menu_img = block.settings.image
+                                                                                        assign mega_menu_block_id = block.id
+                                                                                        assign media_ratio = block.settings.media_ratio
+                                                                                        assign color_scheme = block.settings.color_scheme
+                                                                                        assign overlay_opacity = block.settings.overlay_opacity
+                                                                                    endif
+                                                                                endfor
+                                                                            -%}
+                                                                            {%- if enable_menu_img and menu_img -%}
+                                                                                <a href="{{ second_nested_link.url }}" class="menu-collection-banner menu-collection-banner--{{ mega_menu_block_id }} gradient color-{{ color_scheme }}" tabindex="-1">
+                                                                                    {%- liquid
+                                                                                        assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                                    -%}
+                                                                                    {%- capture sizes -%}
+                                                                                        (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                                    {%- endcapture -%}
+                                                                                    <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                        {% style %}
+                                                                                            .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img {
+                                                                                                --aspect-ratio: {% if media_ratio == 'auto' %}{{ menu_img.aspect_ratio }}{% else %}{{ media_ratio }}{% endif %};
+                                                                                                --banner-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};
+                                                                                                --layout-bg-color: {{ color_scheme.settings.layout_background_color.red }},{{ color_scheme.settings.layout_background_color.green }},{{ color_scheme.settings.layout_background_color.blue }};
+                                                                                                --layout-text-color: {{ color_scheme.settings.layout_text_color.red }},{{ color_scheme.settings.layout_text_color.green }},{{ color_scheme.settings.layout_text_color.blue }};
+                                                                                                {% if color_scheme.settings.overlay_gradient != empty %}
+                                                                                                    --banner-overlay-background: {{ color_scheme.settings.overlay_gradient }};
+                                                                                                {% else %}
+                                                                                                    --banner-overlay-background: {{ color_scheme.settings.overlay_color }};
+                                                                                                {% endif %}
+                                                                                            }
+                                                                                            {% if settings.images_loading != 'disable' and media_ratio == 'auto' %}
+                                                                                                .menu-collection-banner--{{ mega_menu_block_id }} .menu-collection-img .lazy-image {
+                                                                                                    aspect-ratio: var(--asp-rat);
+                                                                                                }
+                                                                                            {% endif %}
+                                                                                        {% endstyle %}
+                                                                                        {% if settings.images_loading != 'disable' %}
+                                                                                            <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ menu_img.aspect_ratio }}">
+                                                                                        {% endif %}
+                                                                                        {{
+                                                                                            menu_img
+                                                                                            | image_url: width: 3200
+                                                                                            | image_tag:
+                                                                                            sizes: sizes,
+                                                                                            widths: widths,
+                                                                                            class: img_class,
+                                                                                            alt: collection.image.alt,
+                                                                                            draggable: false,
+                                                                                            loading: 'lazy',
+                                                                                            fetchpriority: 'low',
+                                                                                            onload: onload_script
+                                                                                        }} 
+                                                                                        {% if settings.images_loading != 'disable' %}
+                                                                                            {% if settings.images_loading != 'fade_scale' %}
+                                                                                            <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                              <img 
+                                                                                              alt="{{ menu_img.alt | escape }}" 
+                                                                                              src="{{ menu_img | image_url: width: 10 }}"
+                                                                                              draggable="false"
+                                                                                              width="10" 
+                                                                                              height="10">
+                                                                                            </div>
+                                                                                            {% endif %}
+                                                                                        </figure>
+                                                                                        {% endif %}
+                                                                                        <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                                            {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ second_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </a>
+                                                                            {% elsif block.settings.show_collection_banner %}
+                                                                                {% for collection in collections %}
+                                                                                    {% if collection.url == second_nested_link.url and collection.image %}
+                                                                                        <a href="{{ second_nested_link.url }}" class="menu-collection-banner gradient color-{{ section.settings.banner_color_scheme }}" tabindex="-1">
+                                                                                                {%- liquid
+                                                                                                    assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                                                                                -%}
+                                                                                                {%- capture sizes -%}
+                                                                                                    (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                                                                                                {%- endcapture -%}
+                                                                                                <div class="menu-collection-img aspect-ratio"{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                                                                                                    {% style %}
+                                                                                                        .menu-collection-img {
+                                                                                                            --aspect-ratio: {% if section.settings.banner_media_ratio == 'auto' %}{{ collection.image.aspect_ratio }}{% else %}{{ section.settings.banner_media_ratio }}{% endif %};
+                                                                                                            --focal-point: {{ section.settings.banner_focal_point }};
+                                                                                                            --banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+                                                                                                            --layout-bg-color: {{ section.settings.banner_color_scheme.settings.layout_background_color.red }},{{ section.settings.banner_color_scheme.settings.layout_background_color.green }},{{ section.settings.banner_color_scheme.settings.layout_background_color.blue }};
+                                                                                                            --layout-text-color: {{ section.settings.banner_color_scheme.settings.layout_text_color.red }},{{ section.settings.banner_color_scheme.settings.layout_text_color.green }},{{ section.settings.banner_color_scheme.settings.layout_text_color.blue }};
+                                                                                                            {% if section.settings.banner_color_scheme.settings.overlay_gradient != empty %}
+                                                                                                                --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_gradient }};
+                                                                                                            {% else %}
+                                                                                                                --banner-overlay-background: {{ section.settings.banner_color_scheme.settings.overlay_color }};
+                                                                                                            {% endif %}
+                                                                                                        }
+                                                                                                        {% if settings.images_loading != 'disable' and section.settings.banner_media_ratio == 'auto' %}
+                                                                                                            .menu-collection-img .lazy-image {
+                                                                                                                aspect-ratio: var(--asp-rat);
+                                                                                                            }
+                                                                                                        {% endif %}
+                                                                                                    {% endstyle %}
+                                                                                                    {% if settings.images_loading != 'disable' %}
+                                                                                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ collection.image.aspect_ratio }}">
+                                                                                                    {% endif %}
+                                                                                                    {{
+                                                                                                        collection.image
+                                                                                                        | image_url: width: 3200
+                                                                                                        | image_tag:
+                                                                                                        sizes: sizes,
+                                                                                                        widths: widths,
+                                                                                                        class: img_class,
+                                                                                                        alt: collection.image.alt,
+                                                                                                        draggable: false,
+                                                                                                        loading: 'lazy',
+                                                                                                        fetchpriority: 'low',
+                                                                                                        onload: onload_script
+                                                                                                    }} 
+                                                                                                    {% if settings.images_loading != 'disable' %}
+                                                                                                        {% if settings.images_loading != 'fade_scale' %}
+                                                                                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                                                                                          <img 
+                                                                                                          alt="{{ collection.image.alt | escape }}" 
+                                                                                                          src="{{ collection.image | image_url: width: 10 }}"
+                                                                                                          draggable="false"
+                                                                                                          width="10" 
+                                                                                                          height="10">
+                                                                                                        </div>
+                                                                                                        {% endif %}
+                                                                                                    </figure>
+                                                                                                    {% endif %}
+                                                                                                    <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                                                        {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ second_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                        </a>
+                                                                                    {% endif %}
+                                                                                {% endfor %}
+                                                                            {% endif %}
+                                                                            <p class="menu-collection-title {{ section.settings.title_style }}{% if uppercase_title %} uppercase{% endif %}{% if section.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                                                {% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ second_nested_link.title }}{% if section.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                                            </p>
+                                                                            {% style %}
+                                                                                .block-nested-menu--{{ nested_menu_block_id }} {
+                                                                                    --aspect-ratio: {{ image_ratio }};
+                                                                                    {% if image_radius == 'default' %}
+                                                                                        --image-border-radius: {{ settings.images_and_sections_radius }};
+                                                                                    {% else %}
+                                                                                        --image-border-radius: {{ image_radius }};
+                                                                                    {% endif %}
+                                                                                }
+                                                                                {% if settings.images_loading != 'disable' and image_ratio == 'auto' %}
+                                                                                    .block-nested-menu--{{ nested_menu_block_id }} .menu__item-image .lazy-image {
+                                                                                        aspect-ratio: var(--asp-rat);
+                                                                                    }
+                                                                                {% endif %}
+                                                                            {% endstyle %}
+                                                                            <ul class="second-nested__list flex--column hide-scrollbar block-nested-menu--{{ nested_menu_block_id }}">
+                                                                                {% if item_img_1 != blank or item_heading_1 != blank and item_link_1 != blank %}
+                                                                                {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                    downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_1, item_image: item_img_1, item_link: item_link_1, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_2 != blank or item_heading_2 != blank and item_link_2 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_2, item_image: item_img_2, item_link: item_link_2, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_3 != blank or item_heading_3 != blank and item_link_3 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_3, item_image: item_img_3, item_link: item_link_3, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_4 != blank or item_heading_4 != blank and item_link_4 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_4, item_image: item_img_4, item_link: item_link_4, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_5 != blank or item_heading_5 != blank and item_link_5 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_5, item_image: item_img_5, item_link: item_link_5, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_6 != blank or item_heading_6 != blank and item_link_6 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_6, item_image: item_img_6, item_link: item_link_6, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_7 != blank or item_heading_7 != blank and item_link_7 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_7, item_image: item_img_7, item_link: item_link_7, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_8 != blank or item_heading_8 != blank and item_link_8 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_8, item_image: item_img_8, item_link: item_link_8, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_9 != blank or item_heading_9 != blank and item_link_9 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_9, item_image: item_img_9, item_link: item_link_9, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                                {% if item_img_10 != blank or item_heading_10 != blank and item_link_10 != blank %}
+                                                                                    {%- render 'nested-item', menu: section.settings.menu, child_menu: true, show_nested: true, event_type: 'click', menu_settings: section.settings, blocks: blocks, bolder_font: bolder_font, 
+                                                                                        downcased_nested_highlighted_items: downcased_nested_highlighted_items, item_style: item_style, level: 'fourth', item_heading: item_heading_10, item_image: item_img_10, item_link: item_link_10, onload_script: onload_script -%}
+                                                                                {% endif %}
+                                                                            </ul>
+                                                                            {% for collection in collections %}
+                                                                                {% if collection.url == second_nested_link.url %}
+                                                                                    <div class="button-block block__button collection-button">
+                                                                                        <a href="{{ second_nested_link.url }}"  tabindex="-1" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                                                                                            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'collection.shop_all' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                                                        </a>
+                                                                                    </div>
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                        <span class='animation-item fourth-level'></span>
+                                                                    {% endif %}
+                                                                    </drawer-menu>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        {% for collection in collections %}
+                                                            {% if collection.url == first_nested_link.url %}
+                                                                <div class="button-block block__button collection-button">
+                                                                    <a href="{{ first_nested_link.url }}"  tabindex="-1" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                                                                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'collection.shop_all' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                                    </a>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <span class='animation-item third-level'></span>
+                                                {% endif %}
+                                            </drawer-menu>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                {% for collection in collections %}
+                                    {% if collection.url == link.url %}
+                                        <div class="button-block block__button collection-button">
+                                            <a href="{{ link.url }}"  tabindex="-1" class="button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}">
+                                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'collection.shop_all' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class='animation-item second-level'></span>
+                        {% endif %}
+                    </drawer-menu>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</div>

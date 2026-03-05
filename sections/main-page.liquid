@@ -1,0 +1,348 @@
+{%- liquid
+  assign disable_max_width = false
+  if section.settings.disable_max_width 
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+    assign disable_max_width = true
+  endif
+
+  assign uppercase_page = false
+  if section.settings.page_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_page = true
+  elsif section.settings.page_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_page = true
+  elsif section.settings.page_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_page = true
+  elsif section.settings.page_style == 'body-font' and settings.uppercase_body
+      assign uppercase_page = true
+  elsif section.settings.page_style == 'caption-font' and settings.uppercase_caption
+      assign uppercase_page = true
+  endif
+
+  assign uppercase_headings = false
+  if section.settings.rte_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_headings = true
+  elsif section.settings.rte_heading_style == 'section-heading' and settings.uppercase_section_headings
+      assign uppercase_headings = true
+  elsif section.settings.rte_heading_style == 'page-title' and settings.uppercase_page_titles
+      assign uppercase_headings = true
+  elsif section.settings.rte_heading_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_headings = true
+  elsif section.settings.rte_heading_style == 'body-font' and settings.uppercase_body
+      assign uppercase_headings = true
+  endif
+
+  assign scheme1 = settings.color_schemes | first
+  assign section_framing = false
+  if section.settings.color_scheme != scheme1 and section.settings.section_framing != 'disable'
+      assign section_framing = true
+  endif
+-%}
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section{% unless section_framing %} color-{{ section.settings.color_scheme }}{% endunless %} side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+    <div class="section-container{% if section_framing and section.settings.section_framing == 'grid' %} page {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}{% unless section_framing %} page {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endunless %}">
+        {%- if section_framing -%}<div class="section-radius elem-padding-l color-{{ section.settings.color_scheme }}"><div {% if section.settings.section_framing != 'grid' %}class="page {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}"{% endif %}>{%- endif -%}
+            <div class="page-wrapper {{ section.settings.content_width }}">
+              {% unless section.settings.hide_heading %}
+                <div class="template-header">
+                  {%- liquid
+                    assign uppercase_heading = false
+                    if section.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                        assign uppercase_heading = true
+                    elsif section.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+                        assign uppercase_heading = true
+                    elsif section.settings.heading_style == 'page-title' and settings.uppercase_page_titles
+                        assign uppercase_heading = true
+                    elsif section.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+                        assign uppercase_heading = true
+                    elsif section.settings.heading_style == 'body-font' and settings.uppercase_body
+                        assign uppercase_heading = true
+                    elsif section.settings.heading_style == 'caption-font' and settings.uppercase_caption
+                        assign uppercase_heading = true
+                    endif
+                  -%}
+                  <h1 class="page__title custom-heading {{ section.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                    {% if section.settings.heading != blank %}
+                      {% liquid
+                        assign heading_text = section.settings.heading
+                        assign processed_text = ''
+                        assign split_text = heading_text | split: '['
+
+                        for part in split_text
+                          if part contains ']'
+                            assign split_bracket = part | split: ']'
+                            assign highlight_text = split_bracket[0]
+                            assign after_bracket = split_bracket[1]
+                            assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                          else
+                            assign processed_text = processed_text | append: part
+                          endif
+                        endfor
+
+                        assign final_text = ''
+                        assign split_text_curly = processed_text | split: '{'
+
+                        for part in split_text_curly
+                          if part contains '}'
+                            assign split_curly = part | split: '}'
+                            assign styled_text = split_curly[0]
+                            assign after_curly = split_curly[1]
+                            assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                          else
+                            assign final_text = final_text | append: part
+                          endif
+                        endfor
+                      %}
+                      {{ final_text }}
+                    {% else %}
+                      {{ page.title | escape }}
+                    {% endif %}
+                  </h1>
+                </div>
+                {% endunless %}
+                <div class="page__content heading-style-{{ section.settings.rte_heading_style }} rte {{ section.settings.page_style }} {% if uppercase_page %} uppercase{% endif %}{% if uppercase_headings %} headings-uppercase{% endif %} 
+                  {% if section.settings.rte_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                  {% if section.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                    {{ page.content }}
+                </div>
+            </div>
+        {%- if section_framing -%}</div></div>{%- endif -%}
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-page.name",
+  "tag": "section",
+  "class": "main-page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.all.settings_titles.heading.custom_heading.label",
+      "info": "t:sections.all.settings_titles.heading.heading.info"
+    },
+    {
+      "type": "select",
+      "id": "heading_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        },
+        {
+          "value": "page-title",
+          "label": "t:sections.all.headings_style.options__5.label"
+        }
+      ],
+      "default": "page-title",
+      "label": "t:sections.all.headings_style.heading_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_heading",
+      "default": false,
+      "label": "t:sections.all.settings_titles.heading.hide_heading.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text",
+      "default": true,
+      "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "select",
+      "id": "rte_heading_style",
+      "options": [
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        },
+        {
+          "value": "page-title",
+          "label": "t:sections.all.headings_style.options__5.label"
+        }
+      ],
+      "default": "section-heading",
+      "label": "t:sections.all.headings_style.richtext_heading_style.label"
+    },
+    {
+      "type": "select",
+      "id": "page_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        }
+      ],
+      "default": "body-font",
+      "label": "t:sections.all.headings_style.text_style.label"
+    },
+    {
+      "type": "select",
+      "id": "content_width",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "t:sections.all.settings_titles.content_width.options__1.label"
+        },
+        {
+          "value": "regular",
+          "label": "t:sections.all.settings_titles.content_width.options__2.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:sections.all.settings_titles.content_width.options__3.label"
+        }
+      ],
+      "default": "regular",
+      "label": "t:sections.all.settings_titles.content_width.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.settings_titles.section_layout_header.content"
+    },
+    {
+      "type": "select",
+      "id": "grid_style",
+      "options": [
+        {
+          "value": "page",
+          "label": "t:sections.all.grid_style.options__1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:sections.all.grid_style.options__3.label"
+        },
+        {
+          "value": "alternative",
+          "label": "t:sections.all.grid_style.options__2.label"
+        }
+      ],
+      "default": "alternative",
+      "label": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_max_width",
+      "default": false,
+      "label": "t:sections.all.disable_max_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "select",
+      "id": "section_framing",
+      "options": [
+        {
+          "value": "disable",
+          "label": "t:sections.all.section_framing.options__1.label"
+        },
+        {
+          "value": "enable",
+          "label": "t:sections.all.section_framing.options__2.label"
+        },
+        {
+          "value": "grid",
+          "label": "t:sections.all.section_framing.options__3.label"
+        }
+      ],
+      "default": "disable",
+      "label": "t:sections.all.section_framing.label",
+      "info": "t:sections.all.section_framing.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

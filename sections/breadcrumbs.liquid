@@ -1,0 +1,134 @@
+{%- liquid
+  assign disable_max_width = false
+  if section.settings.disable_max_width
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+    assign disable_max_width = true
+  endif
+
+  assign full_width = false
+  if section.settings.full_width
+    assign full_width = true
+  endif
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --top-spacing: {{ section.settings.top_spacing }};
+    --bottom-spacing: {{ section.settings.bottom_spacing }};
+  }
+{% endstyle %}
+
+<div class="section color-{{ section.settings.color_scheme }}{% unless full_width %} side-margins{% endunless %}{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+  <div class="section-container {{ section.settings.grid_style }}-grid{% if full_width or disable_max_width %} disable-max-width{% endif %}">
+    {%- render 'breadcrumbs', object: section -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.breadcrumbs.name",
+  "tag": "section",
+  "class": "breadcrumbs-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.breadcrumbs.settings.paragraph.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "breadcrumbs_center_content",
+      "default": false,
+      "label": "t:sections.all.center_content.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.settings_titles.section_layout_header.content"
+    },
+    {
+      "type": "select",
+      "id": "grid_style",
+      "options": [
+        {
+          "value": "page",
+          "label": "t:sections.all.grid_style.options__1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:sections.all.grid_style.options__3.label"
+        },
+        {
+          "value": "alternative",
+          "label": "t:sections.all.grid_style.options__2.label"
+        }
+      ],
+      "default": "page",
+      "label": "t:sections.all.grid_style.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_max_width",
+      "default": false,
+      "label": "t:sections.all.disable_max_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 0.3
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 0.3
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.breadcrumbs.name"
+    }
+  ],
+  "enabled_on": {
+    "templates": [
+      "product",
+      "list-collections",
+      "collection",
+      "blog",
+      "article"
+    ]
+  }
+}
+{% endschema %}

@@ -1,0 +1,108 @@
+<article class="article-card__container flex--row{% if show_more %} show-more-element{% endif %}">
+    <div class="article-card {% if full_width %}article-card--full-width{% endif %} {% if horizontal %}article-card--horizontal{% endif %} {% if content_alignment %}{{ content_alignment }}{% endif %}{% if show_post_border %} with-border{% endif %} color-{{ post_color_scheme }}{% if post_color_scheme != section.settings.color_scheme %} with-color{% endif %}">
+        {%- if show_image -%}
+            <div class="article-card__image aspect-ratio">
+                {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+        {%- endif -%}
+        <div class="article-card__info">
+            {%- for block in section.blocks -%}
+            {%- case block.type -%}
+                {%- when 'title'-%}
+                    {%- liquid
+                        assign uppercase_subheading = false
+                        if block.settings.title_style == 'section-heading' and settings.uppercase_section_headings
+                          assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                          assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_subheading = true
+                        endif
+                      -%}
+                    <h3 class="article-card__info-child article-card__title {% if block.settings.use_accent_color %}article-card__title--accent{% endif %} {{ block.settings.title_style }}{% if uppercase_subheading %} uppercase{% endif %}
+                        {% if block.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" {{ block.shopify_attributes }}>
+                        {% if block.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                        {{ 'blogs.article.article_title' | t }}
+                        {% if block.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                    </h3>
+                {%- when 'info' -%}
+                    {%- liquid
+                        assign uppercase_text = false
+                        if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_text = true
+                        endif
+                      -%}
+                    {%- if block.settings.show_date or block.settings.show_author or block.settings.show_number_of_comments -%}
+                    <div class="article-card__info-child article__info flex--row {{ block.settings.text_style }}
+                    {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if uppercase_text %} uppercase{% endif %}"{{ block.shopify_attributes }}>
+                        {%- if block.settings.show_author -%}
+                            <span class="article__info-author">
+                                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ 'blogs.article.article_author' | t }}{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                            </span>
+                        {%- endif -%}
+                    </div>
+                    {% endif %}
+                {%- when 'excerpt'-%}
+                    {%- liquid
+                        assign uppercase_text = false
+                        if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_text = true
+                        endif
+                        -%}
+                    <div class="article-card__info-child article-card__excerpt-wrapper {{ block.settings.text_style }}
+                    {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if uppercase_text %} uppercase{% endif %}">
+                        {% style %}
+                            #shopify-section-{{ section.id }} .article-card__excerpt-wrapper {
+                                --line-clamp: {{ block.settings.excerpt_line_limit }};
+                            }
+                        {% endstyle %}
+                        <p class="article-card__excerpt {% if article.excerpt == blank %}line-clamp{% endif %}" {{ block.shopify_attributes }}>
+                            {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ 'blogs.article.article_excerpt' | t }}{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                        </p>
+                    </div>
+                {%- when 'read_more'-%}
+                    {%- if block.settings.button_label != blank or block.settings.button_icon != blank -%}
+                        <div class="article-card__info-child article-card__button{% if block.settings.button_label != blank and block.settings.button_icon != blank %} button-block--small-padding{% endif %}" {{ block.shopify_attributes }}>
+                            <div class="article-card__link button {{ block.settings.button_style }}-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}">
+                                {% if block.settings.button_icon != blank %}
+                                    {%- liquid
+                                    assign icon_name = block.settings.button_icon | split: '/'
+                                    if icon_name.size == 3
+                                        assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                    elsif icon_name.size == 2
+                                        assign file_name = icon_name.first
+                                    endif
+                                    assign icon = icon_name.last
+                                    -%}
+                                    <span class="icon-accordion flex--row icon--small">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                                {% endif %}
+                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ block.settings.button_label }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                            </div>
+                        </div>
+                    {%- endif -%}
+            {%- endcase -%}
+            {%- endfor -%}
+        </div>
+    </div>
+</article>
+  

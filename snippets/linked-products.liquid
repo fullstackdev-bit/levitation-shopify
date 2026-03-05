@@ -1,0 +1,43 @@
+{% style %}
+    .linked-products--{{ block.id }} {
+        --focal-point: {{ settings.linked_products_focal_point }};
+        --border-radius: {{ settings.linked_products_image_radius }};
+        --aspect-ratio: {{ settings.linked_products_image_ratio }};
+        --image-size: {{ settings.linked_product_size }}px;
+    }
+    @media screen and (max-width: 768px) {
+        .linked-products--{{ block.id }} {
+            --image-size: {{ settings.linked_product_size_mobile }}px;
+        }
+    }
+{% endstyle %}
+{% liquid 
+     assign linked_products = product.metafields.custom.linked_products
+%}
+{% if linked_products != blank %}
+    <div class="linked-products-block flex--column" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+        {% if block.settings.heading != blank %}
+            <h3 class="{{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if block.settings.bolder_font %}<b>{% endif %}{{ block.settings.heading }}{% if block.settings.bolder_font %}</b>{% endif %}
+            </h3>
+        {% endif %}
+        <div class="linked-products linked-products--{{ block.id }}">
+            {% for item in linked_products.value  %}
+                {% liquid 
+                    assign linked_img = item.metafields.custom.linked_image
+                    assign linked_color = item.metafields.custom.linked_color
+                    assign img_url = linked_img.value | split: '/' | last | escape
+                %}
+                <a class="linked-products__swatch{% if settings.enable_blending and settings.apply_to_swatches %} enable-blending{% endif %}{% if settings.enable_shadow %} swatch--shadow{% endif %}{% if item.url == product.url %} linked-products__swatch--active{% endif %} aspect-ratio" href="{{ item.url }}">
+                    {% if linked_img != blank %}
+                        <span>{{ images[img_url] | image_url: width: 200 | image_tag }}</span>
+                    {% elsif linked_img == blank and linked_color != blank %}
+                        <span style="background-color: {{ linked_color.value }};{% if settings.linked_products_image_ratio == 'auto' %}aspect-ratio: 1/1;{% endif %}"></span>
+                    {% elsif linked_img == blank and linked_color == blank %}
+                        <span>{{ item.featured_image | image_url: width: 200 | image_tag: alt: item.featured_image.alt, draggable: false }}</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,310 @@
+{% liquid
+    if linked_page != blank and linked_page.metafields.custom.gallery.value
+      assign metafield_files = linked_page.metafields.custom.gallery.value
+    else
+      if template.name == 'product'
+          assign metafield_files = product.metafields.custom.gallery.value
+      elsif template.name == 'blog'
+          assign metafield_files = blog.metafields.custom.gallery.value
+      elsif template.name == 'article'
+          assign metafield_files = article.metafields.custom.gallery.value
+      elsif template.name == 'page'
+          assign metafield_files = page.metafields.custom.gallery.value
+      elsif template.name == 'collection'
+          assign metafield_files = collection.metafields.custom.gallery.value
+      endif
+    endif
+
+    if metafield_files != blank
+      if metafield_files.count < 6 and desktop_columns == '6'
+        assign desktop_columns = metafield_files.count
+      endif
+      if metafield_files.count < 5 and desktop_columns == '5'
+        assign desktop_columns = metafield_files.count
+      endif
+      if metafield_files.count < 4 and desktop_columns == '4'
+        assign desktop_columns = metafield_files.count
+      endif
+      if metafield_files.count < 3 and desktop_columns == '3'
+        assign desktop_columns = metafield_files.count
+      endif
+      if metafield_files.count < 2 and desktop_columns == '2'
+        assign desktop_columns = '2'
+      endif
+    endif
+
+    assign onload_script = ''
+    assign loading_images = ''
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+        assign loading_images = 'lazy'
+    elsif section.index > 2
+      assign loading_images = 'lazy'
+    endif
+
+    assign use_original_media_ratio = false
+    if zoom_media_ratio == 'auto'
+      assign use_original_media_ratio = true
+    endif
+  %}
+
+  {% style %}
+  .id-{{ snippet_id }} {
+    --focal-point: {{ focal_point }};
+    --desktop-grid-type: {{ desktop_columns }};
+    --grid-gap: {{ grid_gap }}px;
+    {% if media_radius == 'default' %}
+        --image-radius: {{ settings.images_and_sections_radius }};
+    {% else %}
+        --image-radius: {{ media_radius }};
+    {% endif %}
+  }
+
+  @media screen and (max-width: 500px) {
+    .id-{{ snippet_id }} {
+      --grid-gap: {{ mobile_grid_gap }}px;
+      --desktop-grid-type: {{ mobile_columns }};
+    }
+  }
+{% endstyle %}
+
+{% liquid
+    assign mobile_columns = mobile_columns | times: 1
+    if metafield_files.count == 1
+    assign mobile_columns = 1
+    endif
+%}
+
+<div class="id-{{ snippet_id }}" {{ block.shopify_attributes }}>
+    <cascading-grid>  
+        <ul class="image-grid__grid image-grid__grid--{{ desktop_columns }} image-grid__grid-mobile--{{ mobile_columns }} {% if section_width == 'narrow' %}image-grid__grid--narrow{% endif %} {% if media_ratio == 'auto' %}grid{% endif %}" >
+        {% if metafield_files != blank %}
+            {% for media in metafield_files %}
+                {% if media.media_type == 'image' %}
+                    <li class="image-grid__item ratio-{{ media_ratio }} {% if media_ratio == 'auto' %}grid-item grid-item-desktop--{{ desktop_columns }} grid-item-mobile--{{ mobile_columns }}{% endif %}" data-media-id="{{ media.id }}">
+                        <modal-opener data-modal="#ProductModal-{{ snippet_id }}">
+                            <div class="image-grid__image">
+                                <div class="image-grid__image-wrapper aspect-ratio {% if enable_image_zoom %}hoverable{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                                    {%- capture sizes -%} 
+                                      (max-width: 768px) calc(100vw / {{ mobile_columns }}), calc(100vw / {{ desktop_columns }})
+                                    {%- endcapture -%}
+                                    {%- liquid
+                                      assign widths = '300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                                      assign img_class = 'image'
+                                      if enable_image_zoom and image_zoom_style == 'hover'
+                                        assign img_class = 'image image-magnify-hover'
+                                      endif
+                                    -%}
+                                    {% if settings.images_loading != 'disable' %}
+                                      <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ media.aspect_ratio }}">
+                                    {% endif %}
+                                      {{
+                                        media
+                                        | image_url: width: 3200
+                                        | image_tag:
+                                        sizes: sizes,
+                                        widths: widths,
+                                        alt: media.alt,
+                                        draggable: false,
+                                        class: img_class,
+                                        loading: loading_images,
+                                        onload: onload_script
+                                      }}
+                                      {% if settings.images_loading != 'disable' %}
+                                        {% if settings.images_loading != 'fade_scale' %}
+                                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                          <img 
+                                          alt="{{ media.alt | escape }}" 
+                                          src="{{ media | image_url: width: 10 }}"
+                                          draggable="false"
+                                          width="10" 
+                                          height="10">
+                                        </div>
+                                        {% endif %}
+                                    </figure>
+                                    {% endif %}
+                                    {% if enable_image_zoom %}
+                                        <div class="zoom_icon">
+                                            <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-in' -%}</span>
+                                        </div>
+                                        {% if image_zoom_style == 'hover' %}
+                                          <div class="image-zoom-icon zoom">
+                                            <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-out' -%}</span>
+                                          </div>
+                                        {% else %}
+                                          <button class="product__media-toggle button--modal-opener quick-add-hidden {% if enable_image_zoom %}zoom-cursor{% endif %}" type="button" aria-haspopup="dialog" data-media-id="{{ media.id }}" tabindex="-1"></button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                
+                            </div>
+                        </modal-opener>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% assign placeholders = 'product-1,product-2,product-3,product-4,product-5,product-6,product-1,product-2' | split: ',' %}
+            {% for placeholder in placeholders %}
+            <li class="image-grid__item ratio-{{ media_ratio }} {% if media_ratio == 'auto' %}grid-item grid-item-desktop--{{ desktop_columns }} grid-item-mobile--{{ mobile_columns }}{% endif %}" data-media-id="{{ forloop.index }}">
+                <modal-opener data-modal="#ProductModal-{{ snippet_id }}">
+                    <div class="image-grid__image">
+                        <div class="image-grid__image-wrapper {% if enable_image_zoom %}hoverable{% endif %}">
+                        {{ placeholder | placeholder_svg_tag: 'placeholder-svg ' }}
+                            {% if enable_image_zoom %}
+                                <div class="zoom_icon">
+                                    <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-in' -%}</span>
+                                </div>
+                                {% if image_zoom_style == 'hover' %}
+                                  <div class="image-zoom-icon zoom">
+                                    <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-out' -%}</span>
+                                  </div>
+                                {% else %}
+                                  <button class="product__media-toggle button--modal-opener quick-add-hidden {% if enable_image_zoom %}zoom-cursor{% endif %}" type="button" aria-haspopup="dialog" data-media-id="{{ media.id }}" tabindex="-1"></button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+                </modal-opener>
+            </li>
+            {% endfor %}
+        {% endif %}
+        </ul>  
+        {% if enable_image_zoom and image_zoom_style != 'hover' %}
+        <product-modal 
+          id="ProductModal-{{ snippet_id }}" 
+          class="product-media-modal {% if use_original_media_ratio and image_zoom_style == 'slideshow' %} product-media-modal--original-ratio-slideshow {% endif %}" 
+          data-template-id="ProductModalTemplate-{{ snippet_id }}"
+        >
+          <template id="ProductModalTemplate-{{ snippet_id }}">
+            <div class="product-media-modal__dialog color-{{ section.settings.color_scheme }}" role="dialog" aria-modal="true" tabindex="-1">
+              {% style %}
+                #ProductModal-{{ snippet_id }} {
+                  --item-width: {{ desktop_width }}%;
+                  --focal-point: {{ zoom_focal_point }};
+                  --slider-gap: 8px;
+                  --aspect-ratio: {{ zoom_media_ratio }};
+                  {% if image_zoom_style == 'slideshow'  %}
+                    --desktop-item-width: 100%;
+                  {% endif %}
+                  }
+                  {% if settings.images_loading != 'disable' and zoom_media_ratio == 'auto' %}
+                    #ProductModal-{{ snippet_id }} .lazy-image {
+                      aspect-ratio: var(--asp-rat);
+                    }
+                  {% endif %}
+                  @media screen and (max-width: 1024px) {
+                    #ProductModal-{{ snippet_id }} {
+                    --item-width: {{ mobile_width }}%;
+                  }
+                }
+              {% endstyle %}
+              <button id="ModalClose-{{ snippet_id }}" type="button" class="product-media-modal__toggle button solid-button button-close button--small close-popup icon--large">
+                  {%- render 'glyphs_interface', icon: 'close' -%}
+              </button>
+              <div class="product-media-modal__content hide-scrollbar" role="document" tabindex="0">
+                <div class="product-media-modal__wrapper product-media-modal__wrapper--{{ image_zoom_style }} {% if use_original_media_ratio and image_zoom_style == 'slideshow' %} product-media-modal__wrapper--original-ratio-slideshow {% endif %}">
+                {% if image_zoom_style == 'slideshow' %}
+                  <slider-component id="GalleryViewer-{{ snippet_id }}-zoom" class="slider">
+                    <div class="slider__viewport">
+                      <ul id="Slider-Gallery-{{ snippet_id }}-zoom" class="slider__grid hide-scrollbar slider-in-product-modal" role="list" style="--desktop-columns: 1; --mobile-columns: 1;"
+                        data-count="1"
+                        data-count-mobile="1">
+                {% endif %}
+                {% if metafield_files != blank %}
+                  {%- for media in metafield_files -%}
+                    {% if media.media_type == 'image' %}
+                      {% if image_zoom_style == 'slideshow' %}
+                        <li id="Slide-{{ snippet_id }}-zoom" class="slider__grid-item snap-align aspect-ratio{% if image_zoom_style == 'slideshow' and enable_slideshow_zoom_in %} container-magnify-hover{% endif %} {% if forloop.first %}is-active{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                      {% endif %}
+                      {%- capture sizes -%} 
+                        100vw
+                      {%- endcapture -%}
+                      {%- liquid
+                        assign widths = '300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                        assign img_class = 'image aspect-ratio'
+                        if image_zoom_style == 'slideshow' and enable_slideshow_zoom_in
+                          assign img_class = 'image image-magnify-hover aspect-ratio'
+                        endif
+                      -%}
+                      {% if settings.images_loading != 'disable' %}
+                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ media.aspect_ratio }}">
+                      {% endif %}
+                        {{
+                          media
+                          | image_url: width: 3200
+                          | image_tag:
+                          sizes: sizes,
+                          widths: widths,
+                          alt: media.alt,
+                          draggable: false,
+                          class: img_class,
+                          data-media-id: media.id,
+                          loading: loading_images,
+                          onload: onload_script
+                        }}
+                        {% if settings.images_loading != 'disable' %}
+                          {% if settings.images_loading != 'fade_scale' %}
+                          <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                            <img 
+                            alt="{{ media.alt | escape }}" 
+                            src="{{ media | image_url: width: 10 }}"
+                            draggable="false"
+                            width="10" 
+                            height="10">
+                          </div>
+                          {% endif %}
+                      </figure>
+                      {% endif %}
+                        {% if image_zoom_style == 'slideshow' and enable_slideshow_zoom_in %}
+                          <div class="image-zoom-icon zoom">
+                            <div class="icon-zoom-in">
+                              <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-in' -%}</span>
+                            </div>
+                            <div class="icon-zoom-out">
+                              <span class="flex--row icon icon--large">{%- render 'glyphs_interface', icon: 'zoom-out' -%}</span>
+                            </div>
+                          </div>
+                        {% endif %}
+                      {% if image_zoom_style == 'slideshow' %}
+                      </li>
+                      {% endif %}
+                    {% endif %}
+                  {%- endfor -%}
+                {% else %}
+                {% assign placeholders = 'product-1,product-2,product-3,product-4,product-5,product-6,product-1,product-2' | split: ',' %}
+                  {% for placeholder in placeholders %}
+                    {% if image_zoom_style == 'slideshow' %}
+                      <li id="Slide-{{ snippet_id }}-zoom" class="slider__grid-item snap-align aspect-ratio{% if image_zoom_style == 'slideshow' and enable_slideshow_zoom_in %} container-magnify-hover{% endif %} {% if forloop.first %}is-active{% endif %}">
+                    {% endif %}
+                    <div data-media-id="{{ forloop.index }}" class="aspect-ratio">
+                      {{ placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                    {% if image_zoom_style == 'slideshow' %}
+                    </li>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                      {% if image_zoom_style == 'slideshow' %}
+                      </ul>
+                      <div class="zoom-slider-buttons-items {% unless show_arrow_in_mobile %} hidden-on-mobile{% endunless %}
+                        {% if metafield_files.size == 1 %}hidden-mobile{% endif %}
+                        {% if metafield_files.size == 1 %}hidden-desktop{% endif %}">
+                        <button type="button" class="slider-button slider-button--prev" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">
+                          <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span>
+                        </button>
+                        <button type="button" class="slider-button slider-button--next" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">
+                          <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </slider-component>
+                {% endif %}
+                </div>
+              </div>
+            </div>
+          </template>
+        </product-modal>
+      {% endif %} 
+    </cascading-grid>
+</div>

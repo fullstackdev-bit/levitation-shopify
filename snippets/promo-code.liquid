@@ -1,0 +1,24 @@
+<script src="{{ 'promo-code.js' | asset_url }}" defer="defer"></script>
+<promo-code class="section-block">
+    {%- liquid
+        assign uppercase_text = false
+        if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+          assign uppercase_text = true
+        elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+          assign uppercase_text = true
+        elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+            assign uppercase_text = true
+        elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+            assign uppercase_text = true
+        elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+            assign uppercase_text = true
+        endif
+      -%}
+    <div class="promo-code {% if center_text %}center{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" {{ block.shopify_attributes }}>
+        <div class="promo-code__field"><span class="hide-scrollbar">{{ promo_code }}</span></div>
+        <button class="copy-button {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+        <span class="copy-label show">{{ 'products.product.copy_code' | t }}</span>
+        <span class="copy-success hide">{{ 'products.product.copied_message' | t }}</span>
+        </button>
+    </div>
+</promo-code>

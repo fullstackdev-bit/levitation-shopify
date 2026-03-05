@@ -1,0 +1,167 @@
+{{ 'main-gift-card.css' | asset_url | stylesheet_tag }}
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+        --logo-image-width: {{ section.settings.logo_image_width }}px;
+    }
+{% endstyle %}
+
+<div class="gift-card section color-{{ section.settings.color_scheme }}">
+    <div class="section-container side-margins center{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+        <div class="template-header">
+            <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}">{{ 'gift_cards.issued.subtext' | t }}</h1>
+        </div>
+        <div class="gift-card__image-wrapper" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+            {% if section.settings.logo_image != blank %}
+                {%- assign logo_alt = section.settings.logo_image.alt | default: shop.name | escape -%}
+                <img
+                class="gift-card__image"
+                srcset="{%- if section.settings.logo_image.width >= 100 -%}{{ section.settings.logo_image | image_url: width: 100 }} 100w,{%- endif -%}
+                {%- if section.settings.logo_image.width >= 165 -%}{{ section.settings.logo_image | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if section.settings.logo_image.width >= 375 -%}{{ section.settings.logo_image | image_url: width: 375 }} 375w,{%- endif -%}
+                {{ section.settings.logo_image | image_url }} {{ section.settings.logo_image.width }}w"
+                src="{{ section.settings.logo_image | image_url: width: section.settings.logo_image.width }}"
+                sizes="calc({{ section.settings.logo_image_width }}px * 1.5)"
+                loading="eager"
+                draggable="false"
+                alt="{{ logo_alt }}"
+                style="object-position: {{ section.settings.logo_image.presentation.focal_point }}"
+                width="{{ section.settings.logo_image.width }}"
+                height="{{ section.settings.logo_image.width | divided_by: section.settings.logo_image.aspect_ratio | ceil }}">
+            {% else %}
+                <img
+                class="gift-card__image"
+                src="{{ 'gift-card/card.svg' | shopify_asset_url }}"
+                alt="{{ 'gift_cards.issued.subtext' | t }}"
+                draggable="false"
+                height="260"
+                width="400"
+                loading="eager">
+            {% endif %}
+        </div>
+        <h2 class="gift-card__shop-name section-heading {% if settings.uppercase_section_headings %}uppercase{% endif %}">{{ shop.name }}</h2>
+        <div class="gift-card__value secondary-heading {% if settings.uppercase_secondary_headings %}uppercase{% endif %}">
+            <div class="gift-card__price">
+                {% if settings.currency_code_enabled %}
+                {{ 'gift_cards.issued.price_value' | t }} {{ gift_card.initial_value | money_with_currency }}
+                {% else %}
+                {{ 'gift_cards.issued.price_value' | t }} {{ gift_card.initial_value | money }}
+                {% endif %}
+            </div>
+            {%- if gift_card.enabled == false or gift_card.expired -%}
+                <p class="gift-card__label">{{ 'gift_cards.issued.expired' | t }}</p>
+            {%- endif -%}
+            {%- if gift_card.balance != gift_card.initial_value -%}
+                <p class="gift-card__label">
+                {% if settings.currency_code_enabled %}
+                    {{ 'gift_cards.issued.remaining_html' | t: balance: gift_card.balance | money_with_currency }}
+                {% else %}
+                    {{ 'gift_cards.issued.remaining_html' | t: balance: gift_card.balance | money }}
+                {% endif %}
+                </p>
+            {%- endif -%}
+        </div>
+        <div class="gift-card__info body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+            <p class="gift-card__number">{{ gift_card.code | format_code }}</p>
+            <p class="gift-card__text {% if settings.dim_text %}dim{% endif %}">
+                <span>{{ 'gift_cards.issued.text_1' | t }}</span>
+                <span>{{ 'gift_cards.issued.text_2' | t }}</span>
+            </p>
+        </div>
+        <a
+            href="{{ request.origin }}"
+            class="button solid-button gift-card__shopping body-font {% if section.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}"
+            target="_blank"
+            rel="noopener"
+            aria-describedby="a11y-new-window-message">
+            {% if section.settings.use_main_button %}{% if settings.bolder_main_buttons_font %}<b>{% endif %}{% else %}{% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{% endif %}
+            {{ 'gift_cards.issued.shop_link' | t }}
+            {% if section.settings.use_main_button %}{% if settings.bolder_main_buttons_font %}</b>{% endif %}{% else %}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}{% endif %}
+        </a>
+        <div class="gift-card__qr-code" data-identifier="{{ gift_card.qr_identifier }}"></div>
+        {%- if gift_card.pass_url -%}
+            <a href="{{ gift_card.pass_url }}" class="gift_card__apple-wallet no-print">
+                <img
+                src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}"
+                width="120"
+                height="40"
+                class="gift-card__image"
+                alt="{{ 'gift_cards.issued.add_to_apple_wallet' | t }}"
+                loading="lazy"
+                draggable="false">
+            </a>
+        {%- endif -%}
+        <button class="gift-card__print button outlined-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}" onclick="window.print();">
+            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'gift_cards.issued.print_gift_card' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+        </button>
+    </div>
+</div>
+{% schema %}
+{
+  "name": "t:sections.main-gift-card.name",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "t:sections.main-gift-card.settings.logo_image.label"
+    },
+    {
+      "type": "range",
+      "id": "logo_image_width",
+      "min": 50,
+      "max": 250,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.main-gift-card.settings.logo_image_width.label",
+      "default": 100
+    },
+    {
+      "type": "checkbox",
+      "id": "use_main_button",
+      "default": true,
+      "label": "t:sections.all.buttons.use_main_button.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

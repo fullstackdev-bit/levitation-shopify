@@ -1,0 +1,57 @@
+<custom-options class="custom-options flex--column product-form__input" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign options = block.settings.options | split: ','
+      assign default_option = ''
+      assign required_option = false
+      if block.settings.make_required or block.settings.min_selections > 0
+      assign required_option = true
+      endif
+      assign option_label =  block.settings.option_label
+      if block.settings.option_label != blank and required_option
+        assign option_label =  block.settings.option_label  | append: '*'
+      endif
+    %}
+    {% if settings.show_label and block.settings.option_label != blank %}
+        <p class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}  
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>        
+                {% endif %}
+            </tooltip-component>
+            {% if settings.show_selected_option %} 
+                {% if block.settings.label_bolder_font %}<b>{% endif %}
+                <span class="current-option" data-selected-custom-option>{{  default_option }}</span>
+                {% if block.settings.label_bolder_font %}</b>{% endif %}
+            {% endif %}
+        </p>      
+    {% endif %}
+    {% if options.size > 0 %}
+    <product-checkbox-group class="form__variants {% if block.settings.options_layout == 'two_columns' %} layout-two-columns{% else %} layout-row{% endif %} {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+        data-min="{% if block.settings.min_selections == 0 and block.settings.make_required %}1{% else %}{{ block.settings.min_selections }}{% endif %}" data-max="{{ block.settings.max_selections }}" {% if from_details %} data-place-for-min="{% if block.settings.min_selections == 0 and block.settings.make_required %}1{% else %}{{ block.settings.min_selections }}{% endif %}" data-place-for-max="{{ block.settings.max_selections }}"{% endif %}>
+        {% for option in options %}
+            <label data-group="true" class="field field--checkbox flex--row align-center" for="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}">
+                <input-checkbox>
+                  <input type="checkbox" class="checkbox-group__input" id="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}" form="{{ product_form_id }}" value="{{ option | escape }}" name="properties[{{ block.settings.option_name }}]"
+                    {% if from_details %}
+                        data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}"
+                        data-place-for-name="properties[{{ block.settings.option_name }}]"
+                        data-form-input="{{ product_form_id }}"
+                    {% endif %}
+                    {% if required_option and forloop.first and from_details %}data-input-required{% endif %}
+                    {% if required_option and forloop.first %}required="required" aria-required="true"{% endif %}>
+                </input-checkbox>
+                <span class="label">{% if block.settings.text_bolder_font %}<b>{% endif %}{{ option }}{% if block.settings.text_bolder_font %}</b>{% endif %}</span>
+            </label>
+        {% endfor %}
+        <input type="hidden" name="properties[{{ block.settings.option_name }}]" {% if required_option and from_details %}data-place-for-name="properties[{{ block.settings.option_name }}]"{% endif %} form="{{ product_form_id }}" value>
+    </product-checkbox-group>
+    <span class="input-error-message visually-hidden caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">
+        {% if block.settings.min_selections > 1 %}{{ 'products.product.error_select_options' | t: options: block.settings.min_selections }}{% elsif block.settings.min_selections == 1 %}{{ 'products.product.error_select_option' | t: option: block.settings.min_selections }}{% elsif block.settings.min_selections == 0 and block.settings.make_required %}{{ 'products.product.error_select_option' | t: option: 1 }}{% endif %}
+    </span>
+    {% endif %}
+</custom-options>

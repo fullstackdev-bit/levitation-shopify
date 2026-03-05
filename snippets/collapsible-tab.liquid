@@ -1,0 +1,140 @@
+{% if block.settings.text != blank or block.settings.page != blank %}
+  {% if block.settings.heading != blank or block.settings.icon != blank or block.settings.page != blank %}
+    <div class="accordion{% if compact %} accordion--compact{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+      <accordion-toggle>
+      <div class="accordion-toggle{% if default_open_tab %} open_collapsible is-open{% endif %}">
+        <div tabindex="0" class="accordion__summary">
+          <div class="summary__title">
+            {% liquid
+              assign heading_text = block.settings.heading | default: page.title       
+              assign processed_text = ''
+              assign split_text = heading_text | split: '['
+
+              for part in split_text
+                if part contains ']'
+                  assign split_bracket = part | split: ']'
+                  assign highlight_text = split_bracket[0]
+                  assign after_bracket = split_bracket[1]
+                  assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                else
+                  assign processed_text = processed_text | append: part
+                endif
+              endfor
+
+              
+              assign final_text = ''
+              assign split_text_curly = processed_text | split: '{'
+
+              for part in split_text_curly
+                if part contains '}'
+                  assign split_curly = part | split: '}'
+                  assign styled_text = split_curly[0]
+                  assign after_curly = split_curly[1]
+                  assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                else
+                  assign final_text = final_text | append: part
+                endif
+              endfor
+             %}
+            <div class="summary__title-name custom-heading {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                {% if block.settings.icon != blank %}
+                  {%- liquid
+                    assign icon_name = block.settings.icon | split: '/'
+                    if icon_name.size == 3
+                      assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                    elsif icon_name.size == 2
+                      assign file_name = icon_name.first
+                    endif
+                    assign icon = icon_name.last
+                    assign color_rgb = block.settings.color | color_to_rgb | strip
+                    assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip
+                    -%}
+                 <span class="icon-accordion icon-accordion--with-color flex--row icon--large" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                {% endif %}
+              <p class="accordion__title">
+                {% if block.settings.bolder_font %}<b>{% endif %}{{ final_text }}{% if block.settings.bolder_font %}</b>{% endif %}
+              </p>
+            </div>
+            <span class="icon-accordion icon-accordion--close icon--large">
+              {%- render 'glyphs_interface', icon: 'plus' -%}
+            </span>
+            <span class="icon-accordion icon-accordion--open icon--large">
+              {%- render 'glyphs_interface', icon: 'minus' -%}
+            </span>
+          </div>
+        </div>
+        <div class="accordion__panel hide-scrollbar">
+          <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+            {% if block.settings.text != blank %}
+              {%- liquid
+                assign uppercase_text = false
+                if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                  assign uppercase_text = true
+                elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                  assign uppercase_text = true
+                elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                    assign uppercase_text = true
+                elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                    assign uppercase_text = true
+                elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                    assign uppercase_text = true
+                endif
+                assign uppercase_headings = false
+                if block.settings.richtext_heading_style == 'body-font' and settings.uppercase_body
+                  assign uppercase_headings = true
+                elsif block.settings.richtext_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                  assign uppercase_headings = true
+                elsif block.settings.richtext_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                  assign uppercase_headings = true
+                elsif block.settings.richtext_heading_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_headings = true
+                elsif block.settings.richtext_heading_style == 'page-title' and settings.uppercase_page_titles
+                    assign uppercase_headings = true
+                endif
+              -%}
+              <div class="accordion__text richtext heading-style-{{ block.settings.richtext_heading_style }} {% if block.settings.richtext_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                 rte link-underline{% if uppercase_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                  {{ block.settings.text }}
+              </div>
+            {% endif %}
+            {% if block.settings.page != blank %}
+              {%- liquid
+                assign uppercase_page = false
+                if block.settings.page_style == 'section-heading' and settings.uppercase_section_headings
+                  assign uppercase_page = true
+                elsif block.settings.page_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                  assign uppercase_page = true
+                elsif block.settings.page_style == 'subheading-font' and settings.uppercase_subheadings
+                    assign uppercase_page = true
+                elsif block.settings.page_style == 'body-font' and settings.uppercase_body
+                    assign uppercase_page = true
+                elsif block.settings.page_style == 'caption-font' and settings.uppercase_caption
+                    assign uppercase_page = true
+                endif
+                assign uppercase_headings = false
+                if block.settings.rte_heading_style == 'body-font' and settings.uppercase_body
+                  assign uppercase_headings = true
+                elsif block.settings.rte_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                  assign uppercase_headings = true
+                elsif block.settings.rte_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                  assign uppercase_headings = true
+                elsif block.settings.rte_heading_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_headings = true
+                elsif block.settings.rte_heading_style == 'page-title' and settings.uppercase_page_titles
+                    assign uppercase_headings = true
+                endif
+              -%}
+              <div class="page__content heading-style-{{ block.settings.rte_heading_style }} {% if block.settings.rte_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                 rte {{ block.settings.page_style }}{% if uppercase_page %} uppercase{% endif %}{% if uppercase_headings %} headings-uppercase{% endif %}
+                {% if block.settings.page_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                {{ page.content }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      </accordion-toggle>
+    </div>
+  {% endif %}
+{% endif %}

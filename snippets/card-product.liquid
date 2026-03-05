@@ -1,0 +1,993 @@
+  {%- liquid 
+    assign check_swatch = false
+    assign first_image = card_product.media[0]
+    assign second_image = card_product.media[1]
+    assign aspect_ratio = card_product.featured_image.aspect_ratio
+    if card_product.featured_media.media_type != 'image' 
+        assign aspect_ratio = card_product.featured_media.preview_image.aspect_ratio
+    endif
+
+    assign uppercase_product_price = false
+    assign subheading_heading_font_price = false
+    if card_content_style == 'regular'
+        if settings.product_price_uppercase
+            assign uppercase_product_price = true
+        endif
+        if settings.product_price_style == 'subheading-font' and settings.use_heading_font_subheadings
+            assign subheading_heading_font_price = true
+        endif
+    else
+        if settings.small_product_price_uppercase
+            assign uppercase_product_price = true
+        endif
+        if settings.small_product_price_style == 'subheading-font' and settings.use_heading_font_subheadings
+            assign subheading_heading_font_price = true
+        endif
+    endif
+
+    if force_hover_behavior_none
+        assign hover_behavior = 'none'
+    endif
+
+    if is_in_main_collection_product_grid
+        assign product_url = card_product.selected_or_first_available_variant.url | within: card_collection
+    else 
+        assign product_url = card_product.url | within: card_product.collection
+    endif
+
+    assign onload_script = ''
+    if settings.images_loading != 'disable'
+        assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+    endif
+  -%}
+
+<div class="card-product{% if full_width %} card-product--full-width{% endif %} color-{{ product_card_color_scheme }} {% if settings.enable_blending %}enable-blending{% endif %}
+    {% if show_product_card_border %}with-border{% endif %} {% if product_card_color_scheme != parent_color_scheme %}with-color{% endif %}">
+    <a id="card-product-{{ index }}" class="card hover_behavior-{{ hover_behavior }} flex--column {% if quick_buy == 'on_desktop' or quick_buy == 'enable' %}card-quick-view{% endif %}" href="{% if card_product.has_only_default_variant %}{% if settings.enable_breadcrumbs %}{{ card_product.url | within: collection }}{% else %}{{ card_product.url }}{% endif %}{% else %}{% if card_product.selected_or_first_available_variant.url != blank %}{% if settings.enable_breadcrumbs %}{{ card_product.selected_or_first_available_variant.url | within: collection }}{% else %}{{ card_product.selected_or_first_available_variant.url }}{% endif %}{% else %}{% if settings.enable_breadcrumbs %}{{ card_product.first_available_variant.url | within: collection }}{% else %}{{ card_product.first_available_variant.url }}{% endif %}{% endif %}{% endif %}" draggable="false">
+        {% if first_image or settings.product_placeholder %}
+            <div class="card-product__media-wrapper{% if settings.fit_product_media %} card-product__media-wrapper--fit{% endif %}" style="--total-slides: {{ card_product.media.size }}; --speed: {{ autoplay_speed }}s;">
+                {% liquid 
+                    assign gap = settings.page_column_gap
+                    if grid_style == 'secondary'
+                        assign gap = settings.second_grid_column_gap
+                    elsif grid_style == 'alternative'
+                        assign gap = settings.alt_grid_column_gap
+                    endif
+                %}
+
+                {% if hover_behavior contains 'slider' %}
+                    {%- liquid
+                        assign full_image_urls = ""
+                        assign full_image_alts = ""
+                        assign full_image_sizes_str = ""
+                        assign full_image_srcsets_str = ""
+                        assign full_preload_image_urls = ""
+                    
+                        assign widths = '300, 400, 600, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                        assign widths_array = widths | split: ', '
+                    
+                        for image in card_product.media
+                            assign full_image_url = image.preview_image | image_url | prepend: 'https:' | split: '?' | first
+                            assign full_image_urls = full_image_urls | append: full_image_url | append: ","
+                            assign img_alt = image.preview_image.alt | downcase | escape
+                            assign full_image_alts = full_image_alts | append: img_alt | append: ","
+                    
+                            if settings.images_loading != 'disable'
+                                assign full_preload_image_url = image.preview_image | image_url: width: 10 | prepend: 'https:'
+                                assign full_preload_image_urls = full_preload_image_urls | append: full_preload_image_url | append: ","
+                            endif
+                    
+                        
+                            capture sizes
+                                render 'card-product-media-sizes', media: image.preview_image, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps
+                            endcapture
+                            assign cleaned_sizes = sizes | strip_newlines | strip
+                            assign full_image_sizes_str = full_image_sizes_str | append: cleaned_sizes | append: "||"
+                    
+                          
+                            assign temp_srcset = ""
+                            for width in widths_array
+                                assign image_url_at_width = image.preview_image | image_url: width: width
+                                assign srcset_entry = image_url_at_width | append: ' ' | append: width | append: 'w'
+                                assign temp_srcset = temp_srcset | append: srcset_entry | append: ", "
+                            endfor
+                            
+                            assign final_srcset = temp_srcset | remove_last: ", "
+                            assign full_image_srcsets_str = full_image_srcsets_str | append: final_srcset | append: "||"                       
+                        endfor
+                    -%}
+                    
+                    <slider-swiper 
+                        class="swiper swiper-product-card{% if card_product.media.size > 1 %} swiper-gallery{% endif %}" 
+                        data-total-slides="{{ card_product.media.size }}" 
+                        data-imgs="{{ full_image_urls | remove_last: ',' }}" 
+                        data-img-alts="{{ full_image_alts | remove_last: ',' }}"
+                        data-img-sizes="{{ full_image_sizes_str | remove_last: '||' | escape }}"
+                        data-img-srcsets="{{ full_image_srcsets_str | remove_last: '||' | escape }}"
+                        {% if settings.images_loading != 'disable' %}
+                            data-preload-imgs="{{ full_preload_image_urls | remove_last: ',' }}" 
+                            data-images-loading="{{ settings.images_loading }}"
+                        {% endif %} 
+                        data-loop="{% if card_product.media.size > 1 %}true{% else %}false{% endif %}" 
+                        data-autoplay="{% if hover_behavior contains 'autoplay_slider' %}true{% else %}false{% endif %}" 
+                        data-hover-autoplay="{% if hover_behavior contains 'hover_slider' %}true{% else %}false{% endif %}" 
+                        data-autoplay-speed="{{ autoplay_speed | times: 1000.00 }}" 
+                        data-enable-navigation="true" 
+                        data-pagination-type="bullets"
+                    >
+                        {%- liquid
+                            assign class_name = 'card__image--secondary'
+                            assign placeholder_class = 'card__image-placeholder'
+                        -%}
+                        <ul class="swiper-wrapper{% if settings.show_media_attached_to_variant %} swiper-wrapper-only-variant{% endif %}">               
+                            {% if settings.product_media_ratio == 'auto' %}
+                                {% style %}
+                                    {{ selector_container }} #card-product-{{ index }} .card__product-image {
+                                        --aspect-ratio: {{ card_product.media.first.preview_image.aspect_ratio }};
+                                    }
+                                {% endstyle %}
+                            {% endif %}
+                            {% if card_product.media.first.preview_image %}
+                            <li id="card__product-image--1" data-swiper-slide-alt="{{ card_product.media.first.preview_image.alt }}" class="card__product-image swiper-slide aspect-ratio{% if settings.fit_product_media %} card__product-media--fit{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                                {%- capture sizes -%}
+                                    {% render 'card-product-media-sizes', media: card_product.media.first.preview_image, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps  %}
+                                {%- endcapture -%}
+
+                                {% if settings.images_loading != 'disable' %}
+                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                                {% endif %}
+                                {{
+                                    card_product.media.first.preview_image
+                                    | image_url: width: 3200
+                                    | image_tag:
+                                    sizes: sizes,
+                                    widths: widths,
+                                    alt: card_product.media.first.preview_image.alt,
+                                    loading: 'lazy',
+                                    onload: onload_script,
+                                    draggable: false,
+                                    class: 'swiper-lazy'
+                                }}
+                                {% if settings.images_loading != 'disable' %}
+                                    {% if settings.images_loading != 'fade_scale' %}
+                                    <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                        <img 
+                                        alt="{{ card_product.media.first.preview_image.alt | escape }}" 
+                                        src="{{ card_product.media.first.preview_image | image_url: width: 10 }}"
+                                        draggable="false"
+                                        width="10" 
+                                        height="10">
+                                    </div>
+                                    {% endif %}
+                                </figure>
+                                {% endif %}
+                            </li>
+                            {% elsif card_product.media.first.preview_image == blank and settings.product_placeholder %}
+                                <li id="card__product-image--1" data-swiper-slide-alt="{{ settings.product_placeholder.alt }}" class="card__product-image swiper-slide aspect-ratio{% if settings.fit_product_media %} card__product-media--fit{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                                    {%- capture sizes -%}
+                                        {% render 'card-product-media-sizes', media: settings.product_placeholder, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps  %}
+                                    {%- endcapture -%}
+
+                                    {% if settings.images_loading != 'disable' %}
+                                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                                    {% endif %}
+                                    {{
+                                        settings.product_placeholder
+                                        | image_url: width: 3200
+                                        | image_tag:
+                                        sizes: sizes,
+                                        widths: widths,
+                                        alt: settings.product_placeholder.alt,
+                                        loading: 'lazy',
+                                        onload: onload_script,
+                                        draggable: false,
+                                        class: 'swiper-lazy card__image-placeholder'
+                                    }}
+                                    {% if settings.images_loading != 'disable' %}
+                                        {% if settings.images_loading != 'fade_scale' %}
+                                        <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                            <img 
+                                            alt="{{ settings.product_placeholder.alt | escape }}" 
+                                            src="{{ settings.product_placeholder | image_url: width: 10 }}"
+                                            draggable="false"
+                                            width="10" 
+                                            height="10">
+                                        </div>
+                                        {% endif %}
+                                    </figure>
+                                    {% endif %}
+                                </li>
+                            {% endif %}
+                        </ul>
+                        {% if card_product.media.size > 1 %}
+                            {% if hover_behavior == 'slider' or hover_behavior == 'hover_slider' %}
+                                <div class="swiper-pagination{% unless show_bullets %} swiper-pagination--hidden{% endunless %}" data-desktop-type="bullets" data-mobile-type="bullets"></div>
+                                <div class="swiper-button-prev swiper-button swiper-button-prev-{{ section.id }}{% if hover_behavior == 'hover_slider' %} visually-hidden{% endif %}"><span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span></div>
+                                <div class="swiper-button-next swiper-button swiper-button-next-{{ section.id }}{% if hover_behavior == 'hover_slider' %} visually-hidden{% endif %}"><span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span></div>
+                            {% endif %}
+                            {% if hover_behavior == 'autoplay_slider' %}
+                                <div class="swiper-pagination{% unless show_bullets %} swiper-pagination--hidden{% endunless %}" data-desktop-type="bullets" data-mobile-type="bullets"></div>
+                                <div class="swiper-button-prev swiper-button swiper-button-prev-{{ section.id }}"><span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span></div>
+                                <div class="swiper-button-next swiper-button swiper-button-next-{{ section.id }}"><span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span></div>
+                            {% endif %}
+                        {% endif %}
+                    </slider-swiper>
+                {% else %}
+                    <div class="card__product-media card__product-image aspect-ratio {% if settings.fit_product_media %}card__product-media--fit{% endif %} {% if hover_behavior == 'second_image' %}card__product-media--show-second-img{% endif %}" 
+                        {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+                        style="aspect-ratio: {% if settings.product_media_ratio == 'auto' %}{{ aspect_ratio }}{% else %}{{ settings.product_media_ratio }}{% endif %}; --focal-point: {{ settings.product_focal_point }};">
+                        {%- liquid
+                            assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 600, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                            if complementary_block
+                                assign widths = '150, 200, 300'
+                            endif
+                            assign class_name = 'card__image--secondary'
+                            assign placeholder_class = 'card__image-placeholder'
+                        -%}
+
+                        {%- if first_image -%}
+                            {%- capture sizes -%}
+                                {% render 'card-product-media-sizes', media: first_image, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps  %}
+                            {%- endcapture -%}
+
+                            {% if settings.images_loading != 'disable' %}
+                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                            {% endif %}
+                            {{
+                                first_image
+                                | image_url: width: 3200
+                                | image_tag:
+                                sizes: sizes,
+                                widths: widths,
+                                loading: 'lazy',
+                                onload: onload_script,
+                                alt: first_image.alt,
+                                draggable: false
+                            }}
+                            {% if settings.images_loading != 'disable' %}
+                                {% if settings.images_loading != 'fade_scale' %}
+                                <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                    <img 
+                                    alt="{{ first_image.alt | escape }}" 
+                                    src="{{ first_image | image_url: width: 10 }}"
+                                    draggable="false"
+                                    width="10" 
+                                    height="10">
+                                </div>
+                                {% endif %}
+                            </figure>
+                            {% endif %}
+                            {%- if second_image != nil and hover_behavior == 'second_image' or second_image != nil and hover_behavior == 'second_image_zoom' -%}
+                                {%- capture sizes -%}
+                                    {% render 'card-product-media-sizes', media: second_image, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps  %}
+                                {%- endcapture -%}
+
+                                {% if settings.images_loading != 'disable' %}
+                                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                                {% endif %}
+                                {{
+                                    second_image
+                                    | image_url: width: 3200
+                                    | image_tag:
+                                    sizes: sizes,
+                                    widths: widths,
+                                    class: class_name,
+                                    loading: 'lazy',
+                                    onload: onload_script,
+                                    alt: second_image.alt,
+                                    draggable: false
+                                }}
+                                {% if settings.images_loading != 'disable' %}
+                                    {% if settings.images_loading != 'fade_scale' %}
+                                    <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                        <img 
+                                        alt="{{ second_image.alt | escape }}" 
+                                        src="{{ second_image | image_url: width: 10 }}"
+                                        draggable="false"
+                                        width="10" 
+                                        height="10">
+                                    </div>
+                                    {% endif %}
+                                </figure>
+                                {% endif %}
+                            {%- endif -%}
+                        {%- elsif first_image == blank and settings.product_placeholder -%}
+                            {%- capture sizes -%}
+                                {% render 'card-product-media-sizes', media: settings.product_placeholder, disable_max_width: disable_max_width, full_width: full_width, mobile_width: mobile_width, gap: gap, grid_type: grid_type, mobile_columns: mobile_columns, desktop_columns: desktop_columns, max_width: max_width, disable_grid_gaps: disable_grid_gaps  %}
+                            {%- endcapture -%}
+
+                            {% if settings.images_loading != 'disable' %}
+                                <figure class="lazy-image lazy-image--{{ settings.images_loading }}">
+                            {% endif %}
+                            {{
+                                settings.product_placeholder
+                                | image_url: width: 3200
+                                | image_tag:
+                                sizes: sizes,
+                                widths: widths,
+                                class: placeholder_class,
+                                loading: 'lazy',
+                                onload: onload_script,
+                                alt: settings.product_placeholder.alt,
+                                draggable: false
+                            }}
+                            {% if settings.images_loading != 'disable' %}
+                                {% if settings.images_loading != 'fade_scale' %}
+                                <div class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                                    <img 
+                                    alt="{{ settings.product_placeholder.alt | escape }}" 
+                                    src="{{ settings.product_placeholder | image_url: width: 10 }}"
+                                    draggable="false"
+                                    width="10" 
+                                    height="10">
+                                </div>
+                                {% endif %}
+                            </figure>
+                            {% endif %}
+                        {%- endif -%}
+                    </div>
+                {% endif %}
+                {% if quick_buy == 'on_desktop' or quick_buy == 'enable' %}
+                    <div class="card__extras flex--row{% if quick_buy == 'on_desktop'%} card__extras--mobile-hidden{% endif %}">
+                            {% if card_product.variants.size < 2 %}
+                              {%- liquid
+                                assign product_form_id = 'quick-add-' | append: section.id | append: card_product.id
+                              -%}
+                              <add-to-cart data-variant-id="{{ card_product.selected_or_first_available_variant.id }}" class="{% if settings.action_after_adding_to_cart == 'drawer' %}cart-drawer{% elsif settings.action_after_adding_to_cart == 'popup' %}cart-notification{% endif %}">
+                                <button id="{{ product_form_id }}-submit" type="submit" name="add" class="quick-view-button card__add-to-cart quick button button--secondary solid-button body-font" {% unless card_product.available %}disabled{% endunless %} aria-label="{{ 'accessibility.qiuck_buy.open_qiuck_buy' | t }}">
+                                    <span class="cart__icon icon icon--small flex--row">
+                                        {% if card_product.template_suffix == 'preorder' %}
+                                            {%- render 'glyphs_interface', icon: 'preorder' -%}
+                                        {% else %}
+                                            {% assign icon = settings.cart_name %}
+                                            {%- render 'glyphs_header', icon: icon -%}
+                                        {% endif %}
+                                    </span>
+                                    <div class="loading-overlay__spinner hidden">
+                                        <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                          <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                        </svg>
+                                    </div>
+                                </button>
+                              </add-to-cart>
+                            {% else %}
+                              <quick-view-button data-product-url="{{ product_url }}" data-product-variant-url="{{ card_product.selected_or_first_available_variant.url | within: card_collection }}">
+                                <button type="submit" name="add" class="quick-view-button card__add-to-cart quick button button--secondary solid-button body-font" {% unless card_product.available %}disabled{% endunless %} aria-label="{{ 'accessibility.qiuck_buy.open_qiuck_buy' | t }}">
+                                    <span class="cart__icon icon icon--small flex--row">
+                                        {% if card_product.template_suffix == 'preorder' %}
+                                            {%- render 'glyphs_interface', icon: 'preorder' -%}
+                                        {% else %}
+                                            {% assign icon = settings.cart_name %}
+                                            {%- render 'glyphs_header', icon: icon -%}
+                                        {% endif %}
+                                    </span>
+                                    <div class="loading-overlay__spinner hidden">
+                                        <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                          <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                        </svg>
+                                    </div>
+                                </button>
+                              </quick-view-button>
+                            {% endif %}
+                    </div>
+                {% endif %}
+                <div class="1 card__badges caption-font{% if settings.uppercase_caption %} uppercase{% endif %}">
+                    {% if card_product.available and card_product.metafields.custom.badge != blank %}
+                        {%- liquid
+                            assign badge_name_1 = settings.badge_name_1 | downcase
+                            assign badge_name_2 = settings.badge_name_2 | downcase
+                            assign badge_name_3 = settings.badge_name_3 | downcase
+                            assign badge_name_4 = settings.badge_name_4 | downcase
+                          -%}
+                        {% for badge in card_product.metafields.custom.badge.value %}
+                            {% assign badge_name = badge | downcase %}
+                            <span 
+                                class="card__badges-item card__badges-item--metafield 
+                                    {%- if settings.make_badges_transparent %} card__badges-item--transparent {% endif -%}
+                                    {%- if badge_name != badge_name_1 and badge_name != badge_name_2 and badge_name != badge_name_3 and badge_name != badge_name_4 %}card__badges-item--metafield-unconfigured{% endif -%}
+                                "
+                                {% if badge_name == badge_name_1 %}style="{% if settings.make_badges_transparent %}color: rgb(var(--badge-background-1));{% else %}background-color: rgb(var(--badge-background-1)); color: rgb(var(--badge-text-1));{% endif %}"
+                                {% elsif badge_name == badge_name_2 %}style="{% if settings.make_badges_transparent %}color: rgb(var(--badge-background-2));{% else %}background-color: rgb(var(--badge-background-2)); color: rgb(var(--badge-text-2));{% endif %}"
+                                {% elsif badge_name == badge_name_3 %}style="{% if settings.make_badges_transparent %}color: rgb(var(--badge-background-3));{% else %}background-color: rgb(var(--badge-background-3)); color: rgb(var(--badge-text-3));{% endif %}"
+                                {% elsif badge_name == badge_name_4 %}style="{% if settings.make_badges_transparent %}color: rgb(var(--badge-background-4));{% else %}background-color: rgb(var(--badge-background-4)); color: rgb(var(--badge-text-4));{% endif %}"
+                                {% elsif badge_name != badge_name_1 and badge_name != badge_name_2 and badge_name != badge_name_3 and badge_name != badge_name_4 %}style="background-color: inherit;"{% endif %}
+                            >
+                                {{ badge }}
+                            </span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if settings.show_badge_sale %}
+                        {% if card_product.available and card_product.selected_or_first_available_variant.compare_at_price > card_product.selected_or_first_available_variant.price %}
+                            {% liquid 
+                                assign target = card_product                              
+                                if settings.show_selected_variant_value == true
+                                    assign target = card_product.selected_or_first_available_variant
+                                endif
+
+                                case settings.sale_badge_style
+                                    when 'percentage'
+                                        assign discount = target.compare_at_price | minus: target.price 
+                                        assign discount_percent = discount | times: 100 | divided_by: target.compare_at_price
+                                        assign sale_badge = discount_percent | round | prepend: '-' | append: '%'
+                                    when 'text'
+                                        assign sale_badge = 'products.product.badges.sale_badge' | t
+                                endcase
+                            %}
+                            <span {% if settings.sale_badge_style == 'percentage' %}dir="ltr"{% endif %} class="card__badges-item card__badges-item--sale {% if settings.make_badges_transparent %}card__badges-item--transparent{% endif %}">{{ sale_badge }}</span>
+                        {% endif %}
+                    {% endif %}
+                    {% if settings.show_badge_sold %}
+                        {% unless card_product.available %}
+                            <span class="card__badges-item card__badges-item--sold {% if settings.make_badges_transparent %}card__badges-item--transparent{% endif %}">{{ 'products.product.badges.sold_out_badge' | t }}</span>
+                        {% endunless %}
+                    {% endif %}
+                    {%- if settings.show_badge_preorder and card_product.template_suffix == 'preorder' -%}
+                        <span class="card__badges-item card__badges-item--preorder {% if settings.make_badges_transparent %}card__badges-item--transparent{% endif %}">{{ 'products.product.pre_order' | t }}
+                        </span>
+                    {%- endif -%}
+                </div>
+            </div>
+        {%  endif %}
+        
+        <div class="card-product__content flex--column body-font {% if settings.center_product_card_content and card_content_style == 'regular' %} center{% endif %}{% if settings.center_small_product_card_content and card_content_style == 'small' %} center{% endif %}">
+            {% if price_position != 'with_title' %}
+                <div class="card__price {% if accent_price %}price--bold{% endif %} color-sale-price--{{ compare_at_price_color }} {% if use_accent_color_for_price %}color-price--accent{% endif %} {% if use_sale_color_for_new_price %}color-price--sale{% endif %} card__price--{{ price_position }} {% if card_content_style == 'regular' %}{{ settings.product_price_style }}{% else %}{{ settings.small_product_price_style }}{% endif %}{% if uppercase_product_price %} uppercase{% endif %}{% if subheading_heading_font_price %} subheading-heading-font{% endif %}">
+                    {% render 'price', product: card_product, accent_price: accent_price, show_badges: true, use_accent_color_for_price: use_accent_color_for_price, compare_at_price_color: compare_at_price_color, parent_product_card: true %}
+                </div>
+            {% endif %}
+            <div class="card__info">
+                <div class="card__product-info flex--column">
+                    {% if show_vendor != 'disable' %}
+                        {% liquid 
+                            assign vendor_name = card_product.vendor
+                            assign file_extensions = "svg,png,webp,jpg,jpeg" | split: "," 
+                            capture vendor_value
+                                render 'filename-normalize', value: vendor_name
+                            endcapture
+
+                            for ext in file_extensions
+                                capture vendor_file_name
+                                    render 'filename-normalize', value: vendor_name, keep_case: true
+                                endcapture
+                                assign vendor_file_name = vendor_file_name | append: '.' | append: ext
+
+                                if images[vendor_file_name] != blank
+                                    assign vendor_img_file = images[vendor_file_name] | downcase
+                                    if ext == "svg" or ext == "webp"
+                                        assign vendor_image = images[vendor_file_name] | split: '/' | last | file_url | prepend: 'https:' | split: '?' | first
+                                    else
+                                        assign vendor_image = images[vendor_file_name] | split: '/' | last | file_img_url: '400x400' | prepend: 'https:' | split: '?' | first
+                                    endif                                    
+                                    break
+                                endif
+                            endfor
+                        %}
+                        {% if show_vendor == 'image' %}
+                            {% if images[vendor_file_name] != blank and vendor_img_file contains vendor_value %}
+                                <div class="card__vendor-img" style="background-image: url({{ vendor_image }});"></div>
+                            {% else %}
+                                <p class="card__vendor">{{ card_product.vendor }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="card__vendor">{{ card_product.vendor }}</p>
+                        {% endif %}
+                    {% endif %}
+                    {% if show_title or price_position == 'with_title' %}
+                        <div class="card-product__title-wrapper{% if price_position == 'with_title' %} card-product__title-wrapper--with-price{% endif %}" {% if max_product_name_characters > 0 %}data-name-characters="{{ max_product_name_characters }}"{% endif %}>
+                            {% if show_title %}
+                                {% liquid
+                                    assign product_title = card_product.title
+                                    if max_product_name_characters != blank and max_product_name_characters > 0
+                                        assign product_title = card_product.title | truncate: max_product_name_characters, ''
+                                        if max_product_name_characters < card_product.title.size
+                                            assign product_title = product_title | append: '...'
+                                        endif
+                                    endif 
+
+                                    assign uppercase_product_title = false
+                                    assign subheading_heading_font = false
+                                    assign product_card_bolder_accent = false
+                                    assign accent_color_for_title = false
+                                    if card_content_style == 'regular'
+                                        if settings.product_titles_uppercase
+                                            assign uppercase_product_title = true
+                                        endif
+                                        if settings.product_titles_style == 'subheading-font' and settings.use_heading_font_subheadings
+                                            assign subheading_heading_font = true
+                                        endif
+                                        if settings.bolder_product_titles
+                                            assign product_card_bolder_accent = true
+                                        endif
+                                        if settings.use_accent_color_for_title
+                                            assign accent_color_for_title = true
+                                        endif
+                                    else
+                                        if settings.small_product_titles_uppercase
+                                            assign uppercase_product_title = true
+                                        endif
+                                        if settings.small_product_titles_style == 'subheading-font' and settings.use_heading_font_subheadings
+                                            assign subheading_heading_font = true
+                                        endif
+                                        if settings.small_bolder_product_titles
+                                            assign product_card_bolder_accent = true
+                                        endif
+                                        if settings.small_use_accent_color_for_title
+                                            assign accent_color_for_title = true
+                                        endif
+                                    endif
+                                %}
+                                <p class="card-product__title{% if price_position == 'with_title' %} truncate{% endif %} card__title-js {% if card_content_style == 'regular' %}{{ settings.product_titles_style }}{% else %}{{ settings.small_product_titles_style }}{% endif %}{% if uppercase_product_title %} uppercase{% endif %}{% if subheading_heading_font %} subheading-heading-font{% endif %}{% if accent_color_for_title %} color-accent{% endif %}">
+                                    {% if product_card_bolder_accent %}<b>{% endif %}
+                                    {{ product_title }}
+                                    {% if product_card_bolder_accent %}</b>{% endif %}
+                                </p>
+                            {% endif %}
+                            {% if price_position == 'with_title' %}
+                                <div class="card__price {% if accent_price %}price--bold{% endif %} color-sale-price--{{ compare_at_price_color }} {% if use_accent_color_for_price %}color-price--accent{% endif %} {% if use_sale_color_for_new_price %}color-price--sale{% endif %} card__price--{{ price_position }} {% if card_content_style == 'regular' %}{{ settings.product_price_style }}{% else %}{{ settings.small_product_price_style }}{% endif %}{% if uppercase_product_price %} uppercase{% endif %}{% if subheading_heading_font_price %} subheading-heading-font{% endif %}">
+                                    {% render 'price', product: card_product, accent_price: accent_price, show_badges: true, use_accent_color_for_price: use_accent_color_for_price, compare_at_price_color: compare_at_price_color, parent_product_card: true %}
+                                </div>
+                            {% endif %}  
+                        </div>
+                    {% endif %}
+                </div>
+
+                {%- if show_rating and card_product.metafields.reviews.rating.value != blank -%}
+                    <div class="card__reviews rating-container rating-container--classic">
+                        {% liquid
+                            assign rating_decimal = 0 
+                            assign decimal = card_product.metafields.reviews.rating.value.rating | modulo: 1 
+                            assign rating_decimal = decimal
+                        %}
+                        <div class="rating" role="img" aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: card_product.metafields.reviews.rating.value, rating_max: card_product.metafields.reviews.rating.value.scale_max }}">
+                            <span aria-hidden="true" class="rating-star" style="--rating: {{ card_product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ card_product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"></span>
+                        </div>
+                        <p class="rating-text">
+                            <span aria-hidden="true">{{ card_product.metafields.reviews.rating.value | slice: 0, 3 }} / {{ card_product.metafields.reviews.rating.value.scale_max }}</span>
+                        </p>
+                        <p class="rating-count">
+                            <span aria-hidden="true">{{ card_product.metafields.reviews.rating_count }} {% if card_product.metafields.reviews.rating_count > 1 %}{{ "accessibility.review.other" | t }}{% else %}{{ "accessibility.review.one" | t }}{% endif %}</span>
+                            <span class="visually-hidden">{{ card_product.metafields.reviews.rating_count }} {{ "accessibility.total_reviews" | t }}</span>
+                        </p>
+                    </div>
+                {%- endif -%}
+            </div>
+            {% if show_pickup_availability %}
+                {% liquid
+                    assign current_store = nil
+                    assign availability = nil
+
+                    if cart.attributes['store'] != blank
+                      assign current_store = cart.attributes['store']
+                      assign pick_up_availabilities = card_product.selected_or_first_available_variant.store_availabilities 
+
+                      assign current_store_availability = nil
+                      for availability in pick_up_availabilities 
+                        if availability.location.name == current_store 
+                          assign current_store_availability = availability 
+                          break
+                        endif 
+                      endfor
+
+                      if current_store_availability.available and current_store_availability.pick_up_enabled
+                        assign availability = 'available'
+                      else
+                        assign availability = 'unavailable'
+                      endif
+                    endif   
+                  %}
+
+                {% unless settings.hide_store_selection_text and current_store == nil %}
+                    {% render 'pickup-availability', availability: availability, card_content_style: card_content_style %}
+                {% endunless %}
+            {% endif %}
+            {% if show_short_description and card_product.metafields.descriptors.subtitle != blank %}
+                <div class="card__short-description">
+                    <p>{{ card_product.metafields.descriptors.subtitle }}</p>
+                </div>
+            {% endif %}
+            {% unless card_product.has_only_default_variant %}
+                {% if desktop_options != 'disable' or mobile_options != 'disable' %}
+                    <div class="product_options {% if desktop_options == 'disable' and mobile_options != 'disable' %}product_options--mobile{% endif %} {% if mobile_options == 'disable' and desktop_options != 'disable' %}product_options--desktop{% endif %} product_options--{{ options_position }}{% if desktop_options == 'on_hover' %} product_options-hover{% endif %} flex--column">
+                        {%- if settings.product_card_pills == 'both' or settings.product_card_pills == 'variants' -%}
+                            <div class="swatches_container swatches_container--color-swatch">
+                                {%- for option in card_product.options_with_values -%}
+                                    {%- liquid
+                                        assign option_name = option.name | downcase
+                                        assign is_color = false
+                                        assign swatch_trigger = 'products.product.color_swatch_tag' | t | downcase
+                                        assign swatch_file_extension = 'png'
+                                        assign color_count = 0
+                                        assign variant_image_style = false
+                                        assign variant_thumbnail = settings.variant_thumbnail_swatches_label | downcase
+                                        if option_name contains swatch_trigger
+                                            assign is_color = true
+                                        elsif swatch_trigger == 'color' and option_name contains 'colour'
+                                            assign is_color = true
+                                        endif
+                                        if variant_thumbnail contains option_name 
+                                            assign variant_image_style = true
+                                        endif
+                                        assign downcased_option = option.name | downcase
+                                        assign color_swatch = false
+                                        assign thumbnail = false
+
+                                        for label in color_swatches_labels
+                                            assign label_strip = label | strip
+                                            if downcased_option == label_strip
+                                                assign color_swatch = true
+                                                break
+                                            endif
+                                        endfor
+
+                                        for label in thumbnail_swatches_labels
+                                            assign label_strip = label | strip
+                                            if downcased_option == label_strip
+                                                assign thumbnail = true
+                                                break
+                                            endif
+                                        endfor
+                                        if color_swatch and thumbnail
+                                            assign color_swatch = false
+                                            assign thumbnail = true
+                                        endif
+                                    -%}
+                                    {%- if is_color -%}
+                                        {%- liquid
+                                            assign option_index = forloop.index0
+                                            assign values = ''
+                                            assign max_count = 4
+                                            assign mobile_max_count = 3
+                                        -%}
+                                        <div class="card__colors card__options card__colors--{{ card_product.id }}">
+                                            {% assign available_variants = card_product.variants | where: 'available', true %}
+                                            {% assign media_urls = card_product.media | map: 'preview_image' | map: 'src' | join: ',' %}
+                                            {%- for variant in available_variants -%}
+                                                {%- assign value = variant.options[option_index] %}
+                                                {%- unless values contains value -%}
+                                                {%- liquid
+                                                    assign values = values | join: ',' | append: ',' | append: value | split: ','
+                                                    assign color_count = color_count | plus: 1
+                                                    assign color_swatch_fallback = value | downcase | split: ' ' | last
+                                                    assign color_swatch_for_disabled = value | downcase | split: ' ' | last
+                                                    if value.swatch.image
+                                                        assign image_url = value.swatch.image | image_url: width: 50
+                                                        assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                        assign color_swatch_fallback = swatch_value
+                                                        assign swatch_focal_point = value.swatch.image.presentation.focal_point
+                                                        assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                    elsif value.swatch.color
+                                                        assign color_swatch_fallback = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                        assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                    endif
+
+                                                    assign value_downcase = value | downcase
+                                                    assign swatch_config = settings.swatch_config | newline_to_br | split: '<br />'
+                                                    for swatch in swatch_config
+                                                        assign swatch_parts = swatch | strip | split: ':'
+                                                        assign swatch_name = swatch_parts.first | downcase | strip
+                                                        if swatch_name == value_downcase
+                                                            assign swatch_value = swatch_parts.last | strip
+                                                            if swatch_value contains '#'
+                                                                assign color_swatch_fallback = swatch_value
+                                                                assign color_swatch_for_disabled = swatch_value
+                                                            else
+                                                                assign color_swatch_fallback = value | downcase | split: ' ' | last | handle
+                                                                assign color_swatch_for_disabled = value | downcase | split: ' ' | last | handle
+                                                                if value.swatch.image
+                                                                    assign image_url = value.swatch.image | image_url: width: 50
+                                                                    assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                                    assign color_swatch_fallback = swatch_value
+                                                                    assign swatch_focal_point = value.swatch.image.presentation.focal_point
+                                                                    assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                                elsif value.swatch.color
+                                                                    assign color_swatch_fallback = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                                    assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                                endif
+                                                            endif
+                                                            break
+                                                        endif
+                                                    endfor
+
+                                                    capture color_file_name
+                                                        render 'filename-normalize', value: value, keep_case: true
+                                                    endcapture
+                                                    assign color_file_name = color_file_name | append: '.' | append: swatch_file_extension
+
+                                                    capture color_value
+                                                        render 'filename-normalize', value: value
+                                                    endcapture
+
+                                                    assign img_file = images[color_file_name] | downcase
+                                                    assign color_image = images[color_file_name] | split: '/' | last | file_img_url: '50x50' | prepend: 'https:' | split: '?' | first
+                                                -%}
+                                                {%- if color_count <= max_count -%}
+                                                    {%- liquid
+                                                        assign second_swatch_image = false
+                                                        if variant.image and variant.image.alt != blank
+                                                        if variant.image.alt contains '(' or variant.image.alt contains ')' 
+                                                            assign alt_value = variant.image.alt | downcase | split: '(' | last | split: ')' | first | prepend: '(' | append: ')'
+                                                        else 
+                                                            assign alt_value = variant.image.alt | downcase
+                                                        endif
+                            
+                                                        if alt_value != blank
+                                                            for product_image in card_product.images
+                                                            assign product_image_alt = product_image.alt | downcase
+                                                            if product_image_alt contains alt_value and product_image.id != variant.image.id
+                                                                assign second_swatch_image = product_image
+                                                                break
+                                                            endif
+                                                            endfor
+                                                        endif
+                                                        endif
+                                                        if second_swatch_image == false
+                                                        assign second_swatch_image = card_product.media[1]
+                                                        endif
+
+                                                        if variant.image.alt contains '(' or variant.image.alt contains ')' 
+                                                            assign variant_image_alt = variant.image.alt | downcase | split: '(' | last | split: ')' | first | prepend: '(' | append: ')'
+                                                            assign product_title = card_product.title
+                                                            if card_product.title  contains '(' or card_product.title contains ')' 
+                                                                assign product_title = card_product.title | downcase | split: '(' | last | split: ')' | first | prepend: '(' | append: ')'
+                                                                if product_title == variant_image_alt
+                                                                    assign variant_image_alt = ''
+                                                                endif
+                                                            endif
+                                                        else
+                                                            assign variant_image_alt = variant_image_alt | downcase
+                                                        endif
+                                                    -%}
+                                                    {% liquid
+                                                        if variant.image
+                                                            assign variant_image_url = variant.image | image_url
+                                                        elsif card_product.featured_media
+                                                            assign variant_image_url = card_product.featured_media | image_url
+                                                        endif
+                                                        assign variant_image_url = variant_image_url | split: '/' | last | split: '?' | first
+                                                        assign before_match = media_urls | split: variant_image_url | first
+                                                        assign variant_image_index = before_match | split: ',' | size | minus: 1
+                                                        unless variant.image
+                                                            assign variant_image_index = ''
+                                                        endunless
+                                                    %}
+                                                    <color-swatch
+                                                    class="color-swatch{% if settings.enable_shadow %} swatch--shadow{% endif %}{% if variant.id == card_product.selected_or_first_available_variant.id  and check_swatch %} active-swatch{% endif %}{% if variant_image_style %} color-swatch-image{% endif %} {% if settings.show_selected_variant_value %} show-selected-value{% endif %}"
+                                                    style="{% if variant_image_style %}{%- unless variant.image -%}--swatch-background: {{ color_swatch_fallback }}{%- endunless -%}{%  else %}--swatch-background: {% if images[color_file_name] != blank and img_file contains color_value %}url({{ color_image }}){% else %}{{ color_swatch_fallback }}{% endif %}; --swatch-background-color: {{ color_swatch_for_disabled }};{% if swatch_focal_point %} --swatches-focal-point: {{ swatch_focal_point }};{% else %}  --swatches-focal-point: center{% endif %}{% endif %}"
+                                                    title="{{ value | escape }}"
+                                                    tabindex="0"
+                                                    {%- if variant.image %}
+                                                        data-srcset="{%- if variant.image.width >= 165 -%}{{ variant.image | image_url: width: 165 }} 165w{%- endif -%}
+                                                        {%- if variant.image.width >= 360 -%},{{ variant.image | image_url: width: 360 }} 360w{%- endif -%}
+                                                        {%- if variant.image.width >= 533 -%},{{ variant.image | image_url: width: 533 }} 533w{%- endif -%}
+                                                        {%- if variant.image.width >= 720 -%},{{ variant.image | image_url: width: 720 }} 720w{%- endif -%}
+                                                        {%- if variant.image.width >= 940 -%},{{ variant.image | image_url: width: 940 }} 940w{%- endif -%}
+                                                        {%- if variant.image.width >= 1066 -%},{{ variant.image | image_url: width: 1066 }} 1066w{%- endif -%},
+                                                        {{- variant.image | image_url }} {{ variant.image.width }}w"
+                                                        data-src="{{ variant.image | image_url: width: 533 }}"
+                                                        {%- if hover_behavior == 'second_image'  -%}
+                                                            data-srcset-second="{%- if second_swatch_image.width >= 165 -%}{{ second_swatch_image | image_url: width: 165 }} 165w{%- endif -%}
+                                                            {%- if second_swatch_image.width >= 360 -%},{{ second_swatch_image | image_url: width: 360 }} 360w{%- endif -%}
+                                                            {%- if second_swatch_image.width >= 533 -%},{{ second_swatch_image | image_url: width: 533 }} 533w{%- endif -%}
+                                                            {%- if second_swatch_image.width >= 720 -%},{{ second_swatch_image | image_url: width: 720 }} 720w{%- endif -%}
+                                                            {%- if second_swatch_image.width >= 940 -%},{{ second_swatch_image | image_url: width: 940 }} 940w{%- endif -%}
+                                                            {%- if second_swatch_image.width >= 1066 -%},{{ second_swatch_image | image_url: width: 1066 }} 1066w{%- endif -%},
+                                                            {{- second_swatch_image | image_url }} {{ second_swatch_image.width }}w"
+                                                        data-src-second="{{ second_swatch_image | image_url: width: 533 }}"
+                                                        {%- endif -%}
+                                                    {% elsif card_product.featured_media %}
+                                                        data-srcset="{%- if card_product.featured_media.width >= 165 -%}{{ card_product.featured_media | image_url: width: 165 }} 165w{%- endif -%}
+                                                        {%- if card_product.featured_media.width >= 360 -%},{{ card_product.featured_media | image_url: width: 360 }} 360w{%- endif -%}
+                                                        {%- if card_product.featured_media.width >= 533 -%},{{ card_product.featured_media | image_url: width: 533 }} 533w{%- endif -%}
+                                                        {%- if card_product.featured_media.width >= 720 -%},{{ card_product.featured_media | image_url: width: 720 }} 720w{%- endif -%}
+                                                        {%- if card_product.featured_media.width >= 940 -%},{{ card_product.featured_media | image_url: width: 940 }} 940w{%- endif -%}
+                                                        {%- if card_product.featured_media.width >= 1066 -%},{{ card_product.featured_media | image_url: width: 1066 }} 1066w{%- endif -%},
+                                                        {{- card_product.featured_media | image_url }} {{ card_product.featured_media.width }}w"
+                                                        data-src="{{ card_product.featured_media | image_url: width: 533 }}"
+                                                    {% endif -%}
+                                                        data-variant-id="{{ variant.id }}"
+                                                        data-color-name="{{ color_value }}"
+                                                        data-product-handle="{{ card_product.handle | escape }}"
+                                                        data-product-url="{{ card_product.url }}"
+                                                        data-collection-handle="{{ collection.handle | escape }}"
+                                                        data-current-img-index="{{ variant_image_index }}"
+                                                    >
+                                                    <object tabindex="-1" class="color-swatch__dot {% if variant.available == false %}color-swatch__dot-unavailable {% endif %}{% if variant_image_style %}color-swatch__dot--image {% if settings.enable_blending and settings.apply_to_swatches %} enable-blending{% endif %} {% unless variant.image %}color__swatch-dot--color{% endunless %}{% endif %}" 
+                                                        {% unless variant.image %}{% if settings.variant_thumbnail_image_ratio == 'auto' %}style="aspect-ratio: 1/1;"{% endif %}{% endunless %} aria-label="{{ value | escape }}">
+                                                        {% if variant_image_style and variant.image %}{{ variant.image | image_url: width: 100 | image_tag }}{% endif %}
+                                                        <a class="color-swatch__link" href="{{ variant.url }}" tabindex="-1">
+                                                        <span class="visually-hidden">{{ value }}</span>
+                                                        </a>
+                                                    </object>
+                                                    {% if variant_image_style == false or variant_image_style  %}
+                                                        <span class="color-swatch__title">{{ value | escape }}</span>
+                                                    {% endif %}
+                                                    </color-swatch>
+                                                {%- endif -%}
+                                                {%- endunless -%}
+                                            {%- endfor -%}
+                                            {%- if color_count > max_count -%}
+                                                <object class="color-swatch--more-items" tabindex="-1" aria-label="{{ value | escape }}">
+                                                <a class="color-swatch--more-items-link" href="{{ card_product.url | within: card_collection }}">
+                                                    +{{ color_count | minus: max_count }}
+                                                </a>
+                                                </object>
+                                            {%- endif -%}
+                                            {%- if color_count > mobile_max_count -%}
+                                                <object class="color-swatch--more-items color-swatch--more-items--mobile" tabindex="-1" aria-label="{{ value | escape }}">
+                                                    <a class="color-swatch--more-items-link" href="{{ card_product.url | within: card_collection }}">
+                                                        +{{ color_count | minus: mobile_max_count }}
+                                                    </a>
+                                                </object>
+                                            {%- endif -%}
+                                        </div>
+                                        {%- if color_count < 2 -%}
+                                            <style type="text/css">
+                                                .swatches_container:has( .card__colors--{{ card_product.id }}),
+                                                .card__colors--{{ card_product.id }} {
+                                                    display: none !important;
+                                                }
+                                            </style>
+                                        {%- endif -%}
+                                        {% break %}
+                                    {%- endif -%}
+                                {%- endfor -%}
+                            </div>
+                        {% endif %}
+                        {%- if settings.product_card_pills == 'both' or settings.product_card_pills == 'linked_product' -%}
+                            {%- liquid 
+                            assign linked_products = card_product.metafields.custom.linked_products
+                            -%}
+                            {%- if linked_products != blank -%}
+                            <div class="swatches_container swatches_container--linked-products">
+                            {% style %}
+                                .swatches_container--linked-products {
+                                    --focal-point: {{ settings.linked_products_focal_point }};
+                                    --border-radius: {{ settings.linked_products_image_radius }};
+                                }
+                            {% endstyle %}
+                            {%- liquid
+                                assign linked_count = 0
+                                assign linked_max_count = 4
+                                assign linked_max_count_mobile = 3
+                            -%}
+                            {% for item in linked_products.value  %}
+                                {% liquid 
+                                    assign linked_count = linked_count | plus: 1
+                                    assign linked_img = item.metafields.custom.linked_image
+                                    assign linked_color = item.metafields.custom.linked_color
+                                    assign img_url = linked_img.value | split: '/' | last | escape
+                                    assign img = linked_img.value | split: '/' | last | escape | file_img_url: '200x200' | prepend: 'https:' | split: '?' | first
+                                %}
+                                {%- if linked_count <= linked_max_count -%}
+                                <object {% if item.url != card_product.url %}class="visible"{% endif %}>
+                                    {% style %}
+                                    .linked-products__swatch {
+                                        --aspect-ratio: {{ settings.linked_products_image_ratio }}
+                                    }
+                                    {% endstyle %}
+                                <a class="linked-products__swatch{% if settings.enable_blending and settings.apply_to_swatches %} enable-blending{% endif %}{% if item.url == card_product.url %} linked-products__swatch--active{% endif %}{% if settings.enable_shadow %} linked-products__swatch--shadow{% endif %} aspect-ratio{% if settings.linked_products_image_radius == '2000px 2000px 0 0' %} linked-products__swatch-arc{% endif %}" href="{{ item.url }}">
+                                    {% if linked_img != blank %}
+                                        <span>{{ images[img_url] | image_url: width: 200 | image_tag }}</span>
+                                    {% elsif linked_img == blank and linked_color != blank %}
+                                        <span style="background-color: {{ linked_color.value }};{% if settings.linked_products_image_ratio == 'auto' %}aspect-ratio: 1/1;{% endif %}"></span>
+                                    {% elsif linked_img == blank and linked_color == blank %}
+                                        <span>{{ item.featured_image | image_url: width: 200 | image_tag: alt: item.featured_image.alt, draggable: false }}</span>
+                                    {% endif %}
+                                </a>
+                                </object>
+                                {% endif %}
+                        
+                            {% endfor %}
+                            {%- if linked_count > linked_max_count -%}
+                            <object class="color-swatch--more-items"  aria-label="{{ value | escape }}">
+                                <a class="color-swatch--more-items-link" href="{{ card_product.url | within: card_collection }}" tabindex="-1">
+                                +{{ linked_count | minus: linked_max_count }}
+                                </a>
+                            </object>
+                            {%- endif -%}
+                            {%- if linked_count > linked_max_count_mobile -%}
+                                <object class="color-swatch--more-items color-swatch--more-items--mobile"  aria-label="{{ value | escape }}">
+                                    <a class="color-swatch--more-items-link" href="{{ card_product.url | within: card_collection }}" tabindex="-1">
+                                    +{{ linked_count | minus: linked_max_count_mobile }}
+                                    </a>
+                                </object>
+                                {%- endif -%}
+                            </div>
+                            {%- endif -%}
+                        {%- endif -%}
+                        {% if settings.product_card_pills == 'both' %}
+                            {%- liquid
+                                assign size_variant_label = settings.size_variant_label | downcase
+                            -%}
+                            {%- for option in card_product.options_with_values -%}
+                                {%- liquid
+                                assign option_name = option.name | downcase
+                                -%}
+                                {%- if size_variant_label contains option_name -%}
+                                    <div class="swatches_container swatches_container--sizes caption-font{% if settings.uppercase_caption %} uppercase{% endif %}">
+                                        {%- liquid
+                                        assign variants_available_arr = card_product.variants | map: 'available'
+                                        assign variants_option1_arr = card_product.variants | map: 'option1'
+                                        assign variants_option2_arr = card_product.variants | map: 'option2'
+                                        assign variants_option3_arr = card_product.variants | map: 'option3'
+                                        -%}
+                                        <div class="card__sizes card__options flex--row">
+                                            {%- for value in option.values -%}
+                                                {%- liquid
+                                                assign option_disabled = true
+                                            
+                                                for option1_name in variants_option1_arr
+                                                    case option.position
+                                                    when 1
+                                                        if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_disabled = false
+                                                        endif
+                                                    when 2
+                                                        if option1_name == card_product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_disabled = false
+                                                        endif
+                                                    when 3
+                                                        if option1_name == card_product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == card_product.selected_or_first_available_variant.option2 and variants_option3_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_disabled = false
+                                                        endif
+                                                    endcase
+                                                endfor
+                                                -%}
+                                                <span class="card__size{% if option_disabled %} card__size--disabled{% endif %}">{{- value -}}</span>
+                                            {%- endfor -%}
+                                        </div>
+                                    </div>
+                                {%- endif -%}
+                            {%- endfor -%}
+                        {% endif %}
+                        {% unless settings.product_card_pills == 'both' %}
+                            {%- liquid
+                                assign size_variant_label = settings.size_variant_label | downcase
+                            -%}
+                            {%- for option in card_product.options_with_values -%}
+                                {%- liquid
+                                assign option_name = option.name | downcase
+                                -%}
+                                {%- if size_variant_label contains option_name -%}
+                                    <div class="swatches_container swatches_container--sizes caption-font{% if settings.uppercase_caption %} uppercase{% endif %}">
+                                        {%- liquid
+                                        assign variants_available_arr = card_product.variants | map: 'available'
+                                        assign variants_option1_arr = card_product.variants | map: 'option1'
+                                        assign variants_option2_arr = card_product.variants | map: 'option2'
+                                        assign variants_option3_arr = card_product.variants | map: 'option3'
+                                        -%}
+                                        <div class="card__sizes card__options">
+                                        {%- for value in option.values -%}
+                                            {%- liquid
+                                            assign option_disabled = true
+                                        
+                                            for option1_name in variants_option1_arr
+                                                case option.position
+                                                when 1
+                                                    if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                    assign option_disabled = false
+                                                    endif
+                                                when 2
+                                                    if option1_name == card_product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                    assign option_disabled = false
+                                                    endif
+                                                when 3
+                                                    if option1_name == card_product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == card_product.selected_or_first_available_variant.option2 and variants_option3_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                    assign option_disabled = false
+                                                    endif
+                                                endcase
+                                            endfor
+                                            -%}
+                                            <span class="card__size{% if option_disabled %} card__size--disabled{% endif %}">{{- value -}}</span>
+                                        {%- endfor -%}
+                                        </div>
+                                    </div>
+                                {%- endif -%}
+                            {%- endfor -%}
+                        {% endunless %}
+                    </div>
+                {% endif %}
+            {% endunless %}
+        </div>
+    </a>
+</div>

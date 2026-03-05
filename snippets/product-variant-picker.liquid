@@ -1,0 +1,457 @@
+{%- unless product.has_only_default_variant -%}
+    {%- liquid
+        assign size_guide_count = 0
+
+        assign visible_options_counter = 0
+        for option in product.options_with_values 
+          unless settings.hide_option_with_one_variant and option.values.size == 1
+            assign visible_options_counter = visible_options_counter | plus: 1
+          endunless    
+        endfor
+      -%}
+    <div class="variants" {% if product_template %} id="variant-picker"{% endif %}
+        style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+        {% liquid 
+            assign pills_labels = settings.variant_pills_label | downcase | strip | split: ','
+            assign color_swatches_labels = settings.variant_color_swatches_label | downcase | strip | split: ','
+            assign thumbnail_swatches_labels = settings.variant_thumbnail_swatches_label | downcase | strip | split: ','
+            assign layout_two_columns_labels = settings.variant_two_columns | downcase | strip | split: ','
+            assign layout_row_labels = settings.variant_row | downcase | strip | split: ','
+            assign size_guide_labels = block.settings.variant_size_label | downcase | strip | split: ','
+        %}
+        <variant-picker class="variant-selects flex--column {% if visible_options_counter == 0 %} variant-selects--no-options {% endif %}" 
+            style="--options-size: {{ product.options.size }};" 
+            data-options-size="{{ product.options.size }}" 
+            data-section="{{ section.id }}" 
+            data-url="{{ product.url }}" 
+            data-product-id="{{ product.id }}"
+        >
+            <span class="visually-hidden" style="--options-size: {{ product.options.size }};"></span>
+            {% for option in product.options_with_values %}
+                {% liquid 
+                    assign downcased_option = option.name | downcase
+                    assign color_swatch = false
+                    assign thumbnail = false
+                    assign pill = false
+                    assign layout_row = false
+                    assign layout_two_columns = false
+                    assign size_guide = false
+
+                    for label in pills_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign pill = true
+                            break
+                        endif
+                    endfor
+
+                    for label in color_swatches_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign color_swatch = true
+                            break
+                        endif
+                    endfor
+
+                    for label in thumbnail_swatches_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign thumbnail = true
+                            break
+                        endif
+                    endfor
+                    if color_swatch and thumbnail
+                        assign color_swatch = false
+                        assign thumbnail = true
+                    endif
+
+                    for label in layout_row_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign layout_row = true
+                            break
+                        endif
+                    endfor
+                    for label in layout_two_columns_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign layout_two_columns = true
+                            break
+                        endif
+                    endfor
+                    
+                    for label in size_guide_labels
+                        assign label_strip = label | strip
+                        if downcased_option == label_strip
+                            assign size_guide = true
+                            break
+                        endif
+                    endfor
+                    assign hide_option = false
+                    if settings.hide_option_with_one_variant and option.values.size == 1
+                        assign hide_option = true
+                    endif
+                %}
+                
+                {% if pill or color_swatch or thumbnail %}
+                    {% unless hide_option %}
+                        <div data-section="{{ section.id }}" data-url="{{ product.url }}" {% if settings.hide_option_with_one_variant and option.values.size == 1 %}class="product-form__input-wrapper visually-hidden"{% endif %}>
+                            <div class="js product-form__input flex--column">
+                                {% if settings.show_label %}
+                                <p class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                    {% if block.settings.label_bolder_font %}<b>{% endif %}
+                                    {{ option.name }}
+                                    {% if settings.show_selected_option %} 
+                                        &#x2014;
+                                        <span class="current-option" data-selected-value>{{  option.selected_value }}</span>
+                                    {% endif %}
+                                    {% if block.settings.label_bolder_font %}</b>{% endif %}
+                                </p>
+                                {% endif %}
+                                <div class="form__variants{% if layout_two_columns %} layout-two-columns{% endif %}{% if layout_row %} layout-row{% endif %} 
+                                    {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                {%- liquid
+                                    assign is_color = false
+                                    if settings.variant_color_swatches_label != blank or settings.variant_thumbnail_swatches_label != blank
+                                        assign swatch_file_extension = 'png'
+                                        assign swatch_trigger = 'products.product.color_swatch_tag' | t | downcase
+                                        
+                                        if downcased_option contains swatch_trigger
+                                        assign is_color = true
+                                        elsif swatch_trigger == 'color' and downcased_option contains 'colour'
+                                        assign is_color = true
+                                        endif
+                                    endif
+                                    assign product_form_id = 'product-form-' | append: section.id
+                                    assign option_idx0 = forloop.index0
+                                -%}
+                                {%- for value in option.values -%}
+                                    {%- liquid
+                                        assign option_disabled = true
+                                        if value.variant.available
+                                            assign option_disabled = false
+                                        endif
+
+                                        capture color_file_name
+                                            render 'filename-normalize', value: value, keep_case: true
+                                        endcapture
+                                        assign color_file_name = color_file_name | append: '.' | append: swatch_file_extension
+
+                                        capture color_value
+                                            render 'filename-normalize', value: value
+                                        endcapture
+
+                                        assign img_file = images[color_file_name] | downcase
+                                        assign color_image = images[color_file_name] | split: '/' | last | file_img_url: '248x248' | prepend: 'https:' | split: '?' | first
+                                    -%}
+                                    {%- capture input_dataset -%}
+                                        data-available="{{ value.variant.available }}"
+                                        data-product-url="{{ value.product_url }}"
+                                        data-option-value-id="{{ value.id }}"
+                                    {%- endcapture -%}
+                                    <input type="radio" id="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                    name="{{ option.name }}"
+                                    value="{{ value | escape }}"
+                                    form="{{ product_form_id }}"
+                                    {% if from_details %}data-place-for-id="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                    data-form-input="{{ product_form_id }}"
+                                    {% endif %}
+                                    {% if value.selected %}checked{% endif %}
+                                    class="{% if option_disabled %}disabled{% endif %}{% if value.product_url != blank %} product-combined-listings{% endif %}"
+                                    {{ input_dataset }}
+                                    >
+                                    {%- if thumbnail or is_color and color_swatch -%}
+                                        {%- liquid
+                                            assign value_downcase = value | downcase
+                                            assign swatch_config = settings.swatch_config | newline_to_br | split: '<br />'
+                                            assign color_swatch_fallback = value_downcase | split: ' ' | last | handle
+                                            assign color_swatch_for_disabled = value_downcase | split: ' ' | last | handle
+                                            if value.swatch.image
+                                                assign image_url = value.swatch.image | image_url: width: 50
+                                                assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                assign color_swatch_fallback = swatch_value
+                                                assign swatch_focal_point = value.swatch.image.presentation.focal_point
+                                                assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                            elsif value.swatch.color
+                                                assign color_swatch_fallback = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                            endif
+                                            for swatch in swatch_config
+                                                assign swatch_parts = swatch | strip | split: ':'
+                                                assign swatch_name = swatch_parts.first | downcase | strip
+                                                if swatch_name == value_downcase
+                                                    assign swatch_value = swatch_parts.last | strip
+                                                    if swatch_value contains '#'
+                                                        assign color_swatch_fallback = swatch_value
+                                                        assign color_swatch_for_disabled = swatch_value
+                                                    else
+                                                        assign color_swatch_fallback = value_downcase | split: ' ' | last | handle
+                                                        assign color_swatch_for_disabled = value_downcase | split: ' ' | last | handle
+                                                        if value.swatch.image
+                                                            assign image_url = value.swatch.image | image_url: width: 50
+                                                            assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                            assign color_swatch_fallback = swatch_value
+                                                            assign swatch_focal_point = value.swatch.image.presentation.focal_point
+                                                            assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                        elsif value.swatch.color
+                                                            assign color_swatch_fallback = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                            assign color_swatch_for_disabled = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                        endif
+                                                    endif
+                                                    break
+                                                endif
+                                            endfor
+                                        -%}
+                                    {%- endif -%}
+                                    {%- if thumbnail -%}
+                                        {%- liquid
+                                            assign color_variant_image = ''
+                                            if value.variant.image
+                                                assign color_variant_image = value.variant.image
+                                            endif
+                                            if value.product_url and product.url != value.product_url and value.variant.product.featured_image
+                                                assign color_variant_image = value.variant.product.featured_image
+                                            endif
+                                            if value.variant.product.featured_image != blank and value.product_url
+                                                assign color_variant_image = value.variant.product.featured_image
+                                            endif
+                                            if color_variant_image == ''
+                                                for variant in product.variants
+                                                assign variant_value = variant.options[option_idx0]
+                                                if variant_value == value and variant.image
+                                                    assign color_variant_image = variant.image
+                                                    break
+                                                endif 
+                                                endfor
+                                            endif
+                                        -%}
+                                        <label
+                                        for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                        {% if from_details %}data-place-for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"{% endif %}
+                                        class="color__swatch color__swatch--image flex--column {%- unless color_variant_image != '' -%}{% if images[color_file_name] != blank and img_file contains color_value %} color__swatch--image--background{% endif %}{%- endunless -%}"
+                                        style="{%- unless color_variant_image != '' -%}{% if images[color_file_name] != blank and img_file contains color_value or value.swatch.image %}--swatch-background: url({{ color_image }});{% else %}--swatch-background: {{ color_swatch_fallback }}{% endif %}{% if swatch_focal_point %} --swatches-focal-point: {{ swatch_focal_point }};{% else %}  --swatches-focal-point: center;{% endif %}{%- endunless -%}">
+                                            <span class="color__swatch-dot color__swatch-dot--image {% if settings.enable_blending and settings.apply_to_swatches %}enable-blending{% endif %} {% unless color_variant_image != '' %}color__swatch-dot--color{% if settings.variant_thumbnail_image_ratio == 'auto' %} ratio-square{% endif %}{% endunless %}">
+                                                {% if color_variant_image != '' %}{{ color_variant_image | image_url: width: 248 | image_tag }}{% endif %}
+                                            </span>
+                                            <span class="color__swatch-tooltip caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ value }}</span>
+                                        </label>
+                                    {%- elsif is_color and color_swatch -%}
+                                     <label
+                                        for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                        {% if from_details %}data-place-for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"{% endif %}
+                                        class="color__swatch color__swatch--color {% if pill %} color__swatch--pill input-style--{{ settings.variant_input_size }}{% endif %}"
+                                        style="{% if images[color_file_name] != blank and img_file contains color_value %}--swatch-background: url({{ color_image }}); --swatch-background-color: {{ color_swatch_for_disabled }};{% else %}--swatch-background: {{ color_swatch_fallback }}; --swatch-background-color: {{ color_swatch_for_disabled }};{% if swatch_focal_point %} --swatches-focal-point: {{ swatch_focal_point }};{% else %}  --swatches-focal-point: center;{% endif %}{% endif %}"
+                                    > 
+                                        <span class="color__swatch-dot color__swatch-dot--color"></span>
+                                        <span class="color__swatch-name">{% if block.settings.text_bolder_font %}<b>{% endif %}{{ value }}{% if block.settings.text_bolder_font %}</b>{% endif %}</span>
+                                        {% if pill %}<span class="color__swatch-input"></span>{% endif %}
+                                        {% if layout_row %}<span class="color__swatch-tooltip caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ value }}</span>{% endif %}
+                                    </label>
+                                    {%- else -%}
+                                    {% comment %} Pill {% endcomment %}
+                                    <label
+                                        for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                        {% if from_details %}data-place-for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"{% endif %}
+                                        class="color__swatch color__swatch--pill input-style--{{ settings.variant_input_size }}">
+                                        <span class="color__swatch-name">{% if block.settings.text_bolder_font %}<b>{% endif %}{{ value }}{% if block.settings.text_bolder_font %}</b>{% endif %}</span>
+                                        <span class="color__swatch-input"></span>
+                                    </label>
+                                    {%- endif -%}
+                                    <script type="application/json" data-resource="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}">
+                                        {{ value.variant | json }}
+                                    </script>
+                                {%- endfor -%}
+                                </div>
+                            </div>
+                            {%- if size_guide and size_guide_count == 0 -%}
+                                {% assign size_guide_count = size_guide_count | plus: 1 %}
+                                {%- if block.settings.variant_size_page != blank or block.settings.variant_size_text != blank -%}
+                                <modal-opener class="size-guide" data-modal="#SizeGuideModal-{{ block.id }}">
+                                    <button id="SizeGuide-{{ block.id }}" class="size-guide__button button--modal-opener button link-button {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+                                        {% if block.settings.show_ruler %}
+                                            <span class="size-guide__button-icon">
+                                                {%- render 'glyphs_signs', icon: 'ruler' -%}
+                                            </span>
+                                        {% endif %}
+                                        <span class="size-guide__button-text">
+                                            {% if block.settings.label_bolder_font %}<b>{% endif %}
+                                            {{ 'products.product.size_guide' | t  }}
+                                            {% if block.settings.label_bolder_font %}</b>{% endif %}
+                                        </span>
+                                    </button>
+                                </modal-opener>
+                                {%- endif -%}
+                            {%- endif -%}
+                        </div>
+                    {% endunless %}
+                {% else %}
+                    {% unless hide_option %}
+                        <div class="product-form__input flex--column product-form__input--dropdown{% if settings.hide_option_with_one_variant and option.values.size == 1 %} product-form__input-wrapper visually-hidden{% endif %}">
+                            {% if settings.show_label %}
+                                <label class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" for="Option-{{ section.id }}-{{ forloop.index0 }}" {% if from_details %}data-place-for="Option-{{ section.id }}-{{ forloop.index0 }}"{% endif %}>
+                                    {% if block.settings.label_bolder_font %}<b>{% endif %}
+                                    {{ option.name }}
+                                    {% if block.settings.label_bolder_font %}</b>{% endif %}
+                                </label>
+                            {% endif %}
+                            {%- assign product_form_id = 'product-form-' | append: section.id -%}
+                            <div class="select flex--row align-center
+                            {{ block.settings.text_style }}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                                class="select input  input-style--{{ settings.variant_input_size }}{% if block.settings.text_bolder_font %} bold{% endif %}{% if block.settings.text_uppercase %} uppercase{% endif %}"
+                                name="options[{{ option.name | escape }}]"
+                                form="{{ product_form_id }}"
+                                {% if from_details %}data-form-input="{{ product_form_id }}"{% endif %}
+                                >
+                                {%- for value in option.values -%}
+                                    {%- liquid
+                                        assign option_disabled = true
+                                        if value.variant.available
+                                        assign option_disabled = false
+                                        endif
+                                    -%}
+                                    {%- capture input_dataset -%}
+                                        data-available="{{ value.variant.available }}"
+                                        data-product-url="{{ value.product_url }}"
+                                        data-option-value-id="{{ value.id }}"
+                                    {%- endcapture -%}
+                                    <option {% if value.product_url != blank %}class="product-combined-listings"{% endif %} id="{{ section.id }}-{{ option.name }}-{{ forloop.index0 -}}" {% if from_details %}data-place-for-id="{{ section.id }}-{{ option.name }}-{{ forloop.index0 -}}"{% endif %}
+                                        value="{{ value | escape }}" {% if value.selected %}selected="selected"{% endif %} {{ input_dataset }}>
+                                    {% if option_disabled -%}
+                                        {{- 'products.product.value_unavailable' | t: option_value: value -}}
+                                    {%- else -%}
+                                        {{- value -}}
+                                    {%- endif %}
+                                    </option>
+                                    <script type="application/json" data-resource="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}">
+                                        {{ value.variant | json }}
+                                    </script>
+                                {%- endfor -%}
+                                </select>
+                                <div class="select-icon flex--row align-center">
+                                    {%- render 'glyphs_arrows', icon: 'chevron-down' -%}
+                                </div>
+                            </div>
+                        </div>
+                    {% endunless %}
+                    {%- if size_guide and size_guide_count == 0 -%}
+                        {% assign size_guide_count = size_guide_count | plus: 1 %}
+                        {%- if block.settings.variant_size_page != blank or block.settings.variant_size_text != blank -%}
+                        <modal-opener class="size-guide {% if settings.hide_option_with_one_variant and option.values.size == 1 %} visually-hidden{% endif %}"  data-modal="#SizeGuideModal-{{ block.id }}">
+                            <button id="SizeGuide-{{ block.id }}" class="size-guide__button button--modal-opener button link-button {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+                                {% if block.settings.show_ruler %}
+                                    <span class="size-guide__button-icon">
+                                        {%- render 'glyphs_signs', icon: 'ruler' -%}
+                                    </span>
+                                {% endif %}
+                                <span class="size-guide__button-text">
+                                    {% if block.settings.label_bolder_font %}<b>{% endif %}
+                                    {{ 'products.product.size_guide' | t  }}
+                                    {% if block.settings.label_bolder_font %}</b>{% endif %}
+                                </span>
+                            </button>
+                        </modal-opener>
+                        {%- endif -%}
+                    {%- endif -%}
+                {% endif %}
+                {%- assign size_variant_label = settings.size_variant_label | downcase -%}
+                  {%- if settings.show_selected_variant_value and size_variant_label == downcased_option -%}
+                    <div class="visually-hidden card__sizes">
+                      {%- for value in option.values -%}
+                        {%- liquid
+                          assign option_disabled = true
+                          if value.variant.available
+                            assign option_disabled = false
+                          endif
+                        -%}
+                      <span class="card__size{% if option_disabled %} card__size--disabled{% endif %}">{{- value -}}</span>
+                      <script type="application/json" data-resource="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}">
+                        {{ value.variant | json }}
+                      </script>
+                      {%- endfor -%}
+                    </div>
+                {%- endif -%}
+            {% endfor %}
+        </variant-picker>
+    </div>
+{%- endunless -%}
+{%- if product.has_only_default_variant -%}
+    {%- if block.settings.variant_size_page != blank or block.settings.variant_size_text != blank -%}
+        <modal-opener class="size-guide" data-modal="#SizeGuideModal-{{ block.id }}">
+            <button id="SizeGuide-{{ block.id }}" class="size-guide__button button--modal-opener button link-button {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" data-modal-toggle>
+                {% if block.settings.show_ruler %}
+                    <span class="size-guide__button-icon">
+                        {%- render 'glyphs_signs', icon: 'ruler' -%}
+                    </span>
+                {% endif %}
+                <span class="size-guide__button-text">
+                    {% if block.settings.label_bolder_font %}<b>{% endif %}
+                    {{ 'products.product.size_guide' | t  }}
+                    {% if block.settings.label_bolder_font %}</b>{% endif %}
+                </span>
+            </button>
+        </modal-opener>
+        {%- endif -%}
+{%- endif -%}
+{%- if block.settings.variant_size_page != blank or block.settings.variant_size_text != blank -%}
+{%- capture modal_template_id -%}size-modal-tpl-{{ block.id }}{%- endcapture -%}
+<modal-dialog id="SizeGuideModal-{{ block.id }}" class="global-popup-modal  global-popup-modal--drawer" {{ block.shopify_attributes }} data-template-id="{{ modal_template_id }}">
+    <template id="{{ modal_template_id }}">
+        <div role="dialog" aria-modal="true" class="{% if block.settings.popup_style == 'popover' %}popup color-{{ settings.popup_color_scheme }}{% else %}drawer{% if settings.modal_border %} modal--border{% endif %} color-{{ settings.drawer_color_scheme }}{% endif %} modal {{ block.settings.popup_width }} {% unless block.settings.popup_style %}popup {{ block.settings.popup_width }} color-{{ settings.popup_color_scheme }}{% endunless %} {% if settings.modal_enable_shadow %}modal--shadow{% endif %} hide-scrollbar" tabindex="-1">
+            {% if block.settings.popup_style == 'drawer' %}
+                <div class="button-wrapper">
+                    <button type="button" class="button button-close button--small close-popup icon--large" id="ModalClose-{{ block.id }}">
+                      {%- render 'glyphs_interface', icon: 'close' -%}
+                    </button>
+                  </div>
+            {% endif %}
+            <div class="scroll-area hide-scrollbar">
+            {% if block.settings.popup_style == 'popover' %}
+            <div class="button-wrapper">
+                <button type="button" class="button button-close button--small close-popup icon--large" id="ModalClose-{{ block.id }}">
+                {%- render 'glyphs_interface', icon: 'close' -%}
+                </button>
+            </div>
+            {% endif %}
+        {% liquid 
+            assign uppercase_headings = false
+            if block.settings.rte_heading_style == 'body-font' and settings.uppercase_body
+                assign uppercase_headings = true
+            elsif block.settings.rte_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_headings = true
+            elsif block.settings.rte_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                assign uppercase_headings = true
+            elsif block.settings.rte_heading_style == 'section-heading' and settings.uppercase_section_headings
+                assign uppercase_headings = true
+            elsif block.settings.rte_heading_style == 'page-title' and settings.uppercase_page_titles
+                assign uppercase_headings = true
+            endif
+        %}
+        <div class="{% if block.settings.popup_style == 'popover' %}popup-content{% else %}drawer-wrapper drawer-wrapper--padding{% endif %}{% unless block.settings.popup_style %}popup-content{% endunless %} heading-style-{{ block.settings.rte_heading_style }} {% if block.settings.rte_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+            page__content rte body-font{% if settings.uppercase_body %} uppercase{% endif %}{% if uppercase_headings %} headings-uppercase{% endif %}">
+            {% if block.settings.variant_size_text != blank %}
+                {%- liquid
+                    assign uppercase_text = false
+                    if block.settings.variant_size_text_style == 'section-heading' and settings.uppercase_section_headings
+                        assign uppercase_text = true
+                    elsif block.settings.variant_size_text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                        assign uppercase_text = true
+                    elsif block.settings.variant_size_text_style == 'subheading-font' and settings.uppercase_subheadings
+                        assign uppercase_text = true
+                    elsif block.settings.variant_size_text_style == 'body-font' and settings.uppercase_body
+                        assign uppercase_text = true
+                    elsif block.settings.variant_size_text_style == 'caption-font' and settings.uppercase_caption
+                        assign uppercase_text = true
+                    endif
+                    -%}
+            <div class="{{ block.settings.variant_size_text_style }}{% if uppercase_text %} uppercase{% else %} none-uppercase{% endif %}{% if block.settings.variant_size_text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                {{ block.settings.variant_size_text }}
+            </div>
+            {% endif %}
+            {% if block.settings.variant_size_page != blank %}{{ block.settings.variant_size_page.content }}{% endif %}
+        </div>
+        </div>
+        </div>
+    </template>
+</modal-dialog>
+{%- endif -%}

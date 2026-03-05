@@ -1,0 +1,46 @@
+{%- liquid
+  assign minimum_amount = 'cart.free_shipping_minimum' | t
+  assign is_numbers = false
+  if minimum_amount contains '0' or minimum_amount contains '1' or minimum_amount contains '2' or minimum_amount contains '3' or minimum_amount contains '4' or minimum_amount contains '5' or minimum_amount contains '6' or minimum_amount contains '7' or minimum_amount contains '8' or minimum_amount contains '9'
+    assign is_numbers = true
+  endif
+  if is_numbers == false
+    assign minimum_amount = settings.free_shipping_amount
+  endif
+  assign minimum_amount_in_cents = minimum_amount | times: 100
+  assign total_price = cart.total_price
+
+  if linklists.gift-wrapping.links != blank and linklists.gift-wrapping.links.first.type == 'product_link'
+    assign gift_wrapping = linklists.gift-wrapping.links.first
+    
+    assign gift_wrap_id = gift_wrapping.object.variants.first.id
+    assign gift_wraps_in_cart = 0
+    for item in cart.items
+      if item.id == gift_wrap_id
+        assign gift_wraps_in_cart = item.price
+        break
+      endif
+    endfor
+    assign total_price = total_price | minus: gift_wraps_in_cart
+  endif
+-%}
+
+{%- if minimum_amount != '0' and minimum_amount != 0 -%}
+<div class="free-shipping flex--column subheading-font{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.uppercase_subheadings %} uppercase{% endif %}" 
+  data-free-shipping-amount="{{ minimum_amount }}" data-cart-total="{{ total_price | json }}"
+  data-free-shipping-message="{{ 'cart.free_shipping_unreached_message' | t | escape }}"
+  data-free-shipping-success="{{ 'cart.free_shipping_reached_message' | t | escape }}">
+  {%- if total_price >= minimum_amount_in_cents -%}
+    <span class="free-shipping__text free-shipping__text--success">{% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'cart.free_shipping_reached_message' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}</span>
+    <span class="free-shipping__progress free-shipping__progress--success" style="--progress: 100%;"></span>
+  {%- else -%}
+    {%- capture remaining_amount -%}{{ total_price | minus: minimum_amount_in_cents | abs | money | strip_html }}{%- endcapture -%}
+    <span class="free-shipping__text">{% if settings.bolder_subheadings_font %}<b>{% endif %}
+    {{ 'cart.free_shipping_unreached_message' | t: remaining_amount: remaining_amount }}
+    {% if settings.bolder_subheadings_font %}</b>{% endif %}</span>
+
+    {%- capture progress_percent -%}{{ total_price | times: 1.0 | divided_by: minimum_amount_in_cents | at_most: 1 | times: 100 | round }}%{%- endcapture -%}
+    <span class="free-shipping__progress" style="--progress: {{ progress_percent }};"></span>
+  {%- endif -%}
+</div>
+{%- endif -%}

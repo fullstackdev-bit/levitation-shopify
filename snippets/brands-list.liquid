@@ -1,0 +1,132 @@
+{% liquid
+  assign disable_max_width = false
+  if section.settings.disable_max_width
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'page' and settings.full_width_page_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'alternative' and settings.full_width_alt_grid
+    assign disable_max_width = true
+  elsif section.settings.grid_style == 'secondary' and settings.full_width_second_grid
+    assign disable_max_width = true
+  endif
+
+  assign uppercase_card_title = false
+  if section.settings.card_title_style == 'secondary-heading' and settings.uppercase_secondary_headings
+    assign uppercase_card_title = true
+  elsif section.settings.card_title_style == 'section-heading' and settings.uppercase_section_headings
+    assign uppercase_card_title = true
+  elsif section.settings.card_title_style == 'page-title' and settings.uppercase_page_titles
+    assign uppercase_card_title = true
+  elsif section.settings.card_title_style == 'subheading-font' and settings.uppercase_subheadings
+    assign uppercase_card_title = true
+  elsif section.settings.card_title_style == 'body-font' and settings.uppercase_body
+    assign uppercase_card_title = true
+  elsif section.settings.card_title_style == 'caption-font' and settings.uppercase_caption
+    assign uppercase_card_title = true
+  endif
+
+  assign onload_script = ''
+  assign loading_images = 'eager'
+  if settings.images_loading != 'disable'
+    assign onload_script = 'this.parentNode.classList.add("lazyloaded");'
+    assign loading_images = 'lazy'
+  endif
+  if section.index > 2 
+    assign loading_images = 'lazy'
+  endif
+%}
+
+<ul
+  class="brands-list grid
+    {%- unless section.settings.full_width %} {{ section.settings.grid_style }}-grid {% if disable_max_width %} disable-max-width {% endif %}{% endunless -%}
+    {%- unless section.settings.disable_grid_gaps %} {{ section.settings.grid_style }}-grid-gaps {% endunless -%} {% if section.settings.disable_grid_gaps %}disable-grid-gaps{% endif %}
+  "
+  role="list"
+>
+  {% for vendor_raw in vendors %}
+    {% liquid
+      assign vendor = vendor_raw | strip
+
+      assign file_extensions = 'svg,png,webp,jpg,jpeg' | split: ','
+      capture vendor_value
+        render 'filename-normalize', value: vendor
+      endcapture
+
+      for ext in file_extensions
+        capture vendor_file_name
+          render 'filename-normalize', value: vendor, keep_case: true
+        endcapture
+        assign vendor_file_name = vendor_file_name | append: '.' | append: ext
+
+        if images[vendor_file_name] != blank
+          assign vendor_img_file = images[vendor_file_name] | downcase
+          break
+        endif
+      endfor
+
+      assign vendor_has_image = false
+      if images[vendor_file_name] != blank and vendor_img_file contains vendor_value
+        assign vendor_has_image = true
+      endif
+
+      assign doubled_logo_height = section.settings.logo_height | times: 2
+    %}
+
+    <li class="grid-item {{ forloop.index }}">
+      <a
+        class="brand-card color-{{ section.settings.card_color_scheme }}
+          {%- if section.settings.show_border %} brand-card--with-border {% endif -%}"
+        href="{{ vendor | url_for_vendor }}"
+        aria-label="{{ vendor }}"
+      >
+        {% if vendor_has_image and section.settings.card_style != 'name' %}
+          <div class="brand-card__image-wrapper" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+            {% if settings.images_loading != 'disable' %}
+              <figure class="lazy-image figure-brand-card__image lazy-image--{{ settings.images_loading }}">
+            {% endif %}
+            {{
+              images[vendor_file_name]
+              | image_url: height: doubled_logo_height
+              | image_tag: class: 'brand-card__image', onload: onload_script, loading: loading_images, alt: vendor
+            }}
+            {% if settings.images_loading != 'disable' %}
+              {% if settings.images_loading != 'fade_scale' %}
+                <div
+                  class="lazy-image__preloader lazy-image__preloader--full lazy-image__preloader-{{ settings.images_loading }}"
+                  aria-hidden="true"
+                >
+                  <img
+                    src="{{ images[vendor_file_name] | image_url: width: 10 }}"
+                    draggable="false"
+                    width="10"
+                    height="10"
+                    alt="{{ vendor | escape }}"
+                  >
+                </div>
+              {% endif %}
+              </figure>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if vendor_has_image == false or section.settings.card_style != 'logo' %}
+          <h4
+            class="brand-card__title {{ section.settings.card_title_style }} center
+              {%- if section.settings.card_style == 'logo' %} brand-card__title--with-background {% endif -%}
+              {%- if uppercase_card_title %} uppercase {% endif -%}
+              {%- if section.settings.card_title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}
+            "
+          >
+            {% if section.settings.card_title_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+              <b>
+            {%- endif %}
+            {{ vendor }}
+            {% if section.settings.card_title_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+              </b>
+            {%- endif %}
+          </h4>
+        {% endif %}
+      </a>
+    </li>
+  {% endfor %}
+</ul>

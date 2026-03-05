@@ -1,0 +1,226 @@
+{%- liquid
+  assign max_width = '480px'
+
+  assign desktop_item_width = section.settings.item_width | times: 1
+  if desktop_item_width > 160
+      assign desktop_item_size = 1
+  else
+      assign desktop_item_size = 2
+  endif
+
+  assign mobile_width = section.settings.item_width
+  assign desktop_columns = 2
+
+  assign card_content_style = 'small'
+  if settings.small_bolder_product_price
+    assign accent_price = true
+  endif
+  assign use_accent_color_for_price = false
+  if settings.small_use_accent_color_for_price
+    assign use_accent_color_for_price = true
+  endif
+  assign use_sale_color_for_new_price = false
+  if settings.small_use_sale_color_for_new_price
+    assign use_sale_color_for_new_price = true
+  endif
+
+  assign full_width = false
+  if section.settings.full_width
+    assign max_width = '100vw'
+    assign full_width = true
+  endif
+
+  assign mobile_item_size = 100.00 | divided_by: section.settings.mobile_item_min_width
+
+  assign section_framing = false
+  if section.settings.section_framing != 'disable'
+      assign section_framing = true
+  endif
+
+  assign selector_container = '#shopify-section-' | append: section.id
+  assign compare_at_price_color = settings.small_compare_at_price_color
+  assign products_count = search.results_count
+-%}
+
+{%- liquid
+  assign heading = section.settings.recently_viewed_heading
+  assign heading_style = section.settings.recommendations_heading_style
+  assign uppercase_heading = false
+  if heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_heading = true
+  elsif heading_style == 'section-heading' and settings.uppercase_section_headings
+      assign uppercase_heading = true
+  elsif heading_style == 'page-title' and settings.uppercase_page_titles
+      assign uppercase_heading = true
+  elsif heading_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_heading = true
+  elsif heading_style == 'body-font' and settings.uppercase_body
+      assign uppercase_heading = true
+  elsif heading_style == 'caption-font' and settings.uppercase_caption
+      assign uppercase_heading = true
+  endif
+-%}
+
+<recently-viewed-products class="recently-viewed-products section{% if section_framing == false or section.settings.full_width %} color-{{ section.settings.color_scheme }}{% endif %}{% unless section.settings.full_width or is_section == false %} side-margins{% endunless %}{% if section.settings.show_bottom_line %} bottom-line{% endif %}" 
+  data-url="{{ routes.search_url }}?section_id={{ section.id }}&type=product&q=" {% if request.page_type == 'product' %} data-product-id="{{ product.id }}"{% endif %}
+>
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      --top-spacing: {{ section.settings.top_spacing }};
+      --bottom-spacing: {{ section.settings.bottom_spacing }};
+      --aspect-ratio: {{ settings.product_media_ratio }};
+      --focal-point: {{ settings.product_focal_point }};
+      --reduce-items: 1;
+      --max-width: {{ max_width }};
+      --variant-swatches-radius: {{ settings.variant_swatches_radius }};
+      --variant-thumbnail-aspect-ratio: {{ settings.variant_thumbnail_image_ratio }};
+      --variant-thumbnail-focal-point: {{ settings.variant_thumbnail_focal_point }};
+      --variant-thumbnail-radius: {{ settings.variant_thumbnail_radius }};
+
+      --desktop-item-width: {{ section.settings.item_width }}px;
+    }
+
+    @media screen and (max-width: 1300px) {
+      #shopify-section-{{ section.id }} {
+        {% if desktop_item_size == 6 %}
+          --reduce-items: 2;
+        {% endif %}
+      }
+      {% if desktop_item_size == 6 and products_count >= 5 %}
+        #shopify-section-{{ section.id }} .slider__grid--center {
+          justify-content: flex-start;
+        }
+      {% endif %}
+    }
+
+    @media screen and (max-width: 1100px) {
+      #shopify-section-{{ section.id }} {
+        {% if desktop_item_size == 6 %}
+          --reduce-items: 3;
+        {% elsif desktop_item_size == 5 %}
+          --reduce-items: 2;
+        {% endif %}
+      }
+      {% if desktop_item_size == 6 and products_count >= 4 %}
+        #shopify-section-{{ section.id }} .slider__grid--center {
+          justify-content: flex-start;
+        }
+      {% endif %}
+      {% if desktop_item_size == 5 and section.blocks.size >= 4 %}
+        #shopify-section-{{ section.id }} .slider__grid--center {
+          justify-content: flex-start;
+        }
+      {% endif %}
+    }
+
+    @media screen and (max-width: 1024px) {
+      #shopify-section-{{ section.id }} {
+        --desktop-item-width: {{ section.settings.item_width }}px;
+      }
+
+      #shopify-section-{{ section.id }} .slider__grid--center {
+        justify-content: flex-start;
+      }
+    }
+  {% endstyle %}
+
+  <div class="section-container section-container--recently-viewed{% if section.settings.full_width == false %}{% if section.settings.section_framing == 'grid' %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}{% unless section_framing %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endunless %}{% endif %}">
+    {%- if section_framing and section.settings.full_width == false -%}<div class="section-radius elem-padding-l color-{{ section.settings.color_scheme }}"><div class="{% if section.settings.section_framing != 'grid' %}{{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}">{%- endif -%}     
+      {% unless no_heading %}
+        <div class="{% if section.settings.full_width %}side-margins{% endif %} {% if cart_drawer and is_cart_drawer_side_panel %}cart-drawer__header{% endif %} js-cart-drawer-header">
+          {% if heading %}
+            <{{ section.settings.heading_tag | default: 'h2' }} class="{{ heading_style }}
+            {% if section.id contains 'cart' and section.id contains 'drawer' %}cart-recommendations__header{% else %}section-header{% endif %} 
+            {% if uppercase_heading %} uppercase{% endif %}
+            {% if section.settings.center_text %} center{% endif %} 
+            {% if section.settings.full_width %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}
+            {% if heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+              {% if heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ heading | escape }}{% if heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            </{{ section.settings.heading_tag | default: 'h2' }}>
+          {% endif %}
+        </div>
+      {% endunless %}
+
+      <p class="no-viewed-products-placeholder caption-font" hidden>{{ 'sections.recently_viewed_products.no_viewed_products_placeholder' | t }}</p>
+
+      {% if request.design_mode %}
+        <p class="caption-font">{{ 'sections.recently_viewed_products.disabled_in_editor_placeholder' | t }}</p>
+      {% else %}
+        {%- if request.page_type == 'search' and search.performed and search.results_count > 0 -%}
+          <slider-component id="GalleryViewer-{{ section.id }}" class="slider{% if section.settings.full_width %} slider--full-width{% endif %}">
+            <div class="slider__viewport">
+              {%- assign parsed_terms = search.terms | split: ' OR ' -%}
+              <ul id="Slider-Gallery-{{ section.id }}" class="slider__grid {% if section.settings.alignment_fewer_items == 'center' and desktop_item_width > search.results.count %}slider__grid--center{% endif %}
+                {% unless section.settings.disable_grid_gaps %}{{ section.settings.grid_style }}-grid-gaps{% endunless %} {% if section.settings.disable_grid_gaps %}disable-grid-gaps{% endif %} hide-scrollbar" role="list" 
+                  style="--desktop-columns: {{ desktop_item_width }};--mobile-columns: {{ mobile_item_size }};"
+                  data-count="{{ desktop_item_size }}"
+                  data-mobile-width="{{ section.settings.mobile_item_min_width }}"
+                  data-column-gap="{% if section.settings.grid_style == 'alternative' %}{{ settings.alt_grid_column_gap }}{% elsif section.settings.grid_style == 'page' %}{{ settings.page_column_gap }}{% elsif section.settings.grid_style == 'secondary' %}{{ settings.second_grid_column_gap }}{% endif %}">
+                  {%- assign is_first_match = true -%}
+                  {%- for parsed_term in parsed_terms -%}
+                      {%- assign id = parsed_term | split: 'id:' | last | times: 1 -%}
+                      {%- for product in search.results -%}
+                          {%- if product.id == id -%}
+                              <li id="Slide-{{ section.id }}" class="slider__grid-item {% if is_first_match %}is-active{% endif %}">
+                                {% render 'card-product',
+                                  card_product: product,
+                                  show_vendor: section.settings.show_vendor,
+                                  show_title: section.settings.show_title,
+                                  hover_behavior: section.settings.hover_behavior,
+                                  quick_buy: section.settings.quick_buy,
+                                  price_position: section.settings.price_position,
+                                  options_position: section.settings.options_position,
+                                  desktop_options: section.settings.desktop_options,
+                                  mobile_options: section.settings.mobile_options,
+                                  max_product_name_characters: section.settings.max_product_name_characters,
+                                  show_short_description: section.settings.show_short_description,
+                                  show_rating: section.settings.show_rating,
+                                  max_width: max_width,
+                                  disable_max_width: disable_max_width,
+                                  accent_price: accent_price,
+                                  desktop_columns: desktop_columns,
+                                  mobile_width: mobile_width,
+                                  autoplay_speed: section.settings.autoplay_speed,
+                                  product_card_color_scheme: section.settings.product_card_color_scheme,
+                                  show_product_card_border: section.settings.show_product_card_border,
+                                  complementary_block: false,
+                                  card_content_style: card_content_style,
+                                  use_sale_color_for_new_price: use_sale_color_for_new_price, 
+                                  compare_at_price_color: compare_at_price_color, 
+                                  use_accent_color_for_price: use_accent_color_for_price,
+                                  parent_color_scheme: section.settings.color_scheme,
+                                  full_width: full_width,
+                                  selector_container: selector_container,
+                                  show_bullets: section.settings.show_bullets,
+                                  grid_type: 'slider',
+                                  grid_style: section.settings.grid_style,
+                                  disable_grid_gaps: section.settings.disable_grid_gaps
+                                %}
+                              </li>
+                              {%- assign is_first_match = false -%}
+                          {% endif %}
+                      {% endfor %}
+                  {% endfor %}
+              </ul>
+              <button type="button" class="slider-button slider-button--prev{% if section.settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">
+                <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span>
+              </button>
+              <button type="button" class="slider-button slider-button--next{% if section.settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">
+                <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span>
+              </button>
+              {% if section.settings.show_scrollbar %}
+                {% if section.settings.full_width %}<div class="side-margins">{% endif %}
+                  <div tabindex="0" role="scrollbar" aria-orientation="horizontal" aria-valuemax="100" aria-valuemin="0" aria-valuenow="39" class="slider-scrollbar visually-hidden{% if section.settings.full_width %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif %}">
+                    <span class="slider-scrollbar__track">
+                      <span class="slider-scrollbar__thumb"></span>
+                    </span>
+                  </div>
+                {% if section.settings.full_width %}</div>{% endif %}
+              {% endif %}
+            </div>
+          </slider-component>
+        {%- endif -%}
+      {% endif %}
+    {%- if section_framing and section.settings.full_width == false -%}</div></div>{%- endif -%}
+  </div>
+</recently-viewed-products>

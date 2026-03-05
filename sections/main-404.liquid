@@ -1,0 +1,75 @@
+
+{{ 'main-404.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="template-404 section color-{{ section.settings.color_scheme }}">
+    <div class="section-container side-margins center{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+        <div class="template-header">
+            <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}">
+                {{ 'templates.404.title' | t }}
+            </h1>
+        </div>
+        <p class="body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+            {{ 'templates.404.subtext' | t }}
+        </p>
+        <a href="{{ routes.root_url }}" class="button solid-button button--main body-font{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+            {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'templates.404.return_home' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+        </a>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-404.name",
+  "tag": "section",
+  "class": "section-main-404",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

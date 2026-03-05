@@ -1,0 +1,246 @@
+html[dir="rtl"] #shop-hcaptcha-badge-container {
+    left: unset !important;
+    border-top-left-radius: unset !important;
+    border-bottom-left-radius: unset !important;
+    inset-inline-start: calc(100% - 56px);
+    border-start-start-radius: 12px;
+    border-end-start-radius: 12px ; 
+
+    &:hover {
+        transform: translateX(calc(100% - 56px)) !important;
+    }
+}
+
+html[dir="rtl"] input:is([type="email"], [type="tel"], [type="number"], [type="url"])::placeholder {
+    text-align: var(--placeholder-align); 
+}
+
+html[dir="rtl"] svg.rtl-flip {
+    scale: -1 1;
+}
+
+html[dir="rtl"] :is(.swiper-button-prev, .swiper-button-next) {
+    svg.rtl-flip {
+        scale: none;
+    }
+
+    &:has(.icon)::after {
+        content: none;
+    }
+}
+
+html[dir="rtl"] .drawer:not(.drawer--left):not(.filter-form) {
+    transform: translate(-100%);
+}
+
+html[dir="rtl"] .drawer.drawer--right.modal:not(.filter-form) {
+    transform: translate(100%);
+}
+
+html[dir="rtl"] .global-popup-modal--drawer .drawer.open {
+    animation: drawerOpenRTL .3s var(--transition-timing-function) forwards;
+}
+
+@keyframes drawerOpenRTL {
+    0% {
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(-100%);
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+}
+
+html[dir="rtl"] .newsletter__field {
+    border-top-right-radius: var(--field-radius);
+    border-bottom-right-radius: var(--field-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+html[dir="rtl"] .card-collection--overlay .card-collection__title.center {
+    transform: translate(50%, 0%);
+}
+
+html[dir="rtl"] .card__vendor-img {
+    background-position-x: right;
+}
+
+html[dir="rtl"] .rating-star {
+    --rating-direction: -90deg;
+}
+
+html[dir="rtl"] .color-swatch__title {
+    transform: translate(-50%);
+}
+
+html[dir="rtl"] .button.quick-view-button:not([disabled]) .loading-overlay__spinner:not(.hidden) {
+    transform: translate(-50%, -50%);
+}
+
+html[dir="rtl"] .drawer-recommendations.drawer-recommendations--side-panel {
+    transform: translateX(-100%);
+}
+
+[dir="rtl"] .media-with-text__content-wrapper.left .countdown__timer,
+[dir="rtl"] .banner__content-wrapper:not(.center) .countdown__timer,
+[dir="rtl"] .popup-content:not(.center) .countdown__timer,
+[dir="rtl"] .section-container.rich-text:not(.center) .countdown__timer,
+[dir="rtl"] .product__info-container .countdown__timer {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .media-with-text__content-wrapper.right .countdown__timer {
+  justify-content: flex-start;
+}
+
+@media screen and (max-width: 768px) {
+  [dir="rtl"] .media-with-text__content-wrapper.right .countdown__timer {
+    justify-content: flex-end;
+  }
+}
+
+html[dir="rtl"] 
+.facets__label input[type=checkbox]:disabled.mobile-facets__swatch:after,
+html[dir="rtl"] 
+.facets__label input[type=checkbox]:disabled.mobile-facets__thumbnail--options:after,
+html[dir="rtl"] 
+.facets__color-pill:has(+ .facets__checkbox:disabled):after {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+html[dir="rtl"] .price-range__track-active {
+    background-image: linear-gradient(-90deg, var(--gradient-colors));
+}
+
+html[dir="rtl"] .search-modal:not(.drawer) .predictive-search__button {
+    transform: translateX(50%);
+}
+
+html[dir="rtl"] .scrolling-promotion {
+    flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .scrolling-promotion--left .promotion--animated {
+    animation-name: scrolling-right;
+}
+
+html[dir="rtl"] .scrolling-promotion--right .promotion--animated {
+    animation-name: scrolling-left;
+}
+
+html[dir="rtl"] .banner-grid__info.center {
+    transform: translateX(50%);
+}
+
+[dir="rtl"] .promo-sticky-tab--left_side.open {
+    animation: openLeftStickyTabRTL var(--animation-duration) var(--transition-timing-function);
+}
+
+[dir="rtl"] .promo-sticky-tab--right_side.open {
+    animation: openRightStickyTabRTL var(--animation-duration) var(--transition-timing-function);
+}
+
+[dir="rtl"] .promo-sticky-tab--left_side_bottom.open {
+    animation: openLeftBottomStickyTabRTL var(--animation-duration) var(--transition-timing-function);
+}
+
+[dir="rtl"] .promo-sticky-tab--right_side_bottom.open {
+    animation: openRightBottomStickyTabRTL var(--animation-duration) var(--transition-timing-function);
+}
+
+@keyframes openLeftStickyTabRTL {
+    0% {
+        transform: rotate(270deg) translate(100%, 100%);
+        opacity: 0;
+    }
+}
+
+@keyframes openRightStickyTabRTL {
+    0% {
+        transform: rotate(-90deg) translate(-50%, -100%);
+        opacity: 0;
+    }
+}
+
+@keyframes openLeftBottomStickyTabRTL {
+    0% {
+        transform: rotate(-90deg) translate(100%, 100%);
+        opacity: 0;
+    }
+}
+
+@keyframes openRightBottomStickyTabRTL {
+    0% {
+        transform: rotate(-90deg) translateY(calc(100% - 20px));
+        opacity: 0;
+    }
+}
+
+[dir="rtl"] .promo-sticky-tab--left_side {
+    transform: rotate(270deg) translateX(100%);
+    transform-origin: bottom right;
+}
+
+[dir="rtl"] .promo-sticky-tab--right_side {
+    transform: rotate(-90deg) translateX(-50%);
+    transform-origin: top left;
+}
+
+[dir="rtl"] .promo-sticky-tab--left_side_bottom {
+    transform: rotate(-90deg) translate(100%);
+    transform-origin: bottom right;
+}
+
+[dir="rtl"] .promo-sticky-tab--right_side_bottom {
+    transform: rotate(-90deg) translate(0%, 100%);
+    transform-origin: bottom left;
+}
+
+html[dir="rtl"] .image-comparison__slide:nth-child(1) {
+    z-index: 1;
+}
+
+html[dir="rtl"] .image-comparison__slide:nth-child(1) {
+    transition-property: clip-path;
+    transition-timing-function: ease;
+    clip-path: inset(0px 0px -1px var(--position));
+}
+
+html[dir="rtl"] .image-zoom-icon {
+    transform: translateX(50%);
+}
+
+
+@media screen and (min-width: 769px) {
+    html[dir="rtl"] 
+    .slideshow .swiper-slide:not(.desktop-content-below) 
+    .banner__container-content--left_center .banner__content {
+        transform: translateX(50%);
+    }
+    html[dir="rtl"] 
+    .slideshow .swiper-slide:not(.desktop-content-below) 
+    .banner__container-content--right_center .banner__content {
+        transform: translateX(50%);
+    }
+}
+
+html[dir="rtl"] .section-stories-slideshow .swiper-pagination-bullet-active::before {
+    transform-origin: right center;
+}
+
+html[dir="rtl"] .section-stories-slideshow .stories-slider-button-next {
+    left: 0;
+    right: unset;
+}
+html[dir="rtl"] .section-stories-slideshow .stories-slider-button-prev {
+    right: 0;
+    left: unset;
+}
+html[dir="rtl"] .stories-slider-actions {
+    left: 8px;
+    right: unset;
+}

@@ -1,0 +1,52 @@
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --height: {{ section.settings.height }};
+    }
+
+    .spacer {
+        height: calc(var(--section-padding) * var(--height));
+    }
+{% endstyle %}
+
+<div class="spacer color-{{ section.settings.color_scheme }}">
+</div>
+
+{% schema %}
+{
+  "name": "t:blocks.empty_space.name",
+  "tag": "section",
+  "class": "spacer-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "height",
+      "min": 0,
+      "max": 4,
+      "step": 0.5,
+      "unit": "x",
+      "label": "t:sections.all.height.label",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.header.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.color_scheme.label",
+      "default": "background-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.empty_space.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "*"
+    ]
+  }
+}
+{% endschema %}

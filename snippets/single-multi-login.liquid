@@ -29,8 +29,11 @@
     flex-direction: column;
     flex-basis: 100%;
     flex: 1;
-    padding: 0 25px;
     text-align: center;
+  }
+
+  .login-option > div {
+      display: block !important;
   }
 
   #customer_login .email,
@@ -49,7 +52,7 @@
   }
 
   .key-products {
-    margin-bottom: 4rem;
+    margin: 4rem auto;
     justify-content: center;
   }
 
@@ -98,7 +101,28 @@
   }
 </style>
 
+{% if background_image | blank != true %}
+  {% assign login_title = 'Log in to watch' %}
+  {% assign show_header_icon = 'true' %}
+  <div class="video-overlay-wrapper">
+    <div
+      class="video-overlay"
+      style="background-image: url('{{ background_image }}')"
+    >
+{% endif %}
+
 <div class="single-grid-item login-container">
+  {% if title or sub_title %}
+    <div class="single-col col-4_4 text-center">
+      {% if title %}
+        <h2 class="title {{ title_size }}">{{ title }}</h2>
+      {% endif %}
+      {% if sub_title %}
+        <div class="description">{{ sub_title }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
   {% for login_detail in login_details %}
     {% if forloop.first != true %}
       <div class="login-separator">OR</div>
@@ -116,7 +140,29 @@
           </section>
         {% else %}
           {% capture single-customer-login %}{% section 'single-base-login' %}{% endcapture %}
-          {{ single-customer-login | replace: 'PAGE_URL', page_url }}
+          {% unless default_form == 'signup' %}
+            {% assign single-customer-login = single-customer-login | replace: 'REGISTER_CLASSES', 'single-hidden' %}
+          {% else %}
+            {% assign single-customer-login = single-customer-login | replace: 'LOGIN_CLASSES', 'single-hidden' %}
+          {% endunless %}
+          {% if show_signup_link == 'false' %}
+            {% assign single-customer-login = single-customer-login | replace: 'SIGNUP_LINK_CLASSES', 'single-hidden' %}
+          {% endif %}
+          {% if show_cancel_signup_link == 'false' %}
+            {% assign single-customer-login = single-customer-login
+              | replace: 'CANCEL_SIGNUP_LINK_CLASSES', 'single-hidden'
+            %}
+          {% endif %}
+          {% if show_header_icon == 'true' %}
+            {% assign single-customer-login = single-customer-login | replace: 'SHOW_HEADER_ICON', 'single-display' %}
+          {% endif %}
+          {{
+            single-customer-login
+            | replace: 'LOGIN_TITLE', login_title
+            | replace: 'LOGIN_REDIRECT_URL', login_redirect_url
+            | replace: 'SIGNUP_REDIRECT_URL', signup_redirect_url,
+            | replace: 'CREATE_ACCT_TITLE', create_acct_title
+          }}
         {% endif %}
       {% elsif login_detail_parts[0] == 'WALLET' %}
         {% if login_detail_parts.size > 1 and login_detail_parts[1] == 'true' %}
@@ -126,9 +172,17 @@
             <button class="single-logout-button btn button">Disconnect Wallet</button>
           </section>
         {% else %}
-          {% section 'single-wallet-login' %}
+          {% capture single-connect-wallet %}{% section 'single-wallet-login' %}{% endcapture %}
+          {{ single-connect-wallet | replace: 'CONNECT_WALLET_TITLE', connect_wallet_title }}
         {% endif %}
       {% endif %}
     </div>
   {% endfor %}
 </div>
+{% comment %}
+  <!-- Closing </div> if video overlay is shown -->
+{% endcomment %}
+{% if background_image | blank != true %}
+  </div>
+  </div>
+{% endif %}

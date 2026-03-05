@@ -1,0 +1,43 @@
+{%- liquid
+    assign image_scale_factor = 1
+    assign image_aspect_ratio = media.aspect_ratio
+
+    if settings.product_media_ratio == 'auto'
+        assign target_aspect_ratio = image_aspect_ratio
+    else
+        assign target_aspect_ratio_parts = settings.product_media_ratio | split: '/'
+        assign target_width = target_aspect_ratio_parts[0] | plus: 0.0
+        assign target_height = target_aspect_ratio_parts[1] | plus: 0.0
+        assign target_aspect_ratio = target_width | divided_by: target_height
+    endif
+
+    if image_aspect_ratio > target_aspect_ratio
+        assign image_scale_factor = image_scale_factor | plus: image_aspect_ratio | minus: target_aspect_ratio 
+    endif
+-%}
+
+{%- capture sizes -%}
+    {% if grid_type == 'grid' %}
+		{% if disable_max_width or full_width %}
+			(max-width: 768px) calc(100vw / {{ mobile_columns }} * {{ image_scale_factor }}), {{ max_width | divided_by: desktop_columns | times: image_scale_factor }}vw
+		{% else %}
+			(max-width: 768px) calc(100vw / {{ mobile_columns }} * {{ image_scale_factor }}), {{ max_width | divided_by: desktop_columns | times: image_scale_factor }}px
+		{% endif %}
+    {% elsif grid_type == 'slider' %}
+		{% if disable_grid_gaps %}
+			{% if disable_max_width or full_width %}
+				(max-width: 768px) {{ mobile_width | times: image_scale_factor  }}px, {{ max_width | divided_by: desktop_columns | times: image_scale_factor  }}vw
+			{% else %}
+				(max-width: 768px) {{ mobile_width | times: image_scale_factor  }}px, {{ max_width | divided_by: desktop_columns | times: image_scale_factor  }}px
+			{% endif %}
+		{% else %}
+			{% if disable_max_width or full_width %}
+				(max-width: 768px) {{ mobile_width | times: image_scale_factor }}px, (max-width: 1024px) calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap | divided_by: 4 }}px)) / {{ desktop_columns }} * {{ image_scale_factor }}), calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap }}px)) / {{ desktop_columns }} * {{ image_scale_factor }})
+			{% else %}
+				(max-width: 768px) {{ mobile_width | times: image_scale_factor }}px, (max-width: 1024px) calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap | divided_by: 4 }}px)) / {{ desktop_columns }} * {{ image_scale_factor }}), calc(({{ max_width }} - ({{ desktop_columns | floor }} * {{ gap }}px)) / {{ desktop_columns }} * {{ image_scale_factor }})
+			{% endif %}
+		{% endif %}
+    {% endif %}
+{%- endcapture -%}
+
+{{ sizes }}

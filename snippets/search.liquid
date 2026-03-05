@@ -1,0 +1,74 @@
+<{% if settings.enable_quick_search %}div{% else %}search-element{% endif %} class="search search--{{ search_style }}{% if enable_mobile_search_field %} search-field-mobile{% endif %}{% if show_account == false or shop.customer_accounts_enabled == false %} search--right{% endif %}">
+    {% if settings.enable_quick_search %}<search-modal>{% endif %}
+        <details>
+            <summary tabindex="-1">
+                    {% if search_style != 'field' %}
+                    <a class="search-link header-element flex--row {{ text_style }}{% if text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %} {% if uppercase %} uppercase{% endif %}" href="{{ routes.search_url }}" aria-label="{{ 'templates.search.go_to_search_page' | t }}">
+                        {% if search_style == 'icon' or search_style == 'icon_with_text' %}
+                            <span class="search__icon icon icon--large">
+                                {%- render 'glyphs_header', icon: 'search' -%}
+                            </span>
+                        {% endif %}
+                        {% if search_style == 'text' or search_style == 'icon_with_text' %}
+                            <span>{% if bolder %}<b>{% endif %}{{ 'templates.search.search_title' | t }}{% if bolder %}</b>{% endif %}</span>
+                        {% endif  %}
+                    </a>
+                    {% endif %}
+                    {%- if enable_mobile_search_field or search_style == 'field' -%}
+                    {% style %}
+                        .search-modal__form {
+                            --search-field-radius: {{ search_field_radius }};
+                        }
+                    {% endstyle %}
+                    <form action="{{ routes.search_url }}" method="get" role="search" class="search-modal__form{% if enable_mobile_search_field %} search-modal__form-mobile{% endif %} flex--row">
+                        <div class="{% if section.settings.search_make_translucent %} make-translucent{% endif %} search-field flex--row{% if fill_search_background %} search-field--filled{% endif %}{% if show_search_outline %} search-field--outlined{% endif %}">
+                            <button type="submit" class="search-field__icon" aria-label="{{ 'templates.search.search_for' | t: terms: search.terms }}" tabindex="0">
+                                <span class="search__icon icon icon--large">
+                                    {%- render 'glyphs_header', icon: 'search' -%}
+                                </span>
+                            </button>
+                            <label class="visually-hidden" for="Search-In-Template" aria-hidden="true">{{ 'templates.search.search_title' | t }}</label>
+                            <input 
+                                type="search" 
+                                class="search-field__text{% if settings.quick_search_style == 'drawer' %} search-field__text--drawer{% endif %} body-font{% if settings.uppercase_body %} uppercase{% endif %}" 
+                                id="Search-In-Template"
+                                name="q"
+                                value="{{ search.terms | escape }}"
+                                placeholder="{{ 'templates.search.placeholder' | t }}"
+                                autocomplete="off"
+                                tabindex="0"
+                                {%- if settings.enable_quick_search %}
+                                    role="combobox"
+                                    aria-expanded="false"
+                                    aria-owns="predictive-search-results-list"
+                                    aria-controls="predictive-search-results-list"
+                                    aria-haspopup="listbox"
+                                    aria-autocomplete="list" 
+                                    autocorrect="off"
+                                    autocomplete="off"
+                                    autocapitalize="off"
+                                    spellcheck="false"
+                                {% endif -%}>
+                            <button type="reset" class="search__button" tabindex="-1" aria-label="{{ 'templates.search.clear' | t }}">
+                                <div class="loading-overlay__spinner hidden">
+                                <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                </svg>
+                                </div> 
+                                <span class="search__button-text flex--row caption-font {% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %} visually-hidden">
+                                    {%- render 'glyphs_header', icon: 'search-clear' -%}
+                                </span>
+                            </button>
+                        </div>
+                        <button type="button" class="button-close close-popup icon--large button-close--search" aria-label="{{ 'accessibility.close' | t }}" data-modal-toggle>
+                            {%- render 'glyphs_interface', icon: 'close' -%}
+                        </button>
+                    </form>
+                {%- endif -%}
+            </summary>
+            {% if settings.enable_quick_search %}
+            {% render 'search-modal', header_search_style: search_style, search_field_radius: search_field_radius, fill_search_background: fill_search_background, show_search_outline: show_search_outline %}
+            {% endif %}
+        </details>
+    {% if settings.enable_quick_search %}</search-modal>{% endif %}
+</{% if settings.enable_quick_search %}div{% else %}search-element{% endif %}>

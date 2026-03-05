@@ -1,0 +1,91 @@
+<div class="newsletter newsletter--block">
+    {% if block.settings.label != blank %}
+        <p class="block-heading {{ section.settings.block_headings_style }}{% if uppercase_heading %} uppercase{% endif %}{% if section.settings.block_headings_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            {% if section.settings.block_headings_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ block.settings.label }}{% if section.settings.block_headings_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+        </p>
+    {% endif %}
+    {%- if block.settings.text != blank -%}
+        {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+        -%}
+        <div class="newsletter__subheading richtext rte link-underline {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+        {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+            {{ block.settings.text }}
+        </div>
+    {%- endif -%}
+    <form-state>
+    {% form 'customer', class: 'newsletter-form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        {%- if form.posted_successfully? -%}
+            <h3 class="body-font{% if settings.uppercase_body %} uppercase{% endif %} success-color" id="Newsletter-success--{{ section.id }}" tabindex="-1" autofocus>{{ 'newsletter.success' | t }}</h3>
+        {%- endif -%}
+        {%- if form.errors -%}
+            <h2 class="body-font{% if settings.uppercase_body %} uppercase{% endif %} error-color" tabindex="-1" autofocus id="Newsletter-error--{{ section.id }}">
+                {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}
+            </h2>
+        {%- endif -%}
+        <h2 class="email-no-valid body-font{% if settings.uppercase_body %} uppercase{% endif %} error-color visually-hidden" tabindex="-1">
+            {{ 'newsletter.invalid_email' | t }}
+        </h2>
+        <div class="newsletter__form flex--row align-center">
+            <label class="visually-hidden" for="NewsletterForm--{{ block.id }}" aria-hidden="true">{{ 'templates.contact.form.email' | t | append: '*' }}</label>
+            <input 
+                class="newsletter__field input input--text input-style--big required {% if form.errors %}invalid{% endif %} body-font {% if settings.uppercase_body %} uppercase{% endif %}" 
+                id="NewsletterForm--{{ block.id }}"
+                type="email"
+                dir="ltr"
+                name="contact[email]"
+                value="{{ form.email }}"
+                aria-required="true"
+                required="required"
+                autocorrect="off"
+                autocapitalize="off"
+                autocomplete="email"
+                {% if form.errors %}
+                    autofocus
+                    aria-invalid="true"
+                    aria-describedby="Newsletter-error--{{ block.id }}"
+                {% elsif form.posted_successfully? %}
+                    aria-describedby="Newsletter-success--{{ block.id }}"
+                {% endif %}
+                placeholder="{{ block.settings.placeholder }}"
+            />
+            <button type="submit" class="newsletter__field-button body-font{% if settings.uppercase_body %} uppercase{% endif %}" name="commit" id="Subscribe-block" aria-label="{{ 'newsletter.button_label' | t }}"><b>{{ 'newsletter.button_text' | t }}</b></button>
+        </div>
+        {%- if block.settings.enable_checkbox and block.settings.checkbox_label != blank -%}
+            {%- liquid
+                assign uppercase_text_checkbox = false
+                if block.settings.checkbox_text_style == 'body-font' and settings.uppercase_body
+                    assign uppercase_text_checkbox = true
+                elsif block.settings.checkbox_text_style == 'caption-font' and settings.uppercase_caption
+                    assign uppercase_text_checkbox = true
+                elsif block.settings.checkbox_text_style == 'subheading-font' and settings.uppercase_subheadings
+                    assign uppercase_text_checkbox = true
+                endif
+            -%}
+            <label class="field field--checkbox flex--row align-center" for="checkbox--{{ form_id }}">
+              <input-checkbox>
+                <input type="checkbox" id="checkbox--{{ form_id }}" name="contact[{{ 'templates.contact.form.checkbox' | t }}]" {%  if block.settings.make_required %}required{% endif %}>
+              </input-checkbox>
+              <span class="label richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} {{ block.settings.checkbox_text_style }}{% if uppercase_text_checkbox %} uppercase{% endif %}">
+                {% if block.settings.checkbox_text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ block.settings.checkbox_label }}{% if block.settings.checkbox_text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            </span>
+            </label>
+        {%- endif -%}
+    {% endform %}
+    </form-state>
+    {% if block.settings.caption != blank %}
+        <div class="newsletter__text richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} caption-font{% if settings.uppercase_caption %} uppercase{% endif %}">{{ block.settings.caption }}</div>
+    {% endif %}
+</div>

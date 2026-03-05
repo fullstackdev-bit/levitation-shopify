@@ -1,0 +1,165 @@
+{%- if settings.share_on_facebook or settings.share_on_x or settings.share_on_pinterest or settings.copy_link -%}
+  {%- liquid
+    assign uppercase_text = false
+    if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+        assign uppercase_text = true
+    elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_text = true
+    elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_text = true
+    elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+        assign uppercase_text = true
+    elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_text = true
+    endif
+-%}
+{% if template.name == 'article' %}<div class="side-margins {{ section.settings.grid_style }}-grid {% if disable_max_width %}disable-max-width{% endif %}" {{ block.shopify_attributes }}>{% endif %}
+<div class="article__share share {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}{% if template.name == 'article' %} {{ content_width }}{% endif %}
+  {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}"
+  style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {% unless template.name == 'article' %}{{ block.shopify_attributes }}{% endunless %}>
+  {% if block.settings.display_collapsible_link %}
+      <accordion-toggle>
+          <div class="accordion-toggle share-toggle">
+          <div class="accordion__summary" tabindex="0">
+              <div class="summary__title share__button">
+                  <span class="summary__title-name">
+                    {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                      {{ "general.share.share_button" | t }}
+                    {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                  </span>
+                  <span class="icon-accordion icon-accordion--close share__icon-close icon--large">
+                    {%- render 'glyphs_interface', icon: 'share' -%}
+                  </span>
+                  <span class="icon-accordion icon-accordion--open share__icon-open icon--large">
+                    {%- render 'glyphs_interface', icon: 'close' -%}
+                  </span>
+              </div>
+          </div>
+          <div class="accordion__panel">
+              <div class="accordion__content share-items">
+  {% endif %}
+              <ul class="share-list">
+                {%- if settings.share_on_facebook -%}
+                  <li class="share-list__item">
+                    <a
+                      class="share-list__link"
+                      href="//www.facebook.com/sharer.php?u={{ share_variant_url | default: share_link | prepend: request.origin }}"
+                      target="_blank"
+                      rel="noopener">
+                      <span class="share-list__icon icon--large">
+                        {%- render 'icons-social-media', icon: 'facebook' -%}
+                      </span>
+                      {% unless block.settings.show_only_icons %}
+                      <span class="share-list__title" aria-hidden="true">{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                      {{ 'general.share.share_on_facebook' | t }}
+                      {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}</span>
+                      {% endunless %}
+                      <span class="visually-hidden visually-hidden--inline">{{ 'accessibility.link_messages.new_window' | t }}</span>
+                    </a>
+                  </li>
+                {%- endif -%}
+              
+                {%- if settings.share_on_x -%}
+                  <li class="share-list__item">
+                    <a
+                      class="share-list__link"
+                      href="//twitter.com/share?text={{ share_title | url_param_escape }}&amp;url={{ share_variant_url | default: share_link | prepend: request.origin }}"
+                      target="_blank"
+                      rel="noopener">
+                      <span class="share-list__icon icon--large">
+                        {%- render 'icons-social-media', icon: 'x' -%}
+                      </span>
+                      {% unless block.settings.show_only_icons %}
+                      <span class="share-list__title" aria-hidden="true">{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                      {{ 'general.share.share_on_x' | t }}
+                      {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}</span>
+                      {% endunless %}
+                      <span class="visually-hidden visually-hidden--inline">{{ 'accessibility.link_messages.new_window' | t }}</span>
+                    </a>
+                  </li>
+                {%- endif -%}
+              
+                {%- if settings.share_on_pinterest -%}
+                  <li class="share-list__item">
+                    <a
+                      class="share-list__link"
+                      href="//pinterest.com/pin/create/button/?url={{ share_variant_url | default: share_link | prepend: request.origin }}&amp;media={{ share_image | image_url }}&amp;description={{ share_title | url_param_escape }}"
+                      target="_blank"
+                      rel="noopener">
+                      <span class="share-list__icon icon--large">
+                        {%- render 'icons-social-media', icon: 'pinterest' -%}
+                      </span>
+                      {% unless block.settings.show_only_icons %}
+                      <span class="social-sharing__title" aria-hidden="true">{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                      {{ 'general.share.share_on_pinterest' | t }}
+                      {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}</span>
+                      {% endunless %}
+                      <span class="visually-hidden visually-hidden--inline">{{ 'accessibility.link_messages.new_window' | t }}</span>
+                    </a>
+                  </li>
+                {%- endif -%}
+              
+                {%- if settings.copy_link -%}
+                  <li class="share-list__item">
+                    <copy-link id="Share-{{ section.id }}" class="share-list__link copy-link" tabindex="0">
+                      <span class="share-list__icon icon--large">
+                        {%- render 'icons-social-media', icon: 'share' -%}           
+                      </span>
+                      {% unless block.settings.show_only_icons %}
+                        <span class="social-sharing__title copy-label" aria-hidden="true">{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                        {{ 'general.share.copy_link' | t }}
+                        {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}</span>
+                      {% endunless %}
+                        <span class="copy-success">{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                        {{ 'general.share.copied_message' | t }}
+                        {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}</span>
+                    </copy-link>
+
+                    <script>
+                      if (!customElements.get('copy-link')) {
+                        customElements.define('copy-link', class CopyLink extends HTMLElement {
+                          constructor() {
+                            super();
+                          }
+
+                          connectedCallback() {
+                            this.addEventListener('click', this.handleCopy);
+
+                            this.addEventListener('keydown', (event) => {
+                              if (event.code.toUpperCase() === 'ENTER') {
+                                this.handleCopy();
+                              }
+                            });
+                          }
+
+                          handleCopy() {
+                            navigator.clipboard.writeText(window.location.href).then(() => {
+                              const copyLabel = this.querySelector('.copy-label');
+                              const copySuccess = this.querySelector('.copy-success');
+                      
+                              if (copyLabel) copyLabel.style.display = 'none';
+                              if (copySuccess) copySuccess.style.display = 'block';
+
+                              setTimeout(() => {
+                                if (copyLabel) copyLabel.style.display = 'block';
+                                if (copySuccess) copySuccess.style.display = 'none';
+                              }, 1600);
+                            }).catch((err) => {
+                              console.error('Clipboard copy failed:', err);
+                            });
+                          }
+                        });
+                      }
+                    </script>
+                  </li>
+                {%- endif -%}
+              </ul>
+  {% if block.settings.display_collapsible_link %}
+              </div>
+          </div>
+          </div>
+      </accordion-toggle>
+  {% endif %}
+</div>
+{% if template.name == 'article' %}</div>{% endif %}
+{%- endif -%}

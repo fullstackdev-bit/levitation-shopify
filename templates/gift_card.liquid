@@ -1,54 +1,380 @@
-{%- layout "gift_card" -%}
+{% layout none %}
 
-{%- assign formatted_initial_value = gift_card.initial_value | money_without_trailing_zeros: gift_card.currency -%}
-{%- assign formatted_initial_value_stripped = formatted_initial_value | strip_html -%}
+{% liquid 
+  assign rtl_languages = "ar,he,fa,ur,ps,ks" | split: "," 
+  assign shop_locale_code = request.locale.iso_code
 
-<div class="container">
-  <div class="tt-gift-layout" itemscope itemtype="http://schema.org/Organization">
+  assign dir = 'ltr'
+  if rtl_languages contains shop_locale_code
+      assign dir = 'rtl'
+  endif
+%}
 
-    {% section 'gift-template' %}
-    
-    <h1 class="tt-title">{{ 'gift_cards.issued.subtext' | t }}</h1>
-    
-    {% unless gift_card.enabled %}
-    <p>{{ 'gift_cards.issued.disabled' | t }}</p>
-    {% endunless %}
-    {% assign gift_card_expiry_date = gift_card.expires_on | date: "%d/%m/%y" %}
-    {% if gift_card.expired and gift_card.enabled %}
-    <p>{{ 'gift_cards.issued.expired' | t: expiry: gift_card_expiry_date }}</p>
+<!doctype html>
+<html class="no-js" lang="{{ shop_locale_code }}" dir="{{ dir }}">
+  <head>
+    <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1.0">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    {%- unless settings.heading_font_main.system? and settings.heading_font_secondary.system? and settings.body_font.system? -%}
+        <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+
+    {%- if settings.favicon != blank -%}
+          <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {%- assign formatted_balance = gift_card.balance | money_without_trailing_zeros | strip_html -%}
+
+    <title>{{ 'gift_cards.issued.title' | t: value: formatted_balance, shop: shop.name }}</title>
+
+    <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }}">
+
+    {{ content_for_header }}
+
+    {%- liquid
+        assign body_font_bold = settings.body_font | font_modify: 'weight', 'bold'
+        assign body_font_italic = settings.body_font | font_modify: 'style', 'italic'
+        assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic'
+    %}
+
+    {%- liquid 
+      assign min_spacing_between_sections = 24
+      assign max_spacing_between_sections = 100
+      assign step_value_in_spacing_between_sections = 4.0
+      assign all_steps_in_spacing_between_sections = max_spacing_between_sections | minus: min_spacing_between_sections | divided_by: step_value_in_spacing_between_sections
+      assign step_index_number = settings.spacing_between_sections | minus: min_spacing_between_sections | divided_by: step_value_in_spacing_between_sections
+      
+      assign min_template_header_padding = 16
+      assign max_template_header_padding = 80
+      assign step_value_in_template_header_padding = max_template_header_padding | minus: min_template_header_padding | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign template_header_padding = step_index_number | times: step_value_in_template_header_padding | plus: min_template_header_padding | round
+  
+      assign min_block_padding = 16
+      assign max_block_padding = 48
+      assign step_value_in_block_padding = max_block_padding | minus: min_block_padding | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign block_padding = step_index_number | times: step_value_in_block_padding | plus: min_block_padding | round
+
+      assign min_tab_padding = 16
+      assign max_tab_padding = 32
+      assign step_value_in_tab_padding = max_tab_padding | minus: min_tab_padding | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign tab_padding = step_index_number | times: step_value_in_tab_padding | plus: min_tab_padding | round
+
+      assign min_tab_padding_s = 8
+      assign max_tab_padding_s = 12
+      assign step_value_in_tab_padding_s = max_tab_padding_s | minus: min_tab_padding_s | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign tab_padding_s = step_index_number | times: step_value_in_tab_padding_s | plus: min_tab_padding_s | round
+
+      assign min_mobile_space_between_sections = 24
+      assign max_mobile_space_between_sections = 48
+      assign step_value_in_mobile_space_between_sections = max_mobile_space_between_sections | minus: min_mobile_space_between_sections | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign mobile_space_between_sections = step_index_number | times: step_value_in_mobile_space_between_sections | plus: min_mobile_space_between_sections | round
+
+      assign min_mobile_template_header_padding = 16
+      assign max_mobile_template_header_padding = 48
+      assign step_value_in_mobile_template_header_padding = max_mobile_template_header_padding | minus: min_mobile_template_header_padding | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign mobile_template_header_padding = step_index_number | times: step_value_in_mobile_template_header_padding | plus: min_mobile_template_header_padding | round
+
+      assign min_mobile_block_padding = 16
+      assign max_mobile_block_padding = 20
+      assign step_value_in_mobile_block_padding = max_mobile_block_padding | minus: min_mobile_block_padding | divided_by: all_steps_in_spacing_between_sections | round: 1
+      assign mobile_block_padding = step_index_number | times: step_value_in_mobile_block_padding | plus: min_mobile_block_padding | round
+
+      # Mobile grids gaps
+      assign min_gap = 4
+      assign max_gap = 80
+      assign step_value_in_gap = 4.0
+      assign all_steps_in_gap = max_gap | minus: min_gap | divided_by: step_value_in_gap
+      assign min_mobile_gap = 4
+      assign max_mobile_gap = 16
+      assign step_value_in_mobile_gap = max_mobile_gap | minus: min_mobile_gap | divided_by: all_steps_in_gap | round: 1
+
+      assign mobile_page_column_gap = settings.page_column_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+      assign mobile_page_row_gap = settings.page_row_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+      assign mobile_second_column_gap = settings.second_grid_column_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+      assign mobile_second_row_gap = settings.second_grid_row_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+      assign mobile_alt_column_gap = settings.alt_grid_column_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+      assign mobile_alt_row_gap = settings.alt_grid_row_gap | minus: min_gap | divided_by: step_value_in_gap | times: step_value_in_mobile_gap | plus: min_mobile_gap | round
+
+      assign icon_scale_index = settings.icon_size | times: 1 | minus: 1
+    -%}
+
+    {% style %}
+        {{ settings.heading_font_main | font_face: font_display: 'swap' }}
+        {{ settings.heading_font_secondary | font_face: font_display: 'swap' }}
+        {{ body_font_bold | font_face: font_display: 'swap' }}
+        {{ body_font_italic | font_face: font_display: 'swap' }}
+        {{ body_font_bold_italic | font_face: font_display: 'swap' }}
+        {{ settings.body_font | font_face: font_display: 'swap' }}
+
+        {% for scheme in settings.color_schemes -%}
+            {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
+            {% if forloop.index == 1 -%}
+              :root,
+            {%- endif %}
+            .color-{{ scheme.id }} {
+              --layout-bg-color: {{ scheme.settings.layout_background_color.red }},{{ scheme.settings.layout_background_color.green }},{{ scheme.settings.layout_background_color.blue }};
+            {% if scheme.settings.layout_background_gradient != empty %}
+              --bg-gradient: {{ scheme.settings.layout_background_gradient }};
+            {% else %}
+              --bg-gradient: {{ scheme.settings.layout_background_color }};
+            {% endif %}
+            {% if scheme.settings.overlay_gradient != empty %}
+              --overlay-background: {{ scheme.settings.overlay_gradient }};
+            {% else %}
+              --overlay-background: {{ scheme.settings.overlay_color }};
+            {% endif %}
+            --layout-text-color: {{ scheme.settings.layout_text_color.red }},{{ scheme.settings.layout_text_color.green }},{{ scheme.settings.layout_text_color.blue }};
+            --layout-link-color: {{ scheme.settings.layout_link_color.red }},{{ scheme.settings.layout_link_color.green }},{{ scheme.settings.layout_link_color.blue }};
+            --layout-highlighted-background: {{ scheme.settings.layout_highlighted_background.red }},{{ scheme.settings.layout_highlighted_background.green }},{{ scheme.settings.layout_highlighted_background.blue }};
+            --layout-accent-color: {{ scheme.settings.layout_accent_color.red }},{{ scheme.settings.layout_accent_color.green }},{{ scheme.settings.layout_accent_color.blue }};
+            --popover-bg-color: {{ scheme.settings.popover_background_color.red }},{{ scheme.settings.popover_background_color.green }},{{ scheme.settings.popover_background_color.blue }};
+            --popover-text-color: {{ scheme.settings.popover_text_color.red }},{{ scheme.settings.popover_text_color.green }},{{ scheme.settings.popover_text_color.blue }};
+            --shadow-color: {{ scheme.settings.shadow_color.red }},{{ scheme.settings.shadow_color.green }},{{ scheme.settings.shadow_color.blue }};
+            --button-bg-color: {{ scheme.settings.button_background_color.red }},{{ scheme.settings.button_background_color.green }},{{ scheme.settings.button_background_color.blue }};
+            --button-label-color: {{ scheme.settings.button_label_color.red }},{{ scheme.settings.button_label_color.green }},{{ scheme.settings.button_label_color.blue }};
+            --button-hover-color: {{ scheme.settings.button_hover_color.red }},{{ scheme.settings.button_hover_color.green }},{{ scheme.settings.button_hover_color.blue }};
+            --lines-color: {{ scheme.settings.lines_color.red }},{{ scheme.settings.lines_color.green }},{{ scheme.settings.lines_color.blue }};
+            --rating-color: {{ scheme.settings.rating_color.red }},{{ scheme.settings.rating_color.green }},{{ scheme.settings.rating_color.blue }};
+            --sale-color: {{ scheme.settings.sale_color.red }},{{ scheme.settings.sale_color.green }},{{ scheme.settings.sale_color.blue }};
+            --error-color: {{ scheme.settings.error_color.red }},{{ scheme.settings.error_color.green }},{{ scheme.settings.error_color.blue }};
+            --success-color: {{ scheme.settings.success_color.red }},{{ scheme.settings.success_color.green }},{{ scheme.settings.success_color.blue }};
+            --in-stock-color: {{ scheme.settings.in_stock_color.red }}, {{ scheme.settings.in_stock_color.green }}, {{ scheme.settings.in_stock_color.blue }};
+            --low-inventory-color: {{ scheme.settings.low_inventory_color.red }}, {{ scheme.settings.low_inventory_color.green }}, {{ scheme.settings.low_inventory_color.blue }};
+            --out-of-stock-color: {{ scheme.settings.sold_out_color.red }}, {{ scheme.settings.sold_out_color.green }}, {{ scheme.settings.sold_out_color.blue }};
+            --pickup-available-text: {{ scheme.settings.pickup_available_text.red }}, {{ scheme.settings.pickup_available_text.green }}, {{ scheme.settings.pickup_available_text.blue }};
+            --pickup-available-icon: {{ scheme.settings.pickup_available_icon.red }}, {{ scheme.settings.pickup_available_icon.green }}, {{ scheme.settings.pickup_available_icon.blue }};
+            --pickup-out-of-stock-text: {{ scheme.settings.pickup_out_of_stock_text.red }}, {{ scheme.settings.pickup_out_of_stock_text.green }}, {{ scheme.settings.pickup_out_of_stock_text.blue }};
+            --pickup-out-of-stock-icon: {{ scheme.settings.pickup_out_of_stock_icon.red }}, {{ scheme.settings.pickup_out_of_stock_icon.green }}, {{ scheme.settings.pickup_out_of_stock_icon.blue }};
+          }
+          {% endfor %}
+
+          {{ scheme_classes | prepend: 'body' }} {
+            color: rgb(var(--layout-text-color));
+            background: var(--bg-gradient);
+          }
+
+          :root {
+            --font-body-family: {{ settings.body_font.family }}, {{ settings.body_font.fallback_families }};
+            --font-body-style: {{ settings.body_font.style }};
+            --font-body-weight: {{ settings.body_font.weight }};
+            --body-font-size: {{ settings.body_base_size }}px;
+            --body-line-height: {{ settings.body_line_height }};
+            --body-letter-spacing: {{ settings.body_letter_spacing | divided_by: 1000.0 }}em;
+            --mobile-body-font-scale: {{ settings.mobile_body_font_scale | divided_by: 100.0 }};
+
+            --font-heading-main-family: {{ settings.heading_font_main.family }}, {{ settings.heading_font_main.fallback_families }};
+            --font-heading-main-style: {{ settings.heading_font_main.style }};
+            --font-heading-main-weight: {{ settings.heading_font_main.weight }};
+            --font-heading-second-family: {{ settings.heading_font_secondary.family }}, {{ settings.heading_font_secondary.fallback_families }};
+            --font-heading-second-style: {{ settings.heading_font_secondary.style }};
+            --font-heading-second-weight: {{ settings.heading_font_secondary.weight }};
+            --heading-font-size: {{ settings.heading_base_size }}px;
+            --page-title-line-height: {{ settings.page_titles_line_height }};
+            --section-headings-line-height: {{ settings.section_headings_line_height }};
+            --secondary-headings-line-height: {{ settings.secondary_headings_line_height }};
+            
+            --page-title-letter-spacing: {{ settings.page_titles_letter_spacing | divided_by: 1000.0 }}em;
+            --section-headings-letter-spacing: {{ settings.section_headings_letter_spacing | divided_by: 1000.0 }}em;
+            --secondary-headings-letter-spacing: {{ settings.secondary_headings_letter_spacing | divided_by: 1000.0 }}em;
+            --subheadings-letter-spacing: {{ settings.subheadings_letter_spacing | divided_by: 1000.0 }}em;
+
+            --page-title-font-size: {{ settings.heading_base_size | times: settings.page_titles_desktop_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+            --section-headings-font-size: {{ settings.heading_base_size | times: settings.section_headings_desktop_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+            --secondary-headings-font-size: {{ settings.heading_base_size | times: settings.secondary_headings_desktop_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+            --secondary-headings-font-scale: {{ settings.secondary_headings_desktop_scale | divided_by: 100.0 }};
+            --subheadings-font-size: {{ settings.body_base_size | times: settings.subheadings_desktop_scale | divided_by: 100.0 | at_least: 10 | at_most: 128 }}px;
+
+            --caption-font-size: {{ settings.body_base_size | times: settings.caption_desktop_scale | divided_by: 100.0 | at_most: 128 }}px;
+            --main-button-font-size: {{ settings.body_base_size | times: settings.main_button_desktop_scale | divided_by: 100.0 | at_most: 128 }}px;
+            --main-button-line-height: {{ settings.body_base_size | times: settings.main_button_desktop_scale | divided_by: 100.0 | at_most: 128 | times: 1.25 | round }}px;
+            --button-line-height: {{ settings.body_base_size | times: 1.25 | round }}px;
+            --transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+            --animation-duration: 0.3s;
+            --hover-opacity: 0.7;
+            --section-padding: {{ settings.spacing_between_sections }}px;
+            --inner-section-padding: {{ settings.spacing_between_sections }}px;
+            --page-column-gap: {{ settings.page_column_gap }}px;
+            --page-row-gap: {{ settings.page_row_gap }}px;
+            --second-column-gap: {{ settings.second_grid_column_gap }}px;
+            --second-row-gap: {{ settings.second_grid_row_gap }}px;
+            --alt-column-gap: {{ settings.alt_grid_column_gap }}px;
+            --alt-row-gap: {{ settings.alt_grid_row_gap }}px;
+            --side-margin: {{ settings.left_and_right_margins }}px;
+            --page-grid-width: {{ settings.page_width }}px;
+            --second-grid-width: {{ settings.second_grid_width }}px;
+            --alt-grid-width: {{ settings.alt_grid_width }}px;
+            --border-thickness: {{ settings.border_thickness }};
+            --line-thickness: {{ settings.line_thickness }}px;
+            --cards-radius: {{ settings.card_images_radius }};
+            --drawers-radius: {{ settings.drawers_popups_radius }};
+            --card-collection-shadow-opacity: {{ settings.collection_card_shadow_opacity | divided_by: 100.0 }};
+            --card-collection-shadow-horiz-offset: {{ settings.collection_card_horizontal_offset }}px;
+            --card-collection-shadow-vert-offset: {{ settings.collection_card_vertical_offset }}px;
+            --card-collection-shadow-blur: {{ settings.collection_card_shadow_blur }}px;
+            --card-product-spacing: {{ settings.product_card_inner_spacing }}%;
+            --main-button-vertical-padding: {{ settings.main_vertical_padding }};
+            --main-button-horizontal-padding: calc(var(--main-button-vertical-padding) * 2);
+            --secondary-button-vertical-padding: 8px;
+            --secondary-button-horizontal-padding: calc(var(--secondary-button-vertical-padding) * 2);
+            --button-border-radius: {{ settings.buttons_radius }};
+            --arrow-button-border-radius: {{ settings.arrow_buttons_radius }};
+            --button-shadow-opacity: {{ settings.shadow_opacity | divided_by: 100.0 }};
+            --button-shadow-offset-x: {{ settings.horizontal_offset }}px;
+            --button-shadow-offset-y: {{ settings.vertical_offset }}px;
+            --button-shadow-blur: {{ settings.shadow_blur }}px;
+            
+            --modal-shadow-opacity: {{ settings.modal_shadow_opacity | divided_by: 100.0 }};
+            --modal-shadow-horiz-offset: {{ settings.modal_horizontal_offset }}px;
+            --modal-shadow-vert-offset: {{ settings.modal_vertical_offset }}px;
+            --modal-shadow-blur: {{ settings.modal_shadow_blur }}px;
+
+            --overlay-opacity: {{ settings.overlay_opacity | divided_by: 100.0 }};
+            --overlay-blur: {{ settings.overlay_bg_blur }}px;
+
+            --field-radius: {{ settings.fields_and_dropdowns_radius }};
+            --underline-thickness-body: {{ settings.underline_thickness_body }}px;
+            --underline-offset-body: {{ settings.underline_offset_body }}em;
+            --underline-thickness-heading: {{ settings.underline_thickness_heading }}px;
+            --underline-offset-heading: {{ settings.underline_offset_heading }}em;
+            --images-and-sections-radius: {{ settings.images_and_sections_radius }};
+            
+            --swatches-aspect-ratio: {{ settings.variant_swatches_image_ratio }};
+            --swatches-focal-point: {{ settings.variant_swatches_focal_point }};
+            --swatches-radius: {{ settings.variant_swatches_radius }};
+            --thumbnail-aspect-ratio: {{ settings.variant_thumbnail_image_ratio }};
+            --thumbnail-size : {{ settings.variant_thumbnail_size }}px;
+            --thumbnail-focal-point: {{ settings.variant_thumbnail_focal_point }};
+            --thumbnail-radius: {{ settings.variant_thumbnail_radius }};
+
+            --rte-paragraph-spacing: {{ settings.rte_paragraph_spacing }};
+
+            --template-header-padding: {{ template_header_padding }}px;
+            --block-padding: {{ block_padding }}px;
+            --block-padding-s: {{ block_padding | divided_by: 2 }}px;
+            --block-padding-xs: {{ block_padding | divided_by: 4 }}px;
+            --tab-padding: {{ tab_padding }}px;
+            --tab-padding-s: {{ tab_padding_s }}px;
+
+            --sale-text-color: {{ settings.sale_text_color.red }},{{ settings.sale_text_color.green }},{{ settings.sale_text_color.blue }};
+            --sale-background: {{ settings.sale_background.red }},{{ settings.sale_background.green }},{{ settings.sale_background.blue }};
+            --sold-text-color: {{ settings.sold_text_color.red }},{{ settings.sold_text_color.green }},{{ settings.sold_text_color.blue }};
+            --sold-background: {{ settings.sold_background.red }},{{ settings.sold_background.green }},{{ settings.sold_background.blue }};
+            --preorder-text-color: {{ settings.preorder_text_color.red }},{{ settings.preorder_text_color.green }},{{ settings.preorder_text_color.blue }};
+            --preorder-background: {{ settings.preorder_background.red }},{{ settings.preorder_background.green }},{{ settings.preorder_background.blue }};
+            --badge-text-1: {{ settings.badge_text_color_1.red }},{{ settings.badge_text_color_1.green }},{{ settings.badge_text_color_1.blue }};
+            --badge-background-1: {{ settings.badge_background_1.red }},{{ settings.badge_background_1.green }},{{ settings.badge_background_1.blue }};
+            --badge-text-2: {{ settings.badge_text_color_2.red }},{{ settings.badge_text_color_2.green }},{{ settings.badge_text_color_2.blue }};
+            --badge-background-2: {{ settings.badge_background_2.red }},{{ settings.badge_background_2.green }},{{ settings.badge_background_2.blue }};
+            --badge-text-3: {{ settings.badge_text_color_3.red }},{{ settings.badge_text_color_3.green }},{{ settings.badge_text_color_3.blue }};
+            --badge-background-3: {{ settings.badge_background_3.red }},{{ settings.badge_background_3.green }},{{ settings.badge_background_3.blue }};
+            --badge-text-4: {{ settings.badge_text_color_4.red }},{{ settings.badge_text_color_4.green }},{{ settings.badge_text_color_4.blue }};
+            --badge-background-4: {{ settings.badge_background_4.red }},{{ settings.badge_background_4.green }},{{ settings.badge_background_4.blue }};
+
+            --animation-duration: 0.3s;
+            --transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+            --icon-scale: {%- if settings.icon_size == '1' -%}0{%- else -%}{{ 2 | times: icon_scale_index }}{%- endif -%}px;
+
+            {% if  settings.fade_in_animation == 'enable' %} 
+              --fade-in-duration: {{ settings.page_fade_in_duration }}s;
+            {% endif %}
+            --images-duration: {{ settings.images_duration }}s;
+            --images-delay: {{ settings.images_delay }}s;
+          }
+
+          @media screen and (max-width: 1280px) {
+            :root {
+              --page-title-font-size: {{ settings.heading_base_size | times: settings.page_titles_desktop_scale | divided_by: 100.0 | times: settings.desktop_heading_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --section-headings-font-size: {{ settings.heading_base_size | times: settings.section_headings_desktop_scale | divided_by: 100.0 | times: settings.desktop_heading_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --secondary-headings-font-size: {{ settings.heading_base_size | times: settings.secondary_headings_desktop_scale | divided_by: 100.0 | times: settings.desktop_heading_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --secondary-headings-font-scale: {{ settings.secondary_headings_desktop_scale | divided_by: 100.0 }};
+              --subheadings-font-size: {{ settings.body_base_size | times: settings.subheadings_desktop_scale | divided_by: 100.0 | times: settings.desktop_heading_scale | divided_by: 100.0 | at_least: 10 | at_most: 128 }}px;
+            }
+          }
+
+          @media screen and (max-width: 1024px) {
+            :root {
+              --side-margin: 16px;
+              --section-padding: {{ mobile_space_between_sections }}px;
+              --inner-section-padding: 16px;
+              --page-column-gap: {{ mobile_page_column_gap }}px;
+              --page-row-gap: {{ mobile_page_row_gap }}px;
+              --second-column-gap: {{ mobile_second_column_gap }}px;
+              --second-row-gap: {{ mobile_second_row_gap }}px;
+              --alt-column-gap: {{ mobile_alt_column_gap }}px;
+              --alt-row-gap: {{ mobile_alt_row_gap }}px;
+
+              --template-header-padding: {{ mobile_template_header_padding }}px;
+              --block-padding: {{ mobile_block_padding }}px;
+              --block-padding-s: 16px;
+              --block-padding-xs: 8px;
+              --tab-padding: {{ mobile_block_padding }}px;
+              --tab-padding-s: 10px;
+            }
+          }
+
+          @media screen and (max-width: 768px) {
+            :root {
+              --page-title-font-size: {{ settings.heading_base_size | times: settings.page_titles_mobile_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --section-headings-font-size: {{ settings.heading_base_size | times: settings.section_headings_mobile_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --secondary-headings-font-scale: {{ settings.secondary_headings_mobile_scale | divided_by: 100.0 }};
+              --secondary-headings-font-size: {{ settings.heading_base_size | times: settings.secondary_headings_mobile_scale | divided_by: 100.0 | at_least: 12 | at_most: 128 }}px;
+              --subheadings-font-size: {{ settings.body_base_size | times: settings.subheadings_mobile_scale | divided_by: 100.0 | at_least: 10 | at_most: 128 }}px;
+              --caption-font-size: {{ settings.body_base_size | times: settings.caption_mobile_scale | divided_by: 100.0 | at_most: 128 }}px;
+              --main-button-font-size: {{ settings.body_base_size | times: settings.main_button_mobile_scale | divided_by: 100.0 | at_most: 128 }}px;
+              --main-button-line-height: {{ settings.body_base_size | times: settings.main_button_mobile_scale | divided_by: 100.0 | at_most: 128 | times: 1.25 | round }}px;
+              --button-line-height: {{ settings.body_base_size | times: settings.mobile_body_font_scale | divided_by: 100.0 | times: 1.25 | round }}px;
+              --thumbnail-size : {{ settings.variant_thumbnail_size_mobile }}px;
+
+              --main-button-vertical-padding: 8px;
+              --secondary-button-vertical-padding: 6px;
+              --body-font-size: {{ settings.body_base_size | times: settings.mobile_body_font_scale | divided_by: 100.0 }}px;
+            }
+          }
+    {% endstyle %}
+
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {% if rtl_languages contains shop_locale_code %}
+      {{ 'rtl.css' | asset_url | stylesheet_tag }}
     {% endif %}
-    {% if gift_card.expired != true and gift_card.expires_on and gift_card.enabled %}
-    <p>{{ 'gift_cards.issued.active' | t: expiry: gift_card_expiry_date }}</p>
-    {% endif %}
-    
-    {% if gift_card.balance != gift_card.initial_value %}
-    <p>
-      {{ 'gift_cards.issued.remaining_html' | t: balance: gift_card.balance | money }}
-    </p>
-    {% endif %}
-    <div class="tt-gift-box">
-      <img src="{{ 'gift-img-01.png' | asset_url }}" alt="Gift Card">
-      <div class="tt-description">
-        <div class="tt-sum">{{ formatted_initial_value }}</div>
-        <div class="tt-code" onclick="selectText('GiftCardDigits');"><span id="GiftCardDigits">{{ gift_card.code | format_code }}</span></div>
-      </div>
-    </div>
-    <p>{{ 'gift_cards.issued.redeem_html' | t: value: formatted_initial_value_stripped }}</p>
-    <div id="QrCode" class="tt-gift-dissembled" data-identifier="{{ gift_card.qr_identifier }}"></div>
-    
-    <a href="{{ shop.url }}" class="btn btn-border tt-icon-right">{{ 'gift_cards.issued.shop_link' | t }} <i class="icon-h-47"></i></a>
-    <button type="button" class="btn-link gift_btn" onclick="window.print();"><i class="icon-g-55"></i>{{ 'gift_cards.issued.print' | t }}</button>
 
-    {% if gift_card.pass_url %}
-    <p>
-      <a class="btn btn-border" href="{{ gift_card.pass_url }}">
-        <img class="giftcard__apple-wallet-image" src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}" width="120" height="40" alt="{{ 'gift_cards.issued.add_to_apple_wallet' | t }}">
-      </a>
-    </p>
-    {% endif %}
-    
-  </div>
-</div>
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+      if (Shopify.designMode) {
+        document.documentElement.classList.add('shopify-design-mode');
+      }
+    </script>
+  </head>
 
-{{ 'vendor/qrcode.js' | shopify_asset_url | script_tag }}
-{{ 'gift-card.js' | asset_url | script_tag }}
+  <body id="body" class="body {% if settings.disable_text_selection %}disable-selection{% endif %} {% if settings.fade_in_animation == 'enable' %} fade-in fade-in--{{ settings.page_fade_in_area }} {% endif %}
+    font-page-titles--{{ settings.font_page_titles }} font-section-headings--{{ settings.font_section_headings }} font-secondary-headings--{{ settings.font_secondary_headings }} font-subheadings-headings--{{ settings.font_subheadings_headings }} font-main-button--{{ settings.font_heading_main_buttons }} font-secondary-button--{{ settings.font_heading_secondary_buttons }}">
+    {% section 'main-gift-card' %}
+  </body>
+</html>
+
+<script>
+  let string = { qrImageAlt: {{ 'gift_cards.issued.qr_image_alt' | t | json }} };
+  document.addEventListener('DOMContentLoaded', function() {
+   new QRCode( document.querySelector('.gift-card__qr-code'), {
+    text: document.querySelector('.gift-card__qr-code').dataset.identifier,
+    width: 120,
+    height: 120,
+    imageAltText: string.qrImageAlt
+   });
+  });
+  if (Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function() {
+      new QRCode( document.querySelector('.gift-card__qr-code'), {
+        text: document.querySelector('.gift-card__qr-code').dataset.identifier,
+        width: 120,
+        height: 120,
+        imageAltText: string.qrImageAlt
+       });
+   })
+  }
+</script>

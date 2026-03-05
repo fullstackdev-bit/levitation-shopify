@@ -1,0 +1,51 @@
+<custom-options class="custom-options flex--column product-form__input" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign min_days = block.settings.min_number_of_days | default: 0
+        assign seconds_in_day = 86400
+        assign offset_seconds = min_days | times: seconds_in_day
+        assign now_unix = 'now' | date: '%s' | plus: 0
+        assign min_unix = now_unix | plus: offset_seconds
+        assign min_date = min_unix | date: '%Y-%m-%d'
+        assign max_date = block.settings.last_date 
+    %}
+    <label for="{{ block.id }}-{{ block.settings.option_name }}" class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+        {% if settings.show_label and block.settings.option_label != blank %} 
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ block.settings.option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>
+                {% endif %}
+            </tooltip-component>
+        {% endif %}
+        <p class="form__variants custom-date-wrapper {{ block.settings.text_style }} 
+            {%- if block.settings.text_uppercase %} uppercase {% endif -%}
+            {%- if block.settings.text_bolder_font %} bold {% endif -%}
+            {%- if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif -%}"
+        >
+            <input 
+                type="date" 
+                class="input custom-date-input input--text input-style--{{ settings.variant_input_size }}" 
+                id="{{ block.id }}-{{ block.settings.option_name }}" 
+                name="properties[{{ block.settings.option_name }}]" 
+                
+                {% if from_details %}
+                data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}"
+                data-place-for-name="properties[{{ block.settings.option_name }}]"
+                data-form-input="{{ product_form_id }}"
+                {% endif %}
+                value="{% if min_days != 0 %}{{ min_date }}{% else %}{{ 'now' | date: '%Y-%m-%d' }}{% endif %}" 
+                
+                {% if min_days != 0 %}min="{{ min_date }}"{% if from_details %} data-place-for-min="{{ min_date }}"{% endif %}{% endif %}
+                    {% if max_date != blank %}max="{{ max_date }}"{% if from_details %} data-place-for-max="{{ max_date }}"{% endif %}{% endif %} 
+                form="{{ product_form_id }}"
+            >
+            <span class="custom-calendar-icon icon icon--small">
+                {%- render 'glyphs_signs', icon: 'calendar' -%}
+            </span>
+        </p>
+    </label>
+</custom-options>

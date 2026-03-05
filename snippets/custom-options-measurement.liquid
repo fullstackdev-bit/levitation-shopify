@@ -1,0 +1,67 @@
+<custom-options class="custom-options flex--column product-form__input" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign options = block.settings.options | split: ','
+    %}
+    {% if settings.show_label and block.settings.option_label != blank %}
+        <p class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ block.settings.option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>
+                {% endif %}
+            </tooltip-component>
+        </p>
+    {% endif %}
+    {% if options.size > 0 %}
+    <div class="form__variants {% if block.settings.options_layout == 'one_column' %} flex--column{% else %} layout-row{% endif %}">
+        {% for option in options %}
+            <div class="field field--measurement">
+                {% liquid
+                    assign name_part = option | split: '[' | first | strip
+                    assign unit_part = option | split: '[' | last | replace: ']', '' | strip
+                    if option contains '[' and option contains ']' and block.settings.make_required
+                        assign unit_part = unit_part | append: '*'
+                    elsif block.settings.make_required
+                        assign name_part = name_part | append: '*'
+                    endif
+                %}
+                <label for="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}" 
+                    class="label {{ block.settings.label_style }}
+                        {%- if block.settings.label_uppercase %} uppercase {% endif -%}
+                        {%- if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}"
+                >
+                    {% if block.settings.label_bolder_font %}<b>{% endif %}{{ name_part }}{% if option contains '[' and option contains ']' %}, {{ unit_part }}{% endif %}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                </label>
+                <input 
+                    type="text"
+                    id="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}"
+                    name="properties[{{ block.settings.option_name }} - {{ name_part }}]"
+                    {% if from_details %}
+                    data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}-{{ forloop.index0 }}"
+                    data-place-for-name="properties[{{ block.settings.option_name }} - {{ name_part }}]"
+                    data-form-input="{{ product_form_id }}"
+                {% endif %}
+                {% if block.settings.max_characters != blank %}
+                        maxlength="{{ block.settings.max_characters }}"
+                    {% endif %}
+                    {% if block.settings.make_required %}
+                        required="required" aria-required="true"
+                    {% endif %}
+                    {% if block.settings.make_required and from_details %}data-input-required{% endif %}
+                form="{{ product_form_id }}"
+                    class="input input--text input-style--{{ settings.variant_input_size }} {{ block.settings.text_style }}
+                        {%- if block.settings.text_uppercase %} uppercase {% endif -%}
+                        {%- if block.settings.text_bolder_font %} bold {% endif -%}
+                        {%- if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}
+                        {%- if block.settings.make_required %} required{% endif -%}"
+                >
+                <span class="input-error-message visually-hidden caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'products.product.error_message_required' | t }}</span>
+              </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</custom-options>

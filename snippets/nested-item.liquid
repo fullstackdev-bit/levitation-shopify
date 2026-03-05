@@ -1,0 +1,98 @@
+<li>
+<drawer-menu trigger="click" level="child">
+    <summary class="{{ level }}-level-item" open="false">
+        <div class="menu__item-title {% if item_image != blank and item_style == 'banner' %} menu__item-title--banner{% endif %} flex--row align-center">
+            {% liquid 
+                assign downcased_link_title = item_heading | downcase
+                assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                assign highlight_item = false
+                for highlighted_item in downcased_highlighted_items
+                    if highlighted_item == downcased_link_title
+                        assign highlight_item = true
+                    endif
+                endfor
+                assign highlight_nested_item = false
+                for nested_highlighted_item in downcased_nested_highlighted_items
+                    if nested_highlighted_item == downcased_link_title
+                        assign highlight_nested_item = true
+                    endif
+                endfor
+            %}
+            {% if item_image != blank and item_style == 'thumbnail' %}
+                <div class="menu__item-image aspect-ratio" {% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                    {% if settings.images_loading != 'disable' %}
+                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ item_image.aspect_ratio }}">
+                    {% endif %}
+                    <img srcset="{%- if item_image.width >= 165 -%}{{ item_image | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if item_image.width >= 375 -%}{{ item_image | image_url: width: 375 }} 375w,{%- endif -%}
+                    {%- if item_image.width >= 550 -%}{{ item_image | image_url: width: 550 }} 550w,{%- endif -%}
+                        {{ item_image | image_url: height: item_image.height }}"
+                        src="{{ item_image | image_url: height: item_image.height }}"
+                        loading="lazy"
+                        draggable="false"
+                        sizes="calc(40px * 1)"
+                        {% if settings.images_loading != 'disable' %}onload="this.parentNode.classList.add('lazyloaded');" {% endif %}
+                        width="{{ item_image.width }}"
+                        height="{{ item_image.height }}"
+                        alt="{{ item_image.alt | default: item_heading | escape }}"
+                        style="--focal-point: {{ section.settings.focal_point }}"
+                    />
+                    {% if settings.images_loading != 'disable' %}
+                        {% if settings.images_loading != 'fade_scale' %}
+                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                          <img 
+                          alt="{{ item_image.alt | escape }}" 
+                          src="{{ item_image | image_url: width: 10 }}"
+                          draggable="false"
+                          width="10" 
+                          height="10">
+                        </div>
+                        {% endif %}
+                    </figure>
+                    {% endif %}
+                </div>
+            {% endif %}
+            {% if item_image != blank and item_style == 'banner' %}
+                <a href="{{ item_link.url }}" class="menu__item-image menu__item-image-banner aspect-ratio" {% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+                    {%- liquid
+                        assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 650, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                    -%}
+                    {%- capture sizes -%}
+                        (max-width: 640px) 100vw, clamp(480px, calc(100vw / 3), 640px)
+                    {%- endcapture -%}
+                    {% if settings.images_loading != 'disable' %}
+                        <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ item_image.aspect_ratio }}">
+                    {% endif %}
+                    {{
+                        item_image
+                        | image_url: width: 3200
+                        | image_tag:
+                        sizes: sizes,
+                        widths: widths,
+                        class: img_class,
+                        alt: item_image.alt,
+                        draggable: false,
+                        loading: 'lazy',
+                        fetchpriority: 'low',
+                        onload: onload_script
+                    }} 
+                    {% if settings.images_loading != 'disable' %}
+                        {% if settings.images_loading != 'fade_scale' %}
+                        <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                          <img 
+                          alt="{{ item_image.alt | escape }}" 
+                          src="{{ item_image | image_url: width: 10 }}"
+                          draggable="false"
+                          width="10" 
+                          height="10">
+                        </div>
+                        {% endif %}
+                    </figure>
+                    {% endif %}
+                </a>
+            {% endif %}
+            <a href="{{ item_link.url }}" tabindex="-1" class="{% if highlight_nested_item or highlight_item %} link--highlighted{% endif %} link--single">{% if bolder_font %}<b>{% endif %}{{ item_heading }}{% if bolder_font %}</b>{% endif %}</a>
+        </div>
+    </summary>
+</drawer-menu>
+</li>

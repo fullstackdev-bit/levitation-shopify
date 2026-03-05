@@ -1,0 +1,366 @@
+{% liquid 
+    assign show_everywhere = false
+    assign show_on_homepage = false
+    assign show_on_inner_pages = false
+    if section.blocks.size > 0 and section.settings.advantages == 'show' 
+        assign show_everywhere = true
+    endif
+    if section.settings.advantages == 'show_on_homepage' and template.name == 'index'
+        assign show_on_homepage = true
+    endif
+    if section.settings.advantages == 'show_on_inner_pages' and template.name != 'index'
+        assign show_on_inner_pages = true
+    endif 
+%}
+
+{% if show_everywhere or show_on_homepage or show_on_inner_pages %}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      --spacing: {{ section.settings.spacing }}px;
+      --aspect-ratio: {{ section.settings.image_ratio }};
+      --image-width: {{ section.settings.image_width }}px;
+      {%- if section.settings.image_radius == 'default' -%}
+        --image-radius: {{ settings.images_and_sections_radius }};
+      {%- else -%}
+        --image-radius: {{ section.settings.image_radius }};
+      {%- endif -%}
+      position: relative;
+      background-color: rgb(var(--layout-bg-color)); 
+    }
+  {% endstyle %}
+
+  <div class="color-{{ section.settings.color_scheme }} {% unless section.settings.full_width %}side-margins{% endunless %} advantages {% if section.settings.show_bottom_line %}announcement-bar--line{% endif %}">
+    <div class="blocks__viewport">
+        <div class="text-blocks flex--row slider__grid hide-scrollbar{% if section.settings.full_width %} text-blocks--full-width{% endif %}">
+        {%- for block in section.blocks -%}
+            {%- case block.type -%}
+            {%- when 'text' -%}
+            {% if block.settings.desktop_text != blank or block.settings.mobile_text != blank or block.settings.image != blank or block.settings.icon != 'none' %}
+                {% liquid 
+                    assign uppercase_text = false
+                    if section.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                        assign uppercase_text = true
+                    elsif section.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                        assign uppercase_text = true
+                    elsif section.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                        assign uppercase_text = true
+                    elsif section.settings.text_style == 'body-font' and settings.uppercase_body
+                        assign uppercase_text = true
+                    elsif section.settings.text_style == 'caption-font' and settings.uppercase_caption
+                        assign uppercase_text = true
+                    endif
+                %}
+                <div class="text-block flex--row {{ section.settings.text_style }} slider__grid-item snap-align{% if uppercase_text %} uppercase{% endif %} {% if section.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}" {{ block.shopify_attributes }}>
+                {% if block.settings.image != blank or block.settings.icon != 'none' %}
+                    {% if block.settings.image != blank %}
+                    <div class="text-block__image text-block__image--{{ block.id }}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                        {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+                        <img srcset="{%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                        {%- if block.settings.image.width >= 375 -%}{{ block.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
+                        {%- if block.settings.image.width >= 550 -%}{{ block.settings.image | image_url: width: 550 }} 550w,{%- endif -%}
+                        {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+                        {%- if block.settings.image.width >= 1100 -%}{{ block.settings.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                        {%- if block.settings.image.width >= 1500 -%}{{ block.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                            {{ block.settings.image | image_url }} {{ block.settings.image.width }}w" 
+                        src="{{ block.settings.image | image_url: width: block.settings.image.width }}" 
+                        draggable="false"
+                        sizes="calc({{ section.settings.image_width }}px / 1)"
+                        width="{{ block.settings.image.width }}" 
+                        height="{{ block.settings.image.width | divided_by: block.settings.image.aspect_ratio | ceil }}" 
+                        alt="{{ block.settings.image.alt | default: shop.name | escape }}" 
+                        class="image__item"
+                        style="object-position: {{ block.settings.image.presentation.focal_point }}"/>
+                        {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
+                    </div>
+                    {% else %}
+                    {% if block.settings.icon != blank %}
+                        <div class="text-block__icon">
+                            {%- liquid
+                                assign icon_name = block.settings.icon | split: '/'
+                                if icon_name.size == 3
+                                    assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                elsif icon_name.size == 2
+                                    assign file_name = icon_name.first
+                                endif
+                                assign icon = icon_name.last
+                                assign color_rgb = block.settings.color | color_to_rgb | strip
+                                assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip
+                            -%}
+                            <span class="icon-accordion icon-accordion--with-color" style="--color: {{ color_rgb }}; --mobile-color: {{ mobile_color_rgb }};">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                        </div>
+                    {% endif %}
+                    {% endif %}
+                {% endif %}
+                {% if block.settings.desktop_text != blank or block.settings.mobile_text != blank %}
+                <div class="text-block__content{% if section.settings.center_text %} center{% endif %}">
+                    {% if block.settings.desktop_text != blank %} 
+                    <div class="rte richtext link-underline text-block__item--desktop">{{ block.settings.desktop_text }}</div>
+                    {% endif %}
+                    {% if block.settings.mobile_text != blank %} 
+                    <div class="rte richtext link-underline text-block__item--mobile">{{ block.settings.mobile_text }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                </div>
+            {% endif %}
+            {%- endcase -%}
+        {%- endfor -%}
+        </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+    {
+        "name": "t:sections.advantages.name",
+        "tag": "section",
+        "class": "shopify-section-advantages",
+        "settings": [
+            {
+                "type": "select",
+                "id": "advantages",
+                "options": [
+                {
+                    "value": "disable",
+                    "label": "t:sections.advantages.settings.advantages.options__1.label"
+                },
+                {
+                    "value": "show",
+                    "label": "t:sections.advantages.settings.advantages.options__2.label"
+                },
+                {
+                    "value": "show_on_homepage",
+                    "label": "t:sections.advantages.settings.advantages.options__3.label"
+                },
+                {
+                    "value": "show_on_inner_pages",
+                    "label": "t:sections.advantages.settings.advantages.options__4.label"
+                }
+                ],
+                "default": "show",
+                "label": "t:sections.advantages.settings.advantages.label"
+            },
+            {
+                "type": "select",
+                "id": "text_style",
+                "options": [
+                    {
+                        "value": "caption-font",
+                        "label": "t:sections.all.headings_style.options__6.label"
+                    },
+                    {
+                        "value": "body-font",
+                        "label": "t:sections.all.headings_style.options__1.label"
+                    },
+                    {
+                        "value": "subheading-font",
+                        "label": "t:sections.all.headings_style.options__2.label"
+                    },
+                    {
+                        "value": "secondary-heading",
+                        "label": "t:sections.all.headings_style.options__3.label"
+                    },
+                    {
+                        "value": "section-heading",
+                        "label": "t:sections.all.headings_style.options__4.label"
+                    }
+                ],
+                "default": "body-font",
+                "label": "t:sections.all.headings_style.text_style.label"
+            },
+            {
+                "type": "checkbox",
+                "id": "show_bottom_line",
+                "default": false,
+                "label": "t:sections.all.show_bottom_line.label"
+            }, 
+            {
+                "type": "checkbox",
+                "id": "center_text",
+                "default": true,
+                "label": "t:sections.all.alignment.center_text.label"
+            }, 
+            {
+                "type": "checkbox",
+                "id": "full_width",
+                "default": true,
+                "label": "t:sections.all.full_width.label"
+            },
+            {
+                "type": "header",
+                "content": "t:sections.all.settings_titles.image_header.content"
+            }, 
+            {
+                "type": "select",
+                "id": "media_ratio",
+                "options": [
+                  {
+                    "value": "auto",
+                    "label": "t:sections.all.media.media_ratio.options__1.label"
+                  },
+                  {
+                    "value": "1/1",
+                    "label": "t:sections.all.media.media_ratio.options__2.label"
+                  },
+                  {
+                    "value": "4/5",
+                    "label": "t:sections.all.media.media_ratio.options__3.label"
+                  },
+                  {
+                    "value": "2/3",
+                    "label": "t:sections.all.media.media_ratio.options__4.label"
+                  },
+                  {
+                    "value": "4/3",
+                    "label": "t:sections.all.media.media_ratio.options__5.label"
+                  },
+                  {
+                    "value": "3/2",
+                    "label": "t:sections.all.media.media_ratio.options__6.label"
+                  },
+                  {
+                    "value": "16/9",
+                    "label": "t:sections.all.media.media_ratio.options__7.label"
+                  },
+                  {
+                    "value": "4/1",
+                    "label": "t:sections.all.media.media_ratio.options__8.label"
+                  }
+                ],
+                "default": "auto",
+                "label": "t:sections.all.media.media_ratio.label"
+            }, 
+            {
+                "type": "range",
+                "id": "image_width",
+                "min": 16,
+                "max": 80,
+                "step": 2,
+                "unit": "px",
+                "default": 24,
+                "label": "t:blocks.context_image.settings.image_width.label"
+            }, 
+            {
+                "type": "select",
+                "id": "image_radius",
+                "options": [
+                  {
+                    "value": "default",
+                    "label": "t:sections.all.corner_radius.options__7.label"
+                  },
+                  {
+                    "value": "0px",
+                    "label": "t:sections.all.corner_radius.options__1.label"
+                  },
+                  {
+                    "value": "3px",
+                    "label": "t:sections.all.corner_radius.options__2.label"
+                  },
+                  {
+                    "value": "5px",
+                    "label": "t:sections.all.corner_radius.options__3.label"
+                  },
+                  {
+                    "value": "12px",
+                    "label": "t:sections.all.corner_radius.options__4.label"
+                  },
+                  {
+                    "value": "16px",
+                    "label": "t:sections.all.corner_radius.options__5.label"
+                  },
+                  {
+                    "value": "2000px",
+                    "label": "t:sections.all.corner_radius.options__6.label"
+                  }
+                ],
+                "default": "default",
+                "label": "t:sections.all.corner_radius.label"
+            },
+            {
+                "type": "header",
+                "content": "t:sections.all.colors.header.content"
+            },
+            {
+                "type": "color_scheme",
+                "id": "color_scheme",
+                "label": "t:sections.all.colors.color_scheme.label",
+                "default": "background-1"
+            },
+            {
+                "type": "range",
+                "id": "spacing",
+                "min": 4,
+                "max": 48,
+                "step": 4,
+                "unit": "px",
+                "default": 24,
+                "label": "t:sections.all.spacing.top_and_bottom_spacing.label"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "text",
+                "name": "t:sections.advantages.blocks.text.name",
+                "settings": [
+                    {
+                        "type": "richtext",
+                        "id": "desktop_text",
+                        "default": "<p>Announce something</p>",
+                        "label": "t:sections.all.settings_titles.text.text.label"
+                    }, 
+                    {
+                        "type": "richtext",
+                        "id": "mobile_text",
+                        "default": "<p>Announce</p>",
+                        "label": "t:sections.all.settings_titles.text.mobile_text.label"
+                    }, 
+                    {
+                        "type": "text",
+                        "id": "icon",
+                        "label": "t:sections.all.icons.icon.label",
+                        "info": "t:sections.all.icons.icon.info"
+                    },
+                    {
+                        "type": "color",
+                        "id": "color",
+                        "label": "t:blocks.icon.settings.color.label",
+                        "info": "t:blocks.icon.settings.color.info",
+                        "default": "#000000"
+                    },
+                    {
+                        "type": "color",
+                        "id": "mobile_color",
+                        "label": "t:blocks.icon.settings.mobile_color.label",
+                        "info": "t:blocks.icon.settings.color.info",
+                        "default": "#000000"
+                    },
+                    {
+                        "type": "image_picker",
+                        "id": "image",
+                        "label": "t:sections.all.media.image.image.label"
+                    }
+                ]
+            }
+        ],
+        "max_blocks": 4,
+        "presets": [
+            {
+                "name": "t:sections.advantages.name",
+                "blocks": [
+                    {
+                        "type": "text"
+                    },
+                    {
+                        "type": "text"
+                    },
+                    {
+                        "type": "text"
+                    }
+                ]
+            }
+        ],
+        "disabled_on": {
+            "groups": ["custom.overlay"]
+        }
+    }
+{% endschema %}

@@ -1,0 +1,210 @@
+{% comment %}
+  Renders product buy-buttons.
+  Accepts:
+  - product: {Object} product object.
+  - block: {Object} passing the block information.
+  - product_form_id: {String} product form id.
+  - section_id: {String} id of section to which this snippet belongs.
+  - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
+
+  Usage:
+  {% render 'buy-buttons', block: block, product: product, product_form_id: product_form_id, section_id: section.id, show_pickup_availability: true %}
+{% endcomment %}
+
+<div class="buy-buttons-block body-font {% if settings.uppercase_body %}uppercase{% endif %}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+  {% style %}
+    #shopify-section-{{ section_id }} .product-form {
+      {%- if block.settings.button_radius == 'default' -%}
+        --button-border-radius: {{ settings.buttons_radius }};
+      {%- else -%}
+        --button-border-radius: {{ block.settings.button_radius }};
+      {%- endif -%}
+    }
+  {% endstyle %}
+    {%- if product != blank -%}
+      {%- liquid
+        assign gift_card_recipient_feature_active = false
+        if block.settings.show_gift_card_recipient and product.gift_card?
+          assign gift_card_recipient_feature_active = true
+        endif
+  
+        assign show_dynamic_checkout = false
+        if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
+          assign show_dynamic_checkout = true
+        endif
+
+        if product.template_suffix == 'preorder'
+          assign show_dynamic_checkout = false
+        endif
+      -%}
+  
+      <product-form
+        class="product-form"
+        data-hide-errors="{{ gift_card_recipient_feature_active }}"
+        data-section-id="{{ section.id }}"
+      >
+        <div class="product-form__error-message-wrapper" role="alert" hidden>
+          <span class="product-form__error-message error-color"></span>
+        </div>
+  
+        {%- form 'product', product, data-productid: product.id, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form', data-place-for-id: product_form_id -%}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" disabled class="product-variant-id">
+  
+          {%- if gift_card_recipient_feature_active -%}
+            {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+          {%- endif -%}
+  
+          <div class="product-form__buttons flex--column">
+            {% if block.settings.style == 'show_quantity' %}<div class="product-form__submit-wrapper flex--row">
+              <div
+                id="Quantity-Form-{{ section.id }}"
+                class="product-form__input flex--column product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %} 
+                  body-font {% if settings.uppercase_body %} uppercase{% endif %}">
+                {% # theme-check-disable %}
+                {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
+                {% # theme-check-enable %}
+                <label class="visually-hidden" for="Quantity-{{ section.id }}">{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}</label>
+                <quantity-input class="quantity flex--row" data-url="{{ product.url }}" data-section="{{ section.id }}">
+                  <button class="quantity__button icon--large" name="minus" type="button">
+                    <span class="visually-hidden">
+                      {{- 'products.product.quantity.decrease' | t: product: product.title | escape -}}
+                    </span>
+                    {%- render 'glyphs_interface', icon: 'minus' -%}
+                  </button>
+                  <input
+                    class="quantity__input"
+                    type="number"
+                    dir="ltr"
+                    name="quantity"
+                    aria-label="{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}"
+                    id="Quantity-{{ section.id }}"
+                    data-cart-quantity="{{ cart_qty }}"
+                    data-min="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
+                    min="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
+                    {% if product.selected_or_first_available_variant.quantity_rule.max != null %}
+                      data-max="{{ product.selected_or_first_available_variant.quantity_rule.max }}"
+                      max="{{ product.selected_or_first_available_variant.quantity_rule.max }}"
+                    {% endif %}
+                    step="{{ product.selected_or_first_available_variant.quantity_rule.increment }}"
+                    value="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
+                    form="{{ product_form_id }}"
+                    onclick="this.select();"
+                  />
+                  <button class="quantity__button icon--large" name="plus" type="button">
+                    <span class="visually-hidden">
+                      {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
+                    </span>
+                    {%- render 'glyphs_interface', icon: 'plus' -%}
+                  </button>
+                </quantity-input>
+              </div>
+            {% endif %}
+              <button
+                id="ProductSubmitButton-{{ section_id }}"
+                type="submit"
+                name="add"
+                class="product-form__submit button solid-button body-font {% if block.settings.use_main_button %} button--main {% if settings.bolder_main_buttons_font %}button-main--bold{% endif %}{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary {% if settings.bolder_secondary_buttons_font %}button-main--bold{% endif %}{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}"
+                {% if product.selected_or_first_available_variant.available == false %} disabled{% endif %} {% if product.selected_or_first_available_variant.available == false and product.selected_or_first_available_variant.inventory_management != null %}data-sold-out{% endif %} {%- if product.template_suffix == 'preorder' %} data-pre-order="true"{% endif -%}
+              >
+                {%- unless product.selected_or_first_available_variant.available == false -%}
+                  {%- if block.settings.style == 'price_in_button' -%}
+                    {% liquid
+                      assign bold_price = false
+                      if block.settings.use_main_button and settings.bolder_main_buttons_font
+                        assign bold_price = true
+                      endif
+                      if block.settings.use_main_button == false and settings.bolder_secondary_buttons_font
+                        assign bold_price = true
+                      endif
+                    %}
+                    <span class="price-inside-button">{%- render 'price', product: product, use_variant: true, block: block, bold_price: bold_price, use_accent_color_for_price: use_accent_color_for_price, parent_product_card: false -%}</span>
+                  {%- endif -%}
+                {%- endunless -%}
+                {% if block.settings.use_main_button %}
+                  <span>
+                    {%- if product.selected_or_first_available_variant.available == false -%}
+                      {{ 'products.product.sold_out' | t }}
+                    {%- else -%}
+                      {%- if product.template_suffix == 'preorder' -%}
+                        {{ 'products.product.pre_order' | t }}
+                      {%- else -%}
+                        {%- if settings.cart_name == 'cart' -%}{{ 'products.product.add_to_cart' | t }}{%- elsif settings.cart_name == 'bag' -%}{{ 'products.product.add_to_bag' | t }}{%- else -%}{{ 'products.product.add_to_basket' | t }}{%- endif -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  </span>
+                {% else %}
+                  <span>
+                    {%- if product.selected_or_first_available_variant.available == false -%}
+                      {{ 'products.product.sold_out' | t }}
+                    {%- else -%}
+                      {%- if product.template_suffix == 'preorder' -%}
+                        {{ 'products.product.pre_order' | t }}
+                      {%- else -%}
+                        {%- if settings.cart_name == 'cart' -%}{{ 'products.product.add_to_cart' | t }}{%- elsif settings.cart_name == 'bag' -%}{{ 'products.product.add_to_bag' | t }}{%- else -%}{{ 'products.product.add_to_basket' | t }}{%- endif -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  </span>
+                {% endif %}
+                <div class="loading-overlay__spinner hidden">
+                  <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                  </svg>
+                </div>
+              </button>
+            {% if block.settings.style == 'show_quantity' %}</div>{% endif %}
+            {%- if show_dynamic_checkout -%}
+              <div class="body-font {% if block.settings.use_main_button %}{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% if settings.bolder_main_buttons_font %} bolder-font{% endif %}{% else %}{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %} {% if settings.bolder_secondary_buttons_font %}bolder-font{% endif %}{% endif %}">
+                {{ form | payment_button }}
+            </div>
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+      </product-form>
+    {%- else -%}
+      <div class="product-form">
+        <div class="product-form__buttons form">
+          <button
+            type="submit"
+            name="add"
+            class="product-form__submit button solid-button body-font {% if block.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}"
+            disabled>
+            {% if block.settings.use_main_button %}
+              {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'products.product.sold_out' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+            {% else %}
+              {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'products.product.sold_out' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+            {% endif %}
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+    
+    {%- unless block.settings.hide_pickup_availability -%}
+      {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities
+        | where: 'pick_up_enabled', true
+      -%}
+      {%- if pick_up_availabilities -%}
+        <pickup-availability
+          class="product__pickup-availabilities body-font {% if settings.uppercase_body %}uppercase{% endif %}"
+          {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %}
+            available
+          {% endif %}
+          data-root-url="{{ routes.root_url }}"
+          data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+          data-has-only-default-variant="{{ product.has_only_default_variant }}"
+        >
+          <template>
+            <pickup-availability-preview class="pickup-availability-preview">
+              <div class="pickup-availability-info">
+                <p>{{ 'products.product.pickup_availability.unavailable' | t }}</p>
+                <button class="pickup-availability-button link link--text link-button">
+                  {{ 'products.product.pickup_availability.refresh' | t }}
+                </button>
+              </div>
+            </pickup-availability-preview>
+          </template>
+        </pickup-availability>
+    
+        <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+      {%- endif -%}
+    {%- endunless -%}
+</div>

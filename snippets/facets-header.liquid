@@ -1,0 +1,480 @@
+{%- liquid
+    assign sort_by = results.sort_by | default: results.default_sort_by
+    assign total_active_values = 0
+    if results.url
+      assign results_url = results.url
+    else 
+      assign terms = results.terms | escape
+      assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+    endif
+  
+    if enable_filtering
+      assign price_range_active = false
+      for filter in results.filters
+        if filter.type == "price_range"
+          if filter.min_value.value != nil or filter.max_value.value != nil
+            assign price_range_active = true
+          endif
+        endif
+        assign total_active_values = total_active_values | plus: filter.active_values.size
+      endfor
+    endif
+    assign default_presentation = 'text'
+
+    assign uppercase_label = false
+    if label_style == 'section-heading' and settings.uppercase_section_headings
+        assign uppercase_label = true
+    elsif label_style == 'secondary-heading' and settings.uppercase_secondary_headings
+        assign uppercase_label = true
+    elsif label_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase_label = true
+    elsif label_style == 'body-font' and settings.uppercase_body
+        assign uppercase_label = true
+    elsif label_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase_label = true
+    endif
+-%}
+<facet-filters-form class="facets-header">
+    <form class="facets-vertical-form body-font{% if settings.uppercase_body %} uppercase{% endif %}" id="FacetSortForm">
+        <div class="facets-header__container flex--row">
+            <div class="product-count" role="status">
+                <p id="ProductCount--{{ section.id }}" class="product-count__text">
+                {%- liquid
+                    if results.results_count
+                    if results.results_count == 1
+                        echo 'templates.search.results_with_count.one' | t: terms: results.terms, count: results.results_count
+                    else
+                        echo 'templates.search.results_with_count.other' | t: terms: results.terms, count: results.results_count
+                    endif
+                    elsif results.products_count == results.all_products_count
+                    if results.products_count == 1
+                        echo 'general.facets.product_count_simple.one' | t: count: results.products_count
+                    else
+                        echo 'general.facets.product_count_simple.other' | t: count: results.products_count
+                    endif
+                    else
+                    if results.products_count == 1
+                    echo 'general.facets.product_count.one' | t: product_count: results.products_count, count: results.all_products_count
+                    else
+                    echo 'general.facets.product_count.other' | t: product_count: results.products_count, count: results.all_products_count
+                    endif
+                    endif
+                -%}
+                </p>
+            </div>
+            <div class="facets__wrapper">
+                <div class="facets__sorting">
+                    <div class="sorting">
+                        <div class="facet-filters__field flex--row">
+                        <label class="filter-group-label" for="SortBy">{{ 'general.facets.sort_by_label' | t }}</label>
+                        <div class="select flex--row align-center">
+                            {%- assign sort_by = results.sort_by | default: results.default_sort_by -%}
+                            <select name="sort_by" aria-label="{{ 'general.facets.sort_by_label' | t }}" class="facet-filters__sort select__select sorting__select input-style--{{ section.settings.dropdown_style }}" id="SortBy" aria-describedby="a11y-refresh-page-message">
+                            {%- for option in results.sort_options -%}
+                                <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+                            {%- endfor -%}
+                            </select>
+                            <div class="select-icon flex--row align-center">
+                                {%- render 'glyphs_arrows', icon: 'chevron-down' -%}
+                            </div>
+                            <div class="sort-icon-mobile icon--large flex--row align-center">
+                                {%- render 'glyphs_interface', icon: 'sorting-arrows' -%}
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div> 
+                {% render 'grid-switcher', 
+                    enable_secondary_grid : section.settings.enable_secondary_grid, 
+                    enable_preview_grid: section.settings.enable_preview_grid,
+                    default_grid_style: section.settings.grid_style,
+                    secondary_grid_style: section.settings.secondary_grid_style,
+                    preview_grid_style: section.settings.preview_grid_style, 
+                %}
+            </div>
+        </div>
+        <div class="facet-filters-form-wrapper">
+            <div class="active-facets {% if filter_type == 'horizontal' %}mobile-facets{% endif %} {% if total_active_values == 0 and price_range_active == false %} hidden{% endif %}">
+                {%- for filter in results.filters -%}
+                {%- for value in filter.active_values -%}
+                    <facet-remove>
+                    <a class="active-facets__button" href="{{ value.url_to_remove }}">
+                        {%- render 'glyphs_interface', icon: 'close' -%}
+                        {{ value.label | escape }}
+                    </a>
+                    </facet-remove>
+                {%- endfor -%}
+                {% if filter.type == "price_range" %}
+                    {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+                    <facet-remove>
+                        <a class="active-facets__button" href="{{ filter.url_to_remove }}">
+                            {%- render 'glyphs_interface', icon: 'close' -%}
+                            <span dir="ltr">{% if filter.min_value.value != nil %}{{ filter.min_value.value | money_without_trailing_zeros }}{% else %}{{ 0 | money_without_trailing_zeros }}{% endif %} &#8209; {% if filter.max_value.value != nil %}{{ filter.max_value.value | money_without_trailing_zeros }}{% else %}{{ filter.range_max | money_without_trailing_zeros }}{% endif %}</span>
+                        </a>
+                    </facet-remove>
+                    {%- endif -%}
+                {% endif %}
+                {%- endfor -%}
+                <facet-remove class="facets__clear-all">
+                <a href="{{ results_url }}" class="active-facets__button active-facets__button--clear">
+                    {{ 'general.facets.reset_all' | t }}
+                </a>
+                </facet-remove>
+            </div>
+            <div class="facets">
+                <div class="facets__inner">
+                    <div class="facets__main">
+                        {%- for filter in results.filters -%}
+                            {% liquid 
+                                assign presentation = filter.presentation | default: default_presentation
+                            %}
+                            {% case filter.type %}
+                                {% when 'boolean' or 'list' %}
+                                    {% liquid 
+                                        assign pills_labels = settings.pills_label | downcase | strip | split: ','
+                                        assign color_swatches_labels = settings.color_swatches_label | downcase  | strip | split: ','
+                                        assign thumbnail_swatches_labels = settings.thumbnail_swatches_label | downcase | strip | split: ','
+
+                                        assign layout_row_labels = settings.filter_row | downcase | strip | split: ','
+                                        assign layout_two_columns_labels = settings.filter_two_columns | downcase | strip | split: ','
+
+                                        assign open_collapsible_labels = section.settings.open_collapsible_label | downcase | strip | split: ','
+                                       
+                                        assign filter_label = filter.label | downcase
+                                        assign swatch = false
+                                        assign thumbnail = false
+                                        assign pill = false
+                                        assign layout_row = false
+                                        assign layout_two_columns = false
+                                        assign open_collapsible = false
+
+                                        if presentation == 'image'
+                                            assign thumbnail = true
+                                        endif
+                                        if presentation == 'swatch'
+                                            assign swatch = true
+                                            for label in pills_labels
+                                                assign label_strip = label | strip
+                                                if filter_label == label_strip
+                                                    assign pill = true
+                                                    break
+                                                endif
+                                            endfor
+                                        endif
+                                        if presentation == 'text'
+                                            for label in pills_labels
+                                                assign label_strip = label | strip
+                                                if filter_label == label_strip
+                                                    assign pill = true
+                                                    break
+                                                endif
+                                            endfor
+
+                                            for label in color_swatches_labels
+                                                assign label_strip = label | strip
+                                                if filter_label == label_strip
+                                                    assign swatch = true
+                                                    break
+                                                endif
+                                            endfor
+
+                                            for label in thumbnail_swatches_labels
+                                                assign label_strip = label | strip
+                                                if filter_label == label_strip
+                                                    assign thumbnail = true
+                                                    break
+                                                endif
+                                            endfor
+                                            if swatch and thumbnail
+                                                assign swatch = false
+                                                assign thumbnail = true
+                                            endif
+                                        endif
+
+                                        for label in layout_row_labels
+                                            assign label_strip = label | strip
+                                            if filter_label == label_strip
+                                                assign layout_row = true
+                                                break
+                                            endif
+                                        endfor
+                                        for label in layout_two_columns_labels
+                                            assign label_strip = label | strip
+                                            if filter_label == label_strip
+                                                assign layout_two_columns = true
+                                                break
+                                            endif
+                                        endfor
+                                        for label in open_collapsible_labels
+                                            assign label_strip = label | strip
+                                            if filter_label == label_strip
+                                                assign open_collapsible = true
+                                                break
+                                            endif
+                                        endfor
+                                    %}
+                                    <accordion-toggle data-index="mobile-{{ forloop.index }}">
+                                        <div class="accordion-toggle filter-group facets__details js-filter{% if open_collapsible %} open_collapsible is-open{% endif %}" id="Details-mobile-{{ filter.param_name | escape }}-{{ section.id }}" data-index="mobile-{{ forloop.index }}" tabindex="0">
+                                            <div class="facets__summary accordion__summary" role="button">
+                                            <span class="summary__title {% if filter_type == 'horizontal' %}input-style--{{ section.settings.dropdown_style }} dropdown--{{ section.settings.dropdown_width }}{% endif %}">
+                                                <span class="summary__title-name filter-group-label filter__label {{ label_style }}{% if uppercase_label %} uppercase{% else %} none-uppercase{% endif %}{% if label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                    {% if label_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ filter.label | escape }}{% if label_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                <div class="filter-group-icon icon--large icon-accordion--close">
+                                                    {%- render 'glyphs_interface', icon: 'plus' -%}
+                                                </div>
+                                                <div class="filter-group-icon icon--large icon-accordion--open">
+                                                    {%- render 'glyphs_interface', icon: 'minus' -%}
+                                                </div>
+                                                </span>
+                                            </span>
+                                            </div>
+                                            <div class="accordion__panel facets__submenu filter-group-display">
+                                                {% if filter_type == 'horizontal' %}
+                                                    <p class="facets__title filter__label subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                        {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'general.facets.choose_option' | t: option: filter.label }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+                                                    </p>
+                                                {% endif %}
+                                                {%- if filter.operator == 'AND' and section.settings.filter_and_operator_subtitle != blank -%}
+                                                    <span class="facets__subtitle">{{ section.settings.filter_and_operator_subtitle | escape }}</span>
+                                                {%- endif -%}
+                                                {% liquid 
+                                                    assign row_direction = false
+                                                    if swatch and layout_row and pill == false or thumbnail and layout_row and pill == false
+                                                        assign row_direction = true
+                                                    endif
+                                                    if thumbnail
+                                                        assign row_direction = true
+                                                    endif
+                                                %}
+                                                <ul class="accordion__content facets__list list-unstyled{% if row_direction %} facets__list--row{% endif %}" role="list">
+                                                    {%- for value in filter.values -%}
+                                                        {%- liquid
+                                                            if swatch or thumbnail
+                                                              assign swatch_file_extension = 'png'
+                                                            endif
+                                                            if presentation == 'text'
+                                                                capture color_value
+                                                                    render 'filename-normalize', value: value.value
+                                                                endcapture
+                                                                capture color_file_name
+                                                                    render 'filename-normalize', value: value.value, keep_case: true
+                                                                endcapture
+                                                                assign color_file_name = color_file_name | append: '.' | append: swatch_file_extension
+
+                                                                assign color_swatch_fallback = value.value | downcase | split: ' ' | last
+                                                                assign img_file = images[color_file_name] | downcase
+                                                                assign color_image = images[color_file_name] | split: '/' | last | file_img_url: '248x248' | prepend: 'https:' | split: '?' | first 
+                                                                assign value_downcase = value.value | downcase | strip
+                                                                assign swatch_config = settings.swatch_config | newline_to_br | split: '<br />'
+                                                                
+                                                                for swatch in swatch_config
+                                                                    assign swatch_parts = swatch | strip | split: ':'
+                                                                    assign swatch_name = swatch_parts.first | downcase | strip
+                                                                    if swatch_name == value_downcase
+                                                                        assign swatch_value = swatch_parts.last | strip
+                                                                        if swatch_value contains '#'
+                                                                            assign color_swatch_fallback = swatch_value
+                                                                        else
+                                                                            assign color_swatch_fallback = value.value | downcase | split: ' ' | last | handle
+                                                                            if value.swatch.color
+                                                                                assign color_swatch_fallback = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                                            endif
+                                                                        endif
+                                                                        break
+                                                                    endif
+                                                                endfor
+                                                            endif
+                                                            assign swatch_value = null
+                                                            if presentation == 'swatch'
+                                                                if value.swatch.image
+                                                                    assign image_url = value.swatch.image | image_url: width: 50
+                                                                    assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                                    assign swatch_focal_point = value.swatch.image.presentation.focal_point
+                                                                elsif value.swatch.color
+                                                                    assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                                                endif
+                                                            endif
+                                                            if presentation == 'image'
+                                                                assign image_url = value.image | image_url: width: 300
+                                                                assign swatch_value = 'url(' | append: image_url | append: ')'
+                                                            endif
+                                                        -%}
+                                                        <li class="facets__item list-menu__item filter-group-display__list-item {% if thumbnail %} mobile-facets__item--thumbnail{% endif %}{% if swatch and layout_row and pill == false or thumbnail and layout_row and pill == false %} facets__item--row{% endif %}{% if filter_type == 'drawer' and layout_two_columns and thumbnail == false %} facets__item--two-columns{% endif %}">
+                                                            <label for="Filter-{{ filter.label | escape }}-mobile-{{ forloop.parentloop.index }}-{{ forloop.index }}" class="facets__label{% if value.count == 0 and value.active == false %} facets__label--disabled{% endif %} {% if thumbnail %}flex--column{% else %}flex--row{% endif %} filter-group-option{% if thumbnail %} filter-group-option--thumbnail{% endif %}{% if swatch %} filter-group-option--swatch{% endif %}{% if pill and thumbnail == false %} filter-group-option--pill{% endif %} input-style--{{ settings.input_size }}"
+                                                                {% if swatch and layout_row and pill == false or thumbnail and layout_row and pill == false %} title="{{ value.label | escape }}"{% endif %}>
+                                                            {% if pill and swatch and images[color_file_name] != blank or color_swatch_fallback != blank %}
+                                                                <span class="facets__color-pill" {% unless presentation == 'swatch' or presentation == 'image' and value.image %}{% if swatch or thumbnail %}style="{% if images[color_file_name] != blank and img_file contains color_value %}--swatch-background-image: url({{ color_image }});{% else %} --swatch-background-color: {{ color_swatch_fallback | default: 'white' }};{% endif %}"{% endif %}{% endunless %}
+                                                                {% if presentation == 'swatch'%}style="--swatch--background: {{ swatch_value }};{{ value.swatch.color.first }};{% if swatch_focal_point %} --swatch-focal-point: {{ swatch_focal_point }};{% else %}  --swatch-focal-point: center;{% endif %}"{% endif %}></span>
+                                                            {% endif %}
+                                                            <input class="facets__checkbox facets__checkbox--{{ presentation }} {%  if presentation == 'swatch' or presentation == 'image' %}filter-from-app{% endif %} {% if presentation == 'swatch' or presentation == 'image' or swatch and pill == false %} {% unless presentation == 'swatch' and pill  %} mobile-facets__swatch{% endunless %}{% elsif thumbnail %} mobile-facets__thumbnail{% endif %}{% if thumbnail %} mobile-facets__thumbnail--options{% endif %}"
+                                                                type="checkbox"
+                                                                name="{{ value.param_name }}"
+                                                                value="{{ value.value }}"
+                                                                id="Filter-{{ filter.label | escape }}-mobile-{{ forloop.parentloop.index }}-{{ forloop.index }}"
+                                                                {% if value.active %}checked="checked"{% endif %}
+                                                                {% if value.count == 0 and value.active == false %}disabled="disabled"{% endif %}
+                                                                {%  if presentation == 'swatch' or presentation == 'image' and value.image %}style="--swatch--background: {{ swatch_value }};{{ value.swatch.color.first }};{% if swatch_focal_point %} --swatch-focal-point: {{ swatch_focal_point }};{% else %}  --swatch-focal-point: center{% endif %}"{% else %}
+                                                                {% if swatch or thumbnail %}style="{% if images[color_file_name] != blank and img_file contains color_value %}--swatch-background-image: url({{ color_image }});{% else %} --swatch-background-color: {{ color_swatch_fallback | default: 'white' }};{% endif %}"{% endif %}{% endif %}
+                                                            />
+                                                            <span class="swatch__label{% if thumbnail %} caption-font{% if settings.uppercase_caption %} uppercase{% endif %}{% endif %}">{{ value.label | escape }} ({{ value.count }})</span>
+                                                            </label>
+                                                        </li>
+                                                    {%- endfor -%}
+                                                </ul>
+                                                {% if filter_type == 'horizontal' %}
+                                                    <div class="accordion__footer modal--shadow">
+                                                        <facet-remove>
+                                                            <a href="{{ filter.url_to_remove }}" class="facets__reset button outlined-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% else %} none-uppercase{% endif %}">
+                                                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'general.facets.reset' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                            </a>
+                                                        </facet-remove>
+                                                        <button type="button" {% if filter.active_values.size == 0 %}disabled{% endif %} class="facets__save button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% else %} none-uppercase{% endif %}">
+                                                            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'general.facets.save' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                        </button>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </accordion-toggle>
+                                {% when 'price_range' %}
+                                    <accordion-toggle data-index="mobile-{{ forloop.index }}">
+                                        {% liquid
+                                            assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
+                                            assign uses_comma_decimals = false
+                                            
+                                            if currencies_using_comma_decimals contains cart.currency.iso_code
+                                                assign uses_comma_decimals = true
+                                            endif
+                    
+                                            assign filter_range_max = filter.range_max
+                                            assign filter_min_value = 0
+                                            assign filter_max_value = filter_range_max
+                        
+                                            if filter.min_value.value != nil
+                                                assign filter_min_value = filter.min_value.value
+                                            endif
+                        
+                                            if filter.max_value.value != nil
+                                                assign filter_max_value = filter.max_value.value
+                                            endif
+                        
+                                            assign progress_lower = filter_min_value | times: 100.0 | divided_by: filter_range_max
+                                            assign progress_upper = filter_max_value | times: 100.0 | divided_by: filter_range_max
+                        
+                                            assign filter_range_max_amount = filter_range_max | divided_by: 100.0 | ceil
+                                            assign filter_min_value_amount = filter_min_value | money_without_trailing_zeros | remove: cart.currency.symbol
+                                            assign filter_max_value_amount = filter_max_value | money_without_trailing_zeros | remove: cart.currency.symbol
+
+                                            if uses_comma_decimals
+                                                assign filter_min_value_amount = filter_min_value_amount | replace: '.', '' | replace: ',', '.'
+                                                assign filter_max_value_amount = filter_max_value_amount | replace: '.', '' | replace: ',', '.'
+                                            else
+                                                assign filter_min_value_amount = filter_min_value_amount | replace: ',', ''
+                                                assign filter_max_value_amount = filter_max_value_amount | replace: ',', ''
+                                            endif
+
+                                            assign open_collapsible_labels = section.settings.open_collapsible_label | downcase | strip | split: ','
+                                            assign open_collapsible = false
+                                            assign filter_label = filter.label | downcase
+                                            for label in open_collapsible_labels
+                                                assign label_strip = label | strip
+                                                if filter_label == label_strip
+                                                    assign open_collapsible = true
+                                                    break
+                                                endif
+                                            endfor
+                                        %}
+                                        <div class="accordion-toggle filter-group facets__details js-filter{% if open_collapsible %} open_collapsible is-open{% endif %}" id="Details-mobile-{{ filter.param_name | escape }}-{{ section.id }}" data-index="mobile-{{ forloop.index }}" tabindex="0">
+                                            <div class="facets__summary accordion__summary" role="button">
+                                            <span class="summary__title {% if filter_type == 'horizontal' %}input-style--{{ section.settings.dropdown_style }} dropdown--{{ section.settings.dropdown_width }}{% endif %}">
+                                                <span class="summary__title-name filter-group-label filter__label {{ label_style }}{% if uppercase_label %} uppercase{% else %} none-uppercase{% endif %}{% if label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                    {% if label_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ filter.label | escape }}{% if label_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                                                <div class="filter-group-icon icon--large icon-accordion--close">
+                                                    {%- render 'glyphs_interface', icon: 'plus' -%}
+                                                </div>
+                                                <div class="filter-group-icon icon--large icon-accordion--open">
+                                                    {%- render 'glyphs_interface', icon: 'minus' -%}
+                                                </div>
+                                                </span>
+                                            </span>
+                                            </div>
+                                            <div class="accordion__panel facets__submenu">
+                                                {% if filter_type == 'horizontal' %}
+                                                    <p class="facets__title filter__label subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                                                        {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'general.facets.choose_option' | t: option: filter.label }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+                                                    </p>
+                                                {% endif %}
+                                                <price-range class="facets__price price-range" data-min="0" data-max="{{ filter_range_max_amount }}" style="--progress-lower:{{ progress_lower }}%; --progress-upper:{{ progress_upper }}%;">
+                                                    <div class="fields">
+                                                        <div class="field">
+                                                            <label class="field__label filter-group-option caption-font{% if settings.uppercase_caption %} uppercase{% endif %}{% if settings.input_size == 'big' %} input-style--big{% endif %}" for="Mobile-Filter-{{ filter.label | escape }}-GTE">{{ 'general.facets.from' | t }}</label>
+                                                            <div class="field__item input--text input-style--{{ settings.input_size }}">
+                                                                <span class="field__currency">{{ cart.currency.symbol }}</span>
+                                                                <input class="field__input price-range__input--min"
+                                                                    name="{{ filter.min_value.param_name }}"
+                                                                    id="Mobile-Filter-{{ filter.label | escape }}-GTE"
+                                                                    type="number"
+                                                                    dir="ltr"
+                                                                    placeholder="0"
+                                                                    min="0"
+                                                                    max="{{ filter.range_max | divided_by: 100.0 | ceil }}"
+                                                                    {%- if filter.min_value.value -%}value="{{ filter_min_value_amount }}"{%- endif -%}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div class="field">
+                                                            <label class="field__label filter-group-option caption-font{% if settings.uppercase_caption %} uppercase{% endif %}{% if settings.input_size == 'big' %} input-style--big{% endif %}" for="Mobile-Filter-{{ filter.label | escape }}-LTE">{{ 'general.facets.to' | t }}</label>
+                                                            <div class="field__item input--text input-style--{{ settings.input_size }}">
+                                                                <span class="field__currency">{{ cart.currency.symbol }}</span>
+                                                                <input class="field__input price-range__input--max"
+                                                                name="{{ filter.max_value.param_name }}"
+                                                                id="Mobile-Filter-{{ filter.label | escape }}-LTE"
+                                                                type="number"
+                                                                dir="ltr"
+                                                                placeholder="{{ filter.range_max | divided_by: 100.0 | ceil }}"
+                                                                min="0"
+                                                                max="{{ filter.range_max | divided_by: 100.0 | ceil }}"
+                                                                {%- if filter.max_value.value -%}value="{{ filter_max_value_amount }}"{%- endif -%}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="price-range__track-wrapper">
+                                                        <div class="price-range__track-active"></div>
+                                                        <div class="price-range__track-inactive"></div>
+                                                        <div class="price-range__thumbs is-lower" role="slider" aria-valuenow="{{ filter_min_value_amount }}"></div>
+                                                        <div class="price-range__thumbs is-upper" role="slider" aria-valuenow="{{ filter_max_value_amount }}"></div>
+                                                    </div>
+                                                </price-range>
+                                                {% if filter_type == 'horizontal' %}
+                                                    <div class="accordion__footer modal--shadow">
+                                                        <facet-remove>
+                                                            <a href="{{ filter.url_to_remove }}" class="facets__reset button outlined-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% else %} none-uppercase{% endif %}">
+                                                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'general.facets.reset' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                            </a>
+                                                        </facet-remove>
+                                                        <button type="button" {% if filter.active_values.size == 0 %}disabled{% endif %} class="facets__save button solid-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% else %} none-uppercase{% endif %}">
+                                                            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'general.facets.save' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                                                        </button>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </accordion-toggle>
+                            {% endcase %}
+                        {%- endfor -%}
+                    </div>
+                    {%- if search.performed -%}<input type="hidden" name="q" value="{{ search.terms | escape }}"/>{%- endif -%}
+                    {%- if collection.current_vendor or collection.current_type -%}<input type="hidden" name="q" value="{{ collection.current_vendor | escape }}{{ collection.current_type | escape }}"/>{%- endif -%}
+                </div>
+                {%- if results.terms -%}
+                <input type="hidden" name="q" value="{{ results.terms | escape }}"/>
+                <input name="options[prefix]" type="hidden" value="last"/>
+                {%- endif -%}
+                {%- if results.current_vendor or results.current_type -%}
+                <input type="hidden" name="q" value="{{ results.current_vendor | escape }}{{ results.current_type | escape }}"/>
+                {%- endif -%}
+            </div>
+        </div>
+    </form>
+</facet-filters-form>

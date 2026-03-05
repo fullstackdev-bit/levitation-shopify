@@ -1,0 +1,70 @@
+<div class="section-block contacts-block flex--column" {{ block.shopify_attributes }}>
+    {% if block.settings.subheading != blank %}
+        {%- liquid
+            assign uppercase_subheading = false
+            if block.settings.subheading_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_subheading = true
+            elsif block.settings.subheading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_subheading = true
+            elsif block.settings.subheading_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_subheading = true
+            elsif block.settings.subheading_style == 'body-font' and settings.uppercase_body
+                assign uppercase_subheading = true
+            elsif block.settings.subheading_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_subheading = true
+            endif
+        -%}
+        <p class="contacts-title {{ block.settings.subheading_style }}{% if uppercase_subheading %} uppercase{% endif %}{% if block.settings.subheading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% endif %}">
+            {% if block.settings.subheading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                {{ block.settings.subheading }}
+            {% if block.settings.subheading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+        </p>
+    {% endif %}
+    <div class="contacts-container">
+        {%- liquid
+            assign uppercase_text = false
+            if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+              assign uppercase_text = true
+            elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                assign uppercase_text = true
+            elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                assign uppercase_text = true
+            endif
+        -%}
+        <div class="contacts flex--column {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+            {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+            {% if block.settings.contacts_1 != blank %}
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                {% if block.settings.contacts_1_type == 'text' %}
+                    <p class="contacts__item">{{ block.settings.contacts_1 }}</p>
+                {% elsif block.settings.contacts_1_type == 'phone_number' %}
+                   <a href="tel:{{ block.settings.contacts_1 }}" class="contacts__item link-underline">{{ block.settings.contacts_1 }}</a>
+                {% elsif block.settings.contacts_1_type == 'email' %}
+                    <a href="mailto:{{ block.settings.contacts_1 }}" class="contacts__item link-underline">{{ block.settings.contacts_1 }}</a>
+                {% endif %}
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            {% endif %}
+            {% if block.settings.contacts_2 != blank %}
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                {% if block.settings.contacts_2_type == 'text' %}
+                    <p class="contacts__item">{{ block.settings.contacts_2 }}</p>
+                {% elsif block.settings.contacts_2_type == 'phone_number' %}
+                <a href="tel:{{ block.settings.contacts_2 }}" class="contacts__item link-underline">{{ block.settings.contacts_2 }}</a>
+                {% elsif block.settings.contacts_2_type == 'email' %}
+                <a href="mailto:{{ block.settings.contacts_2 }}" class="contacts__item link-underline">{{ block.settings.contacts_2 }}</a>
+                {% endif %}
+                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+            {% endif %}
+        </div>
+        {% if block.settings.description != blank %}
+            <p class="contacts__description richtext rte link-underline {% if settings.uppercase_section_headings %}headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                    {{ block.settings.description }}
+            </p>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,47 @@
+<custom-options class="custom-options custom-options--{{ block.id }} flex--column product-form__input" data-type="image-upload" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign option_label =  block.settings.option_label
+      if block.settings.option_label != blank and block.settings.make_required
+        assign option_label =  block.settings.option_label  | append: '*'
+      endif
+    %}
+    {% if settings.show_label and block.settings.option_label != blank %}
+        <label class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            for="{{ block.id }}-{{ block.settings.option_name }}">
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>
+                {% endif %}
+            </tooltip-component>
+        </label>
+    {% endif %}
+    <div class="form__variants drop-zone-wrap flex--column {% if block.settings.text_bolder_font %} title-bold{% endif %} {{ block.settings.text_style }}{% if block.settings.text_uppercase %} uppercase{% endif %}{% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+        <div class="drop-zone" id="{{ block.id }}-to-upload" {% if from_details %}data-place-for-id="{{ block.id }}-to-upload"{% endif %}>
+            <div class="drop-zone__container flex--column">
+                <span class="icon icon--large">{%- render 'glyphs_signs', icon: 'upload' -%}</span>
+                <span class="drop-zone__text">{% if block.settings.text_bolder_font %}<b>{% endif %}{{ 'products.product.drop_zone_text' | t }}{% if block.settings.text_bolder_font %}</b>{% endif %}</span>
+                <span class="drop-zone__text  drop-zone__text--secondary caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'products.product.drop_zone_size' | t }}</span>
+                <input type="file" id="{{ block.id }}-{{ block.settings.option_name }}" name="properties[{{ block.settings.option_name }}]" form="{{ product_form_id }}"
+                    {% if from_details %}
+                        data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}"
+                        data-place-for-name="properties[{{ block.settings.option_name }}]"
+                        data-form-input="{{ product_form_id }}"
+                    {% endif %} value="" class="drop-zone__input" 
+                {% if block.settings.make_required %}required="required" aria-required="true"{% endif %}
+                {% if block.settings.make_required and from_details %}data-input-required{% endif %}>
+            </div>
+        </div>
+        <span class="input-error-message visually-hidden caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'products.product.error_message_required' | t }}</span>
+    </div>
+    <div class="file-upload-icons visually-hidden">
+        <span class="icon icon--large icon--video">{%- render 'glyphs_signs', icon: 'video-file' -%}</span>
+        <span class="icon icon--large icon--audio">{%- render 'glyphs_signs', icon: 'audio-file' -%}</span>
+        <span class="icon icon--large icon--file">{%- render 'glyphs_signs', icon: 'file' -%}</span>
+    </div>
+    <p class="file-upload__remove visually-hidden"><span class="caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'customer.addresses.delete' | t }}</span></p>
+</custom-options>

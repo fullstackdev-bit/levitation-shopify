@@ -1,0 +1,50 @@
+<custom-options class="custom-options flex--column product-form__input" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};" {{ block.shopify_attributes }}>
+    {% liquid 
+      assign product_form_id = 'product-form-' | append: section.id
+      assign option_label =  block.settings.option_label
+      if block.settings.option_label != blank and block.settings.make_required
+        assign option_label =  block.settings.option_label  | append: '*'
+      endif
+    %}
+    {% if settings.show_label and block.settings.option_label != blank %}
+        <label class="form__label {{ block.settings.label_style }}{% if block.settings.label_uppercase %} uppercase{% endif %}{% if block.settings.label_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" 
+            for="{{ block.id }}-{{ block.settings.option_name }}"
+        >
+            <tooltip-component class="tooltip form__label-name">
+                {% if block.settings.label_bolder_font %}<b>{% endif %}{{ option_label }}{% if block.settings.label_bolder_font %}</b>{% endif %}
+                {% if block.settings.info_tooltip != blank %}
+                    <span class="tooltip__icon icon icon--small">
+                        {%- render 'glyphs_signs', icon: 'help' -%}
+                        <span class="tooltip__text caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ block.settings.info_tooltip }}</span>
+                    </span>
+                {% endif %}
+            </tooltip-component>
+        </label>
+    {% endif %}
+    <div class="form__variants flex--column">
+        <div class="field">
+            <input 
+                type="text"
+                id="{{ block.id }}-{{ block.settings.option_name }}"
+                name="properties[{{ block.settings.option_name }}]"
+                {% if from_details %}
+                    data-place-for-id="{{ block.id }}-{{ block.settings.option_name }}"
+                    data-place-for-name="properties[{{ block.settings.option_name }}]"
+                    data-form-input="{{ product_form_id }}"
+                {% endif %}
+                {% if block.settings.max_characters != blank %}
+                    maxlength="{{ block.settings.max_characters }}"
+                {% endif %}
+                {% if block.settings.make_required %}required="required" aria-required="true"{% endif %}
+                {% if block.settings.make_required and from_details %}data-input-required{% endif %}
+                form="{{ product_form_id }}"
+                class="input input--text input-style--{{ settings.variant_input_size }} {{ block.settings.text_style }}
+                    {%- if block.settings.make_required %} required {% endif -%}
+                    {%- if block.settings.text_uppercase %} uppercase {% endif -%}
+                    {%- if block.settings.text_bolder_font %} bold {% endif -%}
+                    {%- if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}"
+            >
+            <span class="input-error-message visually-hidden caption-font{% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %}">{{ 'products.product.error_message_required' | t }}</span>
+        </div>
+    </div>
+</custom-options>

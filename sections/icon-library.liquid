@@ -1,0 +1,206 @@
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --top-spacing: 1;
+    --bottom-spacing: 1;
+    --grid-columns: 8;
+  }
+  .library-subsection:not(:last-child) {
+    margin-bottom: 48px;
+  }
+  .library-subsection__heading {
+    margin-bottom: 24px;
+  }
+  .library-subsection__icons {
+    gap: 16px;
+    row-gap: 24px;
+  }
+  .library-subsection__icon {
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    cursor: pointer;
+    will-change: opacity;
+    transition: opacity var(--animation-duration) var(--transition-timing-function);
+  }
+  .copy-success {
+    display: none;
+  }
+  @media (hover: hover) {
+    .library-subsection__icon:hover {
+        opacity: var(--hover-opacity);
+    }
+  }
+  @media screen and (max-width: 1280px) {
+    #shopify-section-{{ section.id }} {
+        --grid-columns: 6;
+    }
+  }
+  @media screen and (max-width: 768px) {
+    #shopify-section-{{ section.id }} {
+        --grid-columns: 4;
+    }
+  }
+  @media screen and (max-width: 500px) {
+    #shopify-section-{{ section.id }} {
+        --grid-columns: 3;
+    }
+  }
+{% endstyle %}
+
+{%- liquid
+    assign scheme1 = settings.color_schemes | first
+-%}
+
+<script src="{{ 'icon-library.js' | asset_url }}" defer="defer"></script>
+
+<div class="library section color-{{ scheme1 }} side-margins">
+    <div class="section-container page-grid disable-max-width tabs-container-js">
+        <div class="section-header">
+            <div class="component-tabs hide-scrollbar">
+                <component-tabs class="component-tabs__wrapper">
+                    <button id="glyphs" class="library-section__heading component-tabs__tab active secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %} tab-js">Glyphs</button>
+                    <button id="handsy" class="library-section__heading component-tabs__tab secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %} tab-js">Handsy</button>
+                    <button id="comic" class="library-section__heading component-tabs__tab secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %} tab-js">Comic</button>
+                    <button id="social_media" class="library-section__heading component-tabs__tab secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %} tab-js">Social media</button>
+                </component-tabs>
+            </div>
+        </div>
+        <div class="section-tabs__content-wrapper">
+            <icon-library id="content-glyphs" class="component-tabs__content tab-content-js active">
+                <div class="library-subsection">
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="arrows">Arrows</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- assign array = 'arrow-up,arrow-down,arrow-right,arrow-left,chevron-down,chevron-up,chevron-right,chevron-left' | split: ',' -%}
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'glyphs_arrows', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+                <div class="library-subsection">
+                    {%- assign array = 'cart,bag,basket,user,menu,menu-2-stripes,search' | split: ',' -%}
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="header">Header</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'glyphs_header', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+                <div class="library-subsection">
+                    {%- assign array = 'sorting-arrows,view-columns,view-rows,view-grid,home,zoom-in,zoom-out,expand,sign-minus,sign-plus,minus,plus,trash,cancel,bookmark,close,edit,external-link,reload,restart,settings,share,heart,heart-filled,star,star-filled,filter,preorder,pause-circle,play-circle,sound-on,mute,play' | split: ',' -%}
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="interface">Interface</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'glyphs_interface', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+                <div class="library-subsection">
+                    {%- assign array = 'checked-checkbox-round-filled,checked-checkbox-round,unchecked,checked-radio,unchecked-checkbox,checked-checkbox,bar-chart,sorting-arrows-horizontal,up-right,down-right,done,installing-updates,fit-to-width,protect,shield,security-lock,user-shield,security-configuration,security-ssl,lock,ask-question,help,question-mark,box-important,exclamation-mark,info-popup,info-squared,error-1,done-2,vote,approval,checkmark,discount,one-free,new,sale,last-24-hours,receive-cash,card-payment,tree-planting,giveaway,give,money-box,coins,dollar-coin,average-price,expensive-price,money-bag,cash,banknotes,cash-2,visa,mastercard,magnetic-card,bank-cards,wallet,two-tickets,train-ticket,price-tag,float,chat,phone,online-support,technical-support,customer-support,headset,support,tools,settings,services,box,dropbox,gift,transit,delivery-1,shipped-1,airplane-take-off,water-transportation,earth-globe,america,earth-planet,worldwide-delivery,world-map,place-market,address,facebook-like,private,eye,sparkling,medal-first-place,crown,stellar,lightning-bolt,diamond,jewel,cherry,apple-fruit,clock,stopwatch,hourglass,infinity,calendar,pie-chart,signal,ruler,t-shirt,women-shoe-side-view,trainers,footwear,hat,hanger,pin,cut,recycling,no-leather,vegan-clothing,machine-wash-warm,eco-driving-indicator,natural-food,vegetarian-food-symbol,spa-flower,potted-plant,easter-rabbit,attach,email,sent,flagpole,link,stationery,people,person-female,person,paid,buying,todo-list,candy-cane-pattern,drafting-compass,camera,debit-card,mobile,multiple-devices,3d-rotate,wi-fi,archive,cloud,download-from-cloud,moon,sun,grass,toggle-off,toggle-on,full-image,bicycle,confectionery,broccoli,tent,shop,automatic,factory,combi-ticket,beach,hot-air-balloon,environmental-planning' | split: ',' -%}
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="signs">Signs</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'glyphs_signs', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+            </icon-library>
+            <icon-library id="content-handsy" class="component-tabs__content tab-content-js">
+                <div class="library-subsection">
+                    <div class="library-subsection__icons grid">
+                        {%- assign array = 'alarm,arrow-down,autograph,book,blocks,button,car,care,chess,choose,clothes,clover,coin,commercial,drag,easy,fingerprint,fingers,flower,folder,gift,goal,grab,home,idea,image,key,letter,magic,medal,metal,ok,paint,peace,pen,pin,pinch,qr,question,scissors,sell,service,shield,sign,smartphone,star,stop,support,thumbs-up,ticket,time,tree-planting,trust,up,waitress,watches,world' | split: ',' -%}
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'handsy', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+            </icon-library>
+            <icon-library id="content-comic" class="component-tabs__content tab-content-js">
+                <div class="library-subsection">
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="part-1">Part 1</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- assign array = 'address-book,alarm-clock,beach,box,briefcase,cafe,calendar,camera,cash-in-hand,checkmark,clipboard,clock,comedy,commercial,communication,croissant,design,dice,download,facebook-like,file,finish-flag,game-controller,goal' | split: ',' -%}
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'comic_part-1', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+                <div class="library-subsection">
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="part-2">Part 2</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- assign array = 'hammer,hdd,heart,home,hourglass,improvement,key,laptop,link,lock,manufacturing,money-bag,money-box,new-message,news,opened-folder,phone,pin,post-office,profit,save,settings,shield,shopping-bag,shopping-cart,stack,stop-gesture,sun' | split: ',' -%}
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'comic_part-2', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+                <div class="library-subsection">
+                    <h3 class="library-subsection__heading secondary-heading{% if settings.uppercase_secondary_headings %} uppercase{% endif %}" data-name="part-3">Part 3</h3>
+                    <div class="library-subsection__icons grid">
+                        {%- assign array = 'taxi,ticket,trash,truck,trust,undo,upload-to-cloud,usb-on,user,walking,wallet,wi-fi,worldwide-delivery,wrench' | split: ',' -%}
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'comic_part-3', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+            </icon-library>
+            <icon-library id="content-social_media" class="component-tabs__content tab-content-js">
+                <div class="library-subsection">
+                    {%- assign array = 'instagram,tiktok,snapchat,pinterest,tumblr,facebook,youtube,vimeo,reddit,trustpilot,tripadvisor,telegram,linkedIn,facebook-messenger,discord,x,share,whatsapp' | split: ',' -%}
+                    <div class="library-subsection__icons grid">
+                        {%- for icon in array -%}
+                            <div class="library-subsection__icon flex--column body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                {%- render 'icons-social-media', icon: icon -%}
+                                <p class="library-subsection__icon-name">{{ icon }}</p>
+                                <span class="copy-success">{{ 'general.share.copied_message' | t }}</span>
+                            </div>
+                        {%- endfor -%}
+                    </div>
+                </div>
+            </icon-library>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.icon-library.name",
+  "tag": "section",
+  "enabled_on": {
+    "templates": [
+      "page"
+    ]
+  }
+}
+{% endschema %}

@@ -1,0 +1,73 @@
+{%- liquid
+  assign raw_store = cart.attributes['store'] | strip
+
+  if raw_store != blank
+    assign store_selector_text = raw_store 
+    
+    if raw_store.size > 20
+      assign trimmed_store = raw_store | slice: 0, 20
+      assign store_selector_text = trimmed_store | append: '...'
+    endif
+  else
+    assign store_selector_text = 'blocks.store_selector.select_your_store' | t
+  endif
+-%}
+
+{%- liquid
+  if block != nil
+    assign selector_settings = block.settings
+  else
+    assign selector_settings = section.settings
+  endif
+
+  assign icon_name = selector_settings.store_selector_icon | split: '/'
+
+  if icon_name.size == 3
+    assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+  elsif icon_name.size == 2
+    assign file_name = icon_name.first
+  endif
+
+  assign icon = icon_name.last
+
+  if selector_settings.elements_text_style
+    assign text_style = selector_settings.elements_text_style
+  else
+    assign text_style = selector_settings.text_style
+  endif
+
+  if selector_settings.elements_uppercase != nil
+    assign uppercase = selector_settings.elements_uppercase
+  elsif selector_settings.uppercase != nil
+    assign uppercase = selector_settings.uppercase
+  else
+    if text_style == 'caption-font' and settings.uppercase_caption
+        assign uppercase = true
+    elsif text_style == 'body-font' and settings.uppercase_body 
+        assign uppercase = true
+    elsif text_style == 'subheading-font' and settings.uppercase_subheadings
+        assign uppercase = true
+    elsif text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+        assign uppercase = true
+    elsif text_style == 'section-heading' and settings.uppercase_section_headings
+        assign uppercase = true
+    endif
+  endif
+-%}
+
+<button
+  class="store-selector {{ text_style }}
+    {%- if text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if uppercase %} uppercase{% endif -%}
+  "
+  data-modal-toggle-store-selector-drawer
+>
+  <span class="store-selector__icon icon icon--large flex--row">
+    {% render 'catalog-icons', file_name: file_name, icon: icon %}
+  </span>
+  {% if text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+    <span class="store-selector__text" data-placeholder="{{ 'blocks.store_selector.select_your_store' | t }}">{{ store_selector_text }}</span>
+  {% if text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+  <div class="dropdown-icon flex--row">
+    {% render 'glyphs_arrows', icon: 'chevron-down' %}
+  </div>
+</button>

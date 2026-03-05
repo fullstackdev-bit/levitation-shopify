@@ -1,0 +1,139 @@
+<div class="localization-container body-font">
+   <div class="localization flex--row block-alignment-row" style="justify-content: {{ alignment }};">
+   {% if object_type.settings.enable_country and localization.available_countries.size > 1 %}
+       <localization-form {% if settings.localization_style == 'drawer' %}class="localization-form-drawer"{% endif %}>
+           {% form 'localization' %}
+               <div class="disclosure">
+                    {% if settings.localization_style == 'drawer' %}<modal-window>{% endif %}
+                   <button type="button" class="disclosure__button {% if show_localization_chevron %}disclosure__button-with-icon{% endif %} {{ font_style }}{% if show_outline %} disclosure__button--outline{% endif %} {% if show_outline == false %}{{ text_style }} {% if uppercase %} uppercase{% endif %}{% endif %} flex--row align-center{% if settings.uppercase_body %} uppercase{% endif %}{% if uppercase %} uppercase{% endif %}" {% if settings.localization_style == 'popover' %}aria-expanded="false"{% else %}data-modal-toggle{% endif %} aria-controls="CountryList" style="--localization-border-radius: {{ localization_radius }};">
+                        {% if show_flag %} {{ 
+                            localization.country 
+                            | image_url: width: 16 
+                            | image_tag: 
+                            class: 'disclosure__button-flag', style: 'display:none;'
+                        }}
+                        {% endif %}
+                        <span>{% if bolder_font or bolder %}<b>{% endif %}{% if object_type.settings.short_country %}{{ localization.country.iso_code }}{% else %}{{ localization.country.name }}{% endif %} ({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}){% if bolder_font or bolder %}</b>{% endif %}</span>
+                        {% if show_localization_chevron %}
+                            <div class="disclosure__button-icon dropdown-icon flex--row">	
+                                {% render 'glyphs_arrows', icon: 'chevron-down' %}			
+                            </div>   
+                        {% endif %}
+                   </button>
+                   {% if settings.localization_style == 'drawer' %}
+                    <div class="overlay overlay-scheme--{{ settings.overlay_scheme_color }}" data-modal-toggle></div>
+                    <div class="drawer modal {% if settings.modal_border %}modal--border{% endif %} color-{{ settings.drawer_color_scheme }} {% if settings.modal_enable_shadow %}modal--shadow{% endif %} hide-scrollbar" tabindex="-1">
+                        <div class="button-wrapper">
+                            <button type="button" class="button-close close-popup icon--large" aria-label="{{ 'accessibility.close' | t }}" data-modal-toggle>
+                                {%- render 'glyphs_interface', icon: 'close' -%}
+                            </button>
+                        </div>
+                        <div class="scroll-area hide-scrollbar">
+                        <div class="drawer-wrapper">
+                    {% else %}
+                        <div class="disclosure__list-wrapper hide-scrollbar popover{% if settings.modal_enable_shadow %} modal--shadow{% endif %}" style="display: none;">
+                    {% endif %}
+                        <p class="disclosure__title subheading-font{% if settings.uppercase_subheadings %} uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                            {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'accessibility.choose_country' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+                        </p>
+                        {% if settings.enable_search_field %}
+                            <div class="localization-search-field flex--row">
+                                <div class="localization-search-field__icon" aria-label="{{ 'templates.search.search_for' | t: terms: search.terms }}">
+                                    <span class="localization-search__icon icon icon--large">
+                                        {%- render 'glyphs_header', icon: 'search' -%}
+                                    </span>
+                                </div>
+                                <label class="visually-hidden" for="Search-In-Counry" aria-hidden="true">{{ 'templates.search.search_title' | t }}</label>
+                                <input 
+                                    type="search" 
+                                    class="localization-search__input search__input body-font{% if settings.uppercase_body %} uppercase{% endif %}" 
+                                    id="Search-In-Counry"
+                                    name="q"
+                                    autocomplete="off"
+                                    >
+                                <button type="reset" class="localization-search__button">
+                                    <div class="loading-overlay__spinner hidden">
+                                    <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                                        <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+                                    </svg>
+                                    </div> 
+                                    <span class="localization-search__button-text flex--row caption-font {% if settings.uppercase_caption %} uppercase{% else %} none-uppercase{% endif %} visually-hidden">
+                                        {%- render 'glyphs_header', icon: 'search-clear' -%}
+                                    </span>
+                                </button>
+                            </div>
+                        {% endif %}
+                       <ul id="CountryList" role="list" class="disclosure__list{% if settings.uppercase_body %} uppercase{% endif %}">
+                       {% for country in localization.available_countries %}
+                           <li class="disclosure__item{% if settings.show_lines_localization %} popovers-line{% endif %}">
+                           <a tabindex="0" class="disclosure__link" href="#"{% if country.iso_code == localization.country.iso_code %} aria-current="true"{% endif %} {% if settings.enable_search_field %}data-country="{{ country.name | default: '' | downcase }}"{% endif %} data-value="{{ country.iso_code }}">
+                            {% if show_flag %} {{ 
+                                country 
+                                | image_url: width: 16 
+                                | image_tag: 
+                                class: 'disclosure__button-flag', style: 'display:none;', loading: 'lazy'
+                            }}
+                            {% endif %}
+                            <span>{% if country.iso_code == localization.country.iso_code %}<b>{% endif %}
+                                    {{ country.name }} {{ country.currency.iso_code }} ({{ country.currency.symbol }})
+                                    {% if country.iso_code == localization.country.iso_code %}</b>{% endif %}</span>
+                               {% if country.iso_code == localization.country.iso_code %}{% render 'glyphs_signs', icon: 'done' %}{% endif %}
+                           </a>
+                           </li>
+                       {% endfor %}
+                       </ul>
+                   {% if settings.localization_style == 'drawer' %}</div></div></div></modal-window>{% else %}</div>{% endif %}
+                   <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
+               </div>
+           {% endform %}
+       </localization-form>
+   {% endif %}
+   {% if object_type.settings.enable_language and localization.available_languages.size > 1 or section.enable_language and localization.available_languages.size > 1 %}
+       <localization-form {% if settings.localization_style == 'drawer' %}class="localization-form-drawer"{% endif %}>
+           {% form 'localization' %}
+           <div class="disclosure">
+                {% if settings.localization_style == 'drawer' %}<modal-window>{% endif %}
+               <button type="button" class="disclosure__button {% if show_localization_chevron %}disclosure__button-with-icon{% endif %} {{ font_style }}{% if show_outline %} disclosure__button--outline{% endif %} {% if show_outline == false %}{{ text_style }} {% if uppercase %} uppercase{% endif %}{% endif %} flex--row align-center{% if settings.uppercase_body %} uppercase{% endif %}{% if uppercase %} uppercase{% endif %}" {% if settings.localization_style == 'popover' %}aria-expanded="false"{% else %}data-modal-toggle{% endif %} aria-controls="LanguageList" style="--localization-border-radius: {{ localization_radius }};">
+                    <span>{% if bolder_font or bolder %}<b>{% endif %}{% if object_type.settings.short_language == false %}{{ localization.language.name }}{% else %}{{ localization.language.iso_code | capitalize }}{% endif %}{% if bolder_font or bolder%}</b>{% endif %}</span>
+                    {%  if show_localization_chevron %}
+                        <div class="disclosure__button-icon dropdown-icon flex--row">	
+                            {% render 'glyphs_arrows', icon: 'chevron-down' %}			
+                        </div> 
+                    {% endif %}  
+               </button>
+               {% if settings.localization_style == 'drawer' %}
+                <div class="overlay overlay-scheme--{{ settings.overlay_scheme_color }}" data-modal-toggle></div>
+                <div class="drawer modal {% if settings.modal_border %}modal--border{% endif %} color-{{ settings.drawer_color_scheme }} {% if settings.modal_enable_shadow %}modal--shadow{% endif %} hide-scrollbar" tabindex="-1">
+                    <div class="button-wrapper">
+                        <button type="button" class="button-close close-popup icon--large" aria-label="{{ 'accessibility.close' | t }}" data-modal-toggle>
+                            {%- render 'glyphs_interface', icon: 'close' -%}
+                        </button>
+                    </div>
+                    <div class="scroll-area hide-scrollbar">
+                    <div class="drawer-wrapper">
+                {% else %}
+                    <div class="disclosure__list-wrapper hide-scrollbar popover{% if settings.modal_enable_shadow %} modal--shadow{% endif %}" style="display: none;">
+                {% endif %}
+                    <p class="disclosure__title subheading-font{% if settings.uppercase_subheadings %} uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                        {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'accessibility.choose_language' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+                    </p>
+                   <ul id="LanguageList" role="list" class="disclosure__list{% if settings.uppercase_body %} uppercase{% endif %}">
+                   {% for language in localization.available_languages %}
+                       <li class="disclosure__item{% if settings.show_lines_localization %} popovers-line{% endif %}" tabindex="-1">
+                           <a tabindex="0" class="disclosure__link" href="#"{% if language.iso_code == localization.language.iso_code %} aria-current="true"{% endif %} hreflang="{{ language.iso_code }}" lang="{{ language.iso_code }}" data-value="{{ language.iso_code }}">
+                               <span>{% if language.iso_code == localization.language.iso_code %}<b>{% endif %}
+                                    {{ language.endonym_name | capitalize }}
+                                    {% if language.iso_code == localization.language.iso_code %}</b>{% endif %}</span>
+                               {% if language.iso_code == localization.language.iso_code %}{% render 'glyphs_signs', icon: 'done' %}{% endif %}
+                           </a>
+                       </li>
+                   {% endfor %}
+                   </ul>
+                {% if settings.localization_style == 'drawer' %}</div></div></div></modal-window>{% else %}</div>{% endif %}
+               <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
+           </div>
+           {% endform %}
+       </localization-form>
+   {% endif %}
+   </div>
+</div>

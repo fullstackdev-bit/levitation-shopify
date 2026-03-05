@@ -1,0 +1,76 @@
+{% style %}
+    {{ object_type.settings.logo_font | font_face: font_display: 'swap' }}
+    #shopify-section-{{ section.id }} {
+        --logo-font-family: {{ object_type.settings.logo_font.family }}, {{ object_type.settings.logo_font.fallback_families }};
+        --logo-font-style: {{ object_type.settings.logo_font.style }};
+        --logo-font-weight: {{ object_type.settings.logo_font.weight }};
+        --logo-font-size: {{ object_type.settings.desktop_logo_font_size }}px;
+        --logo-width: {{ object_type.settings.desktop_logo_width }}px;
+    } 
+    @media screen and (max-width: 768px) {
+        #shopify-section-{{ section.id }} {
+            --logo-width: {{ object_type.settings.mobile_logo_width }}px;
+            --logo-font-size: {{ object_type.settings.mobile_logo_font_size }}px;
+        } 
+    }
+{% endstyle %}
+
+{% liquid 
+    if object_type.settings.image_logo != blank or object_type.settings.overlapping_logo != blank
+        assign image_logo = true
+    endif
+    assign widths = '50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+%}
+
+<div class="logo flex--row" {% if object_type == block %}{{ object_type.shopify_attributes }}{% endif %}>
+    {%- if object_type.settings.logo_type == 'text' -%}
+        <a class="logo__title" href="{{ routes.root_url }}">{% if object_type.settings.text_logo != blank %}{{ object_type.settings.text_logo }}{% else %}{{ shop.name }}{% endif %}</a>
+    {%- else -%}
+        <a class="logo__image {% unless image_logo %}logo__image-only-title {% endunless %}flex--row" href="{{ routes.root_url }}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+            {% if image_logo %}
+                {% liquid 
+                        assign img_class = 'logo__image-item'
+                        assign overlap_img_class = 'logo__image-item logo__image-item--overlap'
+                    if object_type.settings.image_logo == blank and object_type.settings.overlapping_logo != blank
+                        assign overlap_img_class = overlap_img_class | append: ' logo__image-item--overlap-always'
+                    endif
+                    if object_type.settings.image_logo != blank and object_type.settings.overlapping_logo == blank
+                        assign img_class = img_class | append: ' logo__image-item-always'
+                    endif
+                %}
+                {% if object_type.settings.image_logo != blank %}
+                    {% liquid 
+                        assign logo_alt = object_type.settings.image_logo.alt | default: shop.name | escape
+                        assign logo_height = object_type.settings.desktop_logo_height | times: object_type.settings.image_logo.aspect_ratio | ceil
+                    %}
+                    {% capture sizes %}(max-width: 768px) {{ object_type.settings.mobile_logo_width | times: 2 }}px, {{ object_type.settings.desktop_logo_width | times: 2 }}px{% endcapture %}
+                    {{ object_type.settings.image_logo | image_url: width: 1500 | image_tag:
+                    class: img_class,
+                    widths: widths,
+                    height: logo_height,
+                    alt: logo_alt,
+                    sizes: sizes,
+                    preload: true
+                    }}
+                {% endif %}
+                {% if object_type.settings.overlapping_logo != blank %}
+                    {% liquid 
+                        assign logo_alt = object_type.settings.overlapping_logo.alt | default: shop.name | escape
+                        assign logo_height = object_type.settings.desktop_logo_height | times: object_type.settings.overlapping_logo.aspect_ratio | ceil
+                    %}
+                    {% capture sizes %}(max-width: 768px) {{ object_type.settings.mobile_logo_width | times: 2 }}px, {{ object_type.settings.desktop_logo_width | times: 2 }}px{% endcapture %}                  
+                    {{ object_type.settings.overlapping_logo | image_url: width: 1500 | image_tag:
+                    class: overlap_img_class,
+                    widths: widths,
+                    height: logo_height,
+                    alt: logo_alt,
+                    sizes: sizes,
+                    preload: true
+                    }}
+                {% endif %}
+            {% else %}
+                <span class="logo__title">{{ shop.name }}</span>
+            {% endif %}
+        </a>
+    {%- endif -%}
+</div> 

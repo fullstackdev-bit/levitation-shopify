@@ -85,7 +85,7 @@
     {% section 'single-base-login' %}
     {% render 'single-video-ticket-promo' %}
   {% endcapture %}
-  {{ login_section | replace: 'PAGE_URL', page.url }}
+  {{ login_section | replace: 'LOGIN_REDIRECT_URL', page.url | replace: 'SIGNUP_REDIRECT_URL', page.url | replace: 'REGISTER_CLASSES', 'single-hidden' |  replace: 'LOGIN_TITLE', 'Login' }}
 {% else %}
   {% if customer.tags contains customer_tag
     or customer.tags contains global_tag

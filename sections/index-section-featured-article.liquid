@@ -1,0 +1,144 @@
+{%- assign item = section.settings -%}
+{%- assign article = item.article -%}
+
+{%- capture image_size -%}600x{%- endcapture -%}
+
+<div class="{% if item.top_offset == 'none' %}nomargin {% elsif item.top_offset == 'small' %}tt-offset-small {% endif %} container-indent featured-article-section-jk {{ item.custom_classes }}" data-card-type = "{{ section.settings.card_type }}">
+  {% if item.banner != blank  %} <img  class="lazyload featured-article-img" src="{{  item.banner | img_url: 'master' }}"  alt="{{ article.image.alt | escape }}"/>
+   <div class="featured-article-overlay" style="{% if item.banner_bg_color != blank %}background-color: {{ item.banner_bg_color }}; opacity: {{ item.banner_bg_opacity }}{% endif %}"></div>
+  {% elsif article != blank %} <img  class="lazyload featured-article-img" src="{{  article.image.src | img_url: 'master' }}"  alt="{{ article.image.alt | escape }}"/>
+   <div class="featured-article-overlay" style="{% if item.banner_bg_color != blank %}background-color: {{ item.banner_bg_color }}; opacity: {{ item.banner_bg_opacity }}{% endif %}"></div>{% endif %}
+  <div class="container{% if item.fullwidth %}-fluid{% endif %}">
+      {% if article != blank %}
+        <div class="row align-items-center">
+          <div class="col-12 col-lg-8 ">
+              <div class="text-white text-center text-lg-left">
+                <div class="tt-title-description">                  
+                  <h2 class="tt-title fancy-heading text-uppercase text-white text-center text-lg-left font-weight-bold">
+                      {{ article.title }}
+                  </h2>
+                  <div class="tt-post-content my-5">            
+                    {{ article.excerpt }} 
+                  </div>                  
+                  </div>              
+                  <a href="{{ article.url }}" class="text-white position-relative btn-link" style="font-size: 20px; font-weight: 600; line-height: 1.8;" target="_blank">READ MORE <span class="btn-underline bg-white"></span></a>
+              </div>
+          </div>
+          <div class="col-12 col-sm-9 col-md-6 col-lg-4 mx-auto mt-5 mt-lg-0 article-sidebar">
+            <div class="sidebar-content">
+              {% if section.settings.product != blank %}
+                <div class="tt-block-aside mt-4">
+                  <div class="tt-aside-content main-feature-product">   
+                    {%- include "product-grid-item" product: section.settings.product, custom_img: section.settings.product_img, card_style: section.settings.card_type -%}
+                  </div>
+                </div>
+              {% elsif article.metafields.custom.feature_product.value != blank %}
+                <div class="tt-block-aside mt-4">
+                  <div class="tt-aside-content main-feature-product">   
+                    {%- include "product-grid-item" product: article.metafields.custom.feature_product.value, custom_img: section.settings.product_img, card_style: section.settings.card_type -%}
+                  </div>
+                </div>
+                {% endif %}
+            </div>
+          </div>    
+      </div>          
+        {%- else -%}
+        <span style="display: flex; justify-content: center;">This section doesn’t currently include any content. Add content to this section using the sidebar.</span>
+       
+      {%- endif -%}
+      
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "ticle",
+	"class": "index-section",
+    "settings": [
+      {
+        "type": "select",
+        "id": "top_offset",
+        "label": "Top Offset",
+        "default": "normal",
+        "options": [
+          {
+            "value": "none",
+            "label": "None"
+          },
+          {
+            "value": "small",
+            "label": "Small"
+          },
+          {
+            "value": "normal",
+            "label": "Normal"
+          }
+        ]
+      },
+      {
+        "id": "article",
+        "type": "article",
+        "label": "Article"
+      },
+      {
+        "id": "product",
+        "type": "product",
+        "label": "Featured Product",
+        "info": "If you blank this field, we will display article's feature product."
+      },
+      {
+        "type": "select",
+        "id": "card_type",
+        "label": "Products Card Type",
+        "options": [
+          { "value": "default", "label": "Default" },
+          { "value": "custom", "label": "Custom" }
+        ],
+        "default": "custom"
+      },
+      {
+        "id": "product_img",
+        "type": "image_picker",
+        "label": "Featured Product Image",
+        "info": "if this is empty, it will use the product featured image"
+      },
+      {
+        "id": "banner",
+        "type": "image_picker",
+        "label": "Banner Image",
+        "info": "if this is empty, it will use the article featured image"
+      },
+      {
+        "id": "banner_bg_color",
+        "type": "color",
+        "label": "Overlay Background Color",
+        "default": "#000000"
+      },
+      {
+        "id": "banner_bg_opacity",
+        "type": "text",
+        "label": "Overlay opacity",
+        "default": "0.3"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_classes",
+        "label": "Custom css classes",
+        "info": "For the custom styles. Add your styles in the theme.css.liquid"
+      },
+      {
+        "type": "checkbox",
+        "id": "fullwidth",
+        "label": "Fullwidth size",
+        "default": false
+      }
+	],
+    "presets": [
+      {
+        "name": "ticle",
+        "category": "Blog"
+      }
+    ]
+  }
+{% endschema %}

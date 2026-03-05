@@ -1,0 +1,143 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section customer register">
+  <div class="section-container side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}"> 
+    <div class="customer__wrapper">
+        <div class="template-header">
+          <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+            {{ 'customer.register.title' | t }}
+          </h1>
+        </div>
+        <form-state class="customer__form-state body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+          {%- form 'create_customer' -%}
+          {%- if form.errors contains 'form' -%}
+              <h2 class="body-font {% if settings.uppercase_body %}uppercase{% endif %} error-color" tabindex="-1" autofocus>
+                {{ form.errors.messages['form'] }}
+              </h2>
+          {%- endif -%}
+              <div class="fields-wrapper">
+                <div class="field">
+                    <label class="label" for="RegisterForm-FirstName">
+                      {{ 'customer.register.first_name' | t }}
+                    </label>      
+                    <input
+                      class="input input--text"
+                      type="text"
+                      name="customer[first_name]"
+                      id="RegisterForm-FirstName"
+                      {% if form.first_name %}value="{{ form.first_name }}"{% endif %}
+                      autocomplete="given-name">
+                </div>
+                <div class="field">
+                    <label class="label" for="RegisterForm-LastName">
+                      {{ 'customer.register.last_name' | t }}
+                    </label>
+                    <input
+                      class="input input--text"
+                      type="text"
+                      name="customer[last_name]"
+                      id="RegisterForm-LastName"
+                      {% if form.last_name %}value="{{ form.last_name }}"{% endif %}
+                      autocomplete="family-name">
+                </div>
+                <div class="field">
+                    <label class="label" for="RegisterForm-email">
+                      {{ 'customer.register.email' | t | append: '*' }}
+                    </label>      
+                    <input
+                      class="input input--text required {% if form.errors contains 'email' %}invalid{% endif %}"
+                      type="email"
+                      dir="ltr"
+                      name="customer[email]"
+                      required="required"
+                      id="RegisterForm-email"
+                      {% if form.email %} value="{{ form.email }}"{% endif %}
+                      spellcheck="false"
+                      autocapitalize="off"
+                      aria-required="true"
+                      {% if form.errors contains 'email' %}
+                        aria-invalid="true"
+                        aria-describedby="RegisterForm-email-error"
+                      {% endif %}>
+                </div>
+                <div class="field">
+                    <label class="label" for="RegisterForm-password">
+                      {{ 'customer.register.password' | t | append: '*' }}
+                    </label>     
+                    <input
+                      class="input input--text required {% if form.errors contains 'password' %}invalid{% endif %}"
+                      type="password"
+                      required="required"
+                      name="customer[password]"
+                      id="RegisterForm-password"
+                      aria-required="true"
+                      autocomplete="new-password"
+                      {% if form.errors contains 'password' %}
+                        aria-invalid="true"
+                        aria-describedby="RegisterForm-password-error"
+                      {% endif %}>
+                </div>
+              </div>
+              <button class="button solid-button button--submit body-font button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+                {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'customer.register.submit' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+              </button>
+          {%- endform -%}
+        </form-state>
+        <div class="customer__have-account body-font {% if settings.uppercase_body %}uppercase{% endif %} flex--row">
+            <p>{{ 'customer.register.have_account' | t }}</p>
+            <span class="link-underline">{{ 'customer.register.login' | t | customer_login_link }}</span>
+        </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-register.name",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_bottom_line",
+      "default": false,
+      "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text",
+      "default": true,
+      "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

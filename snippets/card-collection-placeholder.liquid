@@ -1,0 +1,44 @@
+{% liquid
+  if card_style
+    assign collection_card_style = card_style
+  else 
+    assign collection_card_style = settings.collection_card_style
+  endif
+
+  assign heading_style = settings.collection_card_heading_style
+
+  assign uppercase_heading = false
+  if heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+      assign uppercase_heading = true
+  elsif heading_style == 'section-heading' and settings.uppercase_section_headings
+      assign uppercase_heading = true
+  elsif heading_style == 'page-title' and settings.uppercase_page_titles
+      assign uppercase_heading = true
+  elsif heading_style == 'subheading-font' and settings.uppercase_subheadings
+      assign uppercase_heading = true
+  elsif heading_style == 'body-font' and settings.uppercase_body
+      assign uppercase_heading = true
+  elsif heading_style == 'caption-font' and settings.uppercase_caption
+      assign uppercase_heading = true
+  endif
+%}
+
+<div class="card-collection{% if full_width %} card-collection--full-width{% endif %} card-collection--{{ collection_card_style }} color-{{ card_color_scheme }} {% if show_collection_card_border %}with-border{% endif %}{% if card_color_scheme != parent_color_scheme %} with-color{% endif %}">
+    <div class="card-collection__media {% unless card_style == 'media-on-side' %} aspect-ratio{% endunless %}">
+        <div class="card__image card__image-placeholder" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+    </div>
+    <h2 class="card-collection__title {{ heading_style }}
+      {%- if settings.center_collection_card_content %} center {% endif -%} 
+      {%- if uppercase_heading %} uppercase {% endif -%}
+      {%- if heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%}"
+    >
+      {% if heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ 'collection.collection_title_placeholder' | t }}{% if heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+      {%- if settings.show_arrow -%}
+        <span class="card-collection__icon">
+          {%- render 'glyphs_arrows', icon: 'arrow-right' -%}
+        </span>
+      {%- endif -%}
+    </h2>
+</div>

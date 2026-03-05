@@ -1,0 +1,263 @@
+{% if block.show_overlay %}
+<div class="overlay mega-menu__overlay overlay-scheme--{{ settings.overlay_scheme_color }}"></div>
+{% endif %}
+<div class="mega-menu hide-scrollbar flex--row mega-menu-{{ id }} color-{{ block.color_scheme }}
+    {%- if is_in_announcement_bar %} mega-menu--in-announcement-bar{% endif %}
+    {%- if short %} mega-menu-short{% else %}{% if settings.modal_border %} modal--border{% endif %}{% if block.show_top_line %} top-line{% endif %}{% endif %} 
+    {%- if settings.modal_enable_shadow %} modal--shadow{% endif %}" {{ mega_block.shopify_attributes }}>
+    {%- liquid
+        assign columns = block.columns | times: 1
+        if short
+            assign disable_max_width = true
+            
+            assign max_width = '800px'
+        else
+            assign disable_max_width = false
+            if block.disable_max_width 
+                assign disable_max_width = true
+            elsif block.grid_style == 'page' and settings.full_width_page_grid
+                assign disable_max_width = true
+            elsif block.grid_style == 'alternative' and settings.full_width_alt_grid
+                assign disable_max_width = true
+            elsif block.grid_style == 'secondary' and settings.full_width_second_grid
+                assign disable_max_width = true
+            endif
+            
+            assign max_width = '100vw'
+            if disable_max_width == false and section.settings.grid_style == 'page'
+                assign max_width = settings.page_width
+            elsif disable_max_width == false and section.settings.grid_style == 'alternative'
+                assign max_width = settings.alt_grid_width
+            elsif disable_max_width == false and section.settings.grid_style == 'secondary'
+                assign max_width = settings.second_grid_width
+            endif
+        endif
+
+        assign enable_1 = false
+        assign enable_2 = false
+        assign enable_3 = false
+        assign enable_4 = false
+        assign enable_5 = false
+        assign enable_6 = false
+        assign column_menu = columns
+        if link.links.size > 0
+            if columns == 2 
+                assign enable_1 = true
+                if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+            endif
+            if columns == 3 
+                assign enable_1 = true
+                assign enable_2 = true
+                if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_2 != blank or block.heading_2 != blank or block.subheading_2 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+            endif
+            if columns == 4 
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_2 != blank or block.heading_2 != blank or block.subheading_2 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_3 != blank or block.heading_3 != blank or block.subheading_3 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+            endif
+            if columns == 5 
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                assign enable_4 = true
+                if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_2 != blank or block.heading_2 != blank or block.subheading_2 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_3 != blank or block.heading_3 != blank or block.subheading_3 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_4 != blank or block.heading_4 != blank or block.subheading_4 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+            endif
+            if columns == 6 
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                assign enable_4 = true
+                assign enable_5 = true
+                if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_2 != blank or block.heading_2 != blank or block.subheading_2 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_3 != blank or block.heading_3 != blank or block.subheading_3 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_4 != blank or block.heading_4 != blank or block.subheading_4 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+                if block.banner_image_5 != blank or block.heading_5 != blank or block.subheading_5 != blank
+                    assign column_menu = column_menu | minus: 1
+                endif
+            endif
+        else
+            assign column_menu = 0
+            if columns == 1
+                assign enable_1 = true
+            endif
+            if columns == 2 
+                assign enable_1 = true
+                assign enable_2 = true
+            endif
+            if columns == 3 
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+            endif
+            if columns == 4 
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                assign enable_4 = true
+            endif
+            if columns == 5
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                assign enable_4 = true
+                assign enable_5 = true
+            endif
+            if columns == 6
+                assign enable_1 = true
+                assign enable_2 = true
+                assign enable_3 = true
+                assign enable_4 = true
+                assign enable_5 = true
+                assign enable_6 = true
+            endif
+        endif
+
+        assign onload_script = ''
+        assign loading_images = 'lazy'
+        if settings.images_loading != 'disable'
+            assign onload_script = 'this.parentNode.classList.add("lazyloaded");' 
+        endif
+    -%}
+    {% style %}
+        .mega-menu-{{ id }} {
+            --vertical-aligment: {{ block.vertical_content_alignment }};
+            --grid-columns: {{ block.columns }};
+            --aspect-ratio: {{ block.media_ratio }};
+            --column-menu: {{ column_menu }};
+            --overlay-opacity: {{ block.banner_overlay_opacity | divided_by: 100.0 }};
+            --vertical-position: {{ block.vertical_content_position }};
+            {%- if block.banner_image_radius == 'default' -%}
+                --image-radius: {{ settings.images_and_sections_radius }};
+            {%- else -%}
+                --image-radius: {{ block.banner_image_radius }};
+            {%- endif -%}
+            --banner-size: {{ block.banner_size }}%;
+        }
+        {% if settings.images_loading != 'disable' and block.media_ratio == 'auto' %}
+            .mega-menu-{{ id }} .lazy-image {
+                aspect-ratio: var(--asp-rat);
+            }
+        {% endif %}
+        {% if block.vertical_content_position == 'below' %}
+            .mega-menu-{{ id }} .mega-menu__banner-content {
+                --layout-text-color: {{ block.color_scheme.settings.layout_text_color.red }},{{ block.color_scheme.settings.layout_text_color.green }},{{ block.color_scheme.settings.layout_text_color.blue }};
+            }
+        {% endif %}
+    {% endstyle %}
+    
+    <div class="list-menu-dropdown side-margins{% if block.swap_banner_position %} list-menu-dropdown--right{% endif %}{% if block.show_dividers %} list-menu-dropdown--lines{% endif %}">
+        <div class="list-menu-dropdown--wrapper scroll-area hide-scrollbar">
+            <div class="mega-menu__list-container {% if block.show_dividers %}mega-menu__list-container--lines{% endif %} grid {{ block.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}" data-columns="{{ block.columns }}">
+                <ul class="menu__dropdown-child {{ block.horizontal_link_alignment }}{% if block.swap_banner_position %} menu__dropdown-child--right{% endif %}">
+                    {%- for first_nested_link in link.links -%}
+                        <li class="menu__dropdown-child-item">
+                            <div class="menu__item-title menu__item-title--second-level">
+                                {% liquid 
+                                    assign downcased_link_title = first_nested_link.title | downcase
+                                    assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                    for highlighted_item in downcased_highlighted_items
+                                        if highlighted_item == downcased_link_title
+                                            assign highlight_item = true
+                                        endif
+                                    endfor
+                                %}
+                                <a class="menu__dropdown-child-item-link {% if first_nested_link.current %} link--current{% endif %} {{ block.first_link_style }}{% if block.first_link_uppercase %} uppercase{% endif %}{% if block.first_link_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if highlight_item and downcased_highlighted_items contains downcased_link_title %} link--highlighted{% endif %}" href="{{ first_nested_link.url }}">
+                                    <div class="menu__item-link-title">{% if block.first_link_bolder_font %}<b>{% endif %}{{ first_nested_link.title }}{% if block.first_link_bolder_font %}</b>{% endif %}</div>
+                                </a>
+                            </div>
+                            {% if first_nested_link.links.size > 0 %}
+                                <div class="menu__dropdown-grandchild-container">
+                                    <ul class="menu__dropdown-grandchild">
+                                    {% for second_nested_link in first_nested_link.links %}
+                                        <li class="menu__dropdown-grandchild-item">
+                                            {% liquid 
+                                                assign downcased_link_title = second_nested_link.title | downcase
+                                                assign downcased_highlighted_items = section.settings.highlight_menu_item | downcase | split: ", "
+                                                for highlighted_item in downcased_highlighted_items
+                                                    if highlighted_item == downcased_link_title
+                                                        assign highlight_item = true
+                                                    endif
+                                                endfor
+                                            %}
+                                            <a class="menu__dropdown-grandchild-link {% if second_nested_link.current %} link--current{% endif %} {{ block.second_link_style }}{% if block.second_link_uppercase %} uppercase{% endif %}{% if block.second_link_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if highlight_item and downcased_highlighted_items contains downcased_link_title %} link--highlighted{% endif %}" href="{{ second_nested_link.url }}">
+                                                <div class="menu__item-link-title">{% if block.second_link_bolder_font %}<b>{% endif %}{{ second_nested_link.title }}{% if block.second_link_bolder_font %}</b>{% endif %}</div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {%- endfor -%}
+                </ul>
+                {% if block.show_dividers and columns == 2 %}
+                <span class="mega-menu__line" data-index="1"></span>
+                {% elsif block.show_dividers and columns == 3 %}
+                <span class="mega-menu__line" data-index="1"></span>
+                <span class="mega-menu__line" data-index="2"></span>
+                {% elsif block.show_dividers and columns == 4 %}
+                <span class="mega-menu__line" data-index="1"></span>
+                <span class="mega-menu__line" data-index="2"></span>
+                <span class="mega-menu__line" data-index="3"></span>
+                {% elsif block.show_dividers and columns == 5 %}
+                <span class="mega-menu__line" data-index="1"></span>
+                <span class="mega-menu__line" data-index="2"></span>
+                <span class="mega-menu__line" data-index="3"></span>
+                <span class="mega-menu__line" data-index="4"></span>
+                {% elsif block.show_dividers and columns == 6 %}
+                <span class="mega-menu__line" data-index="1"></span>
+                <span class="mega-menu__line" data-index="2"></span>
+                <span class="mega-menu__line" data-index="3"></span>
+                <span class="mega-menu__line" data-index="4"></span>
+                <span class="mega-menu__line" data-index="5"></span>
+                {% endif %}
+               
+                {% if block.banner_image_1 != blank or block.heading_1 != blank or block.subheading_1 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_1, heading: block.heading_1, subheading: block.subheading_1, link: block.banner_link_1, disable_max_width: disable_max_width, max_width: max_width, number: 1, enable: enable_1, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                {% if block.banner_image_2 != blank or block.heading_2 != blank or block.subheading_2 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_2, heading: block.heading_2, subheading: block.subheading_2, link: block.banner_link_2, disable_max_width: disable_max_width, max_width: max_width, number: 2, enable: enable_2, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                {% if block.banner_image_3 != blank or block.heading_3 != blank or block.subheading_3 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_3, heading: block.heading_3, subheading: block.subheading_3, link: block.banner_link_3, disable_max_width: disable_max_width, max_width: max_width, number: 3, enable: enable_3, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                {% unless short %}
+                    {% if block.banner_image_4 != blank or block.heading_4 != blank or block.subheading_4 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_4, heading: block.heading_4, subheading: block.subheading_4, link: block.banner_link_4, disable_max_width: disable_max_width, max_width: max_width, number: 4, enable: enable_4, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                    {% if block.banner_image_5 != blank or block.heading_5 != blank or block.subheading_5 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_5, heading: block.heading_5, subheading: block.subheading_5, link: block.banner_link_5, disable_max_width: disable_max_width, max_width: max_width, number: 5, enable: enable_5, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                    {% if block.banner_image_6 != blank or block.heading_6 != blank or block.subheading_6 != blank %}{% render 'mega-menu-banner', block: block, image: block.banner_image_6, heading: block.heading_6, subheading: block.subheading_6, link: block.banner_link_6, disable_max_width: disable_max_width, max_width: max_width, number: 6, enable: enable_6, columns: columns, onload_script: onload_script, loading_images: loading_images, parent_link_title: link.title %}{% endif %}
+                {% endunless %}
+            </div>
+        </div>
+    </div>
+    <span class="mega-menu__hidden-item"></span>
+</div>

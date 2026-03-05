@@ -1,0 +1,68 @@
+.section-related-and-subcollections .subcollections-gallery {
+    margin-top: 0;
+}
+.subcollections-gallery .banner-gallery__card--wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.subcollections-gallery .banner-gallery__card {
+    cursor: pointer;
+    flex: 1 1 100%;
+}
+
+.subcollections-gallery a.banner-gallery__card,
+.banner-gallery__card--placeholder {
+    height: 100%;
+}
+
+.section-related-and-subcollections .section-overlap--enable .slider__grid {
+    gap: 0px;
+}
+
+.section-related-and-subcollections .section-overlap--enable .slider-button--prev {
+    inset-inline-start: 8px;
+}
+
+.section-related-and-subcollections .section-overlap--enable .slider-button--next {
+    inset-inline-end: 8px;
+}
+
+.section-related-and-subcollections .slider__grid {
+    height: var(--height);
+    min-height: max-content;
+}
+
+.section-related-and-subcollections .section.side-margins:not(.disable-margins).section-overlap--enable .slider-scrollbar {
+    margin-inline-start: var(--side-margin);
+    margin-inline-end: var(--side-margin);
+    width: calc(100% -(var(--side-margin)* 2));
+}
+
+@media screen and (min-width: 769px) {
+    .section-related-and-subcollections .section-overlap--desktop .slider__grid {
+        gap: 0px;
+    }
+    .section-related-and-subcollections .section-overlap--desktop .slider-button--prev {
+        inset-inline-start: 8px;
+    }
+    .section-related-and-subcollections .section-overlap--desktop .slider-button--next {
+        inset-inline-end: 8px;
+    }
+    .section-related-and-subcollections .section.side-margins:not(.disable-margins).section-overlap--desktop .slider-scrollbar {
+        margin-inline-start: var(--side-margin);
+        margin-inline-end: var(--side-margin);
+        width: calc(100% -(var(--side-margin)* 2));
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .section-related-and-subcollections .section-overlap--mobile .slider__grid {
+        gap: 0px;
+    }
+    .section-related-and-subcollections .section.side-margins:not(.disable-margins).section-overlap--mobile .slider-scrollbar {
+        margin-inline-start: var(--side-margin);
+        margin-inline-end: var(--side-margin);
+        width: calc(100% -(var(--side-margin)* 2));
+    }
+}

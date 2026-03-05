@@ -1,0 +1,191 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+    #shopify-section-{{ section.id }} {
+        --top-spacing: {{ section.settings.top_spacing }};
+        --bottom-spacing: {{ section.settings.bottom_spacing }};
+    }
+{% endstyle %}
+
+<div class="section customer login">
+    <div class="section-container side-margins{% if section.settings.show_bottom_line %} bottom-line{% endif %}">
+        <div class="customer__wrapper">
+            <div class="template-header" id="recover" tabindex="-1">
+                <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                    {{ 'customer.recover_password.title' | t }}
+                </h1>
+            </div>
+            <div>
+                <p class="customer__subheading subheading-font {% if settings.use_heading_font_subheadings %}subheading-heading-font{% endif %} {% if settings.uppercase_subheadings %}uppercase{% endif %}">
+                    {% if settings.bolder_subheadings_font %}<b>{% endif %}{{ 'customer.recover_password.subtext' | t }}{% if settings.bolder_subheadings_font %}</b>{% endif %}
+                </p>
+                <form-state class="customer__form-state body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+                    {%- form 'recover_customer_password' -%}
+                    {% assign recover_success = form.posted_successfully? %}
+                    {%- if form.errors -%}
+                    <div class="error-color">{{ form.errors.messages['form'] }}</div>  
+                    {%- endif -%}
+                    <div class="fields-wrapper">
+                        <div class="field">
+                            <label class="label" for="RecoverEmail">
+                                {{ 'customer.login_page.email' | t | append: '*' }}
+                            </label>
+                            <input 
+                            type="email"
+                            dir="ltr"
+                            class="input input--text required {% if form.errors %}invalid{% endif %}"
+                            value=""
+                            required="required"
+                            name="email"
+                            id="RecoverEmail"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            {% if form.errors %}
+                                aria-invalid="true"
+                                aria-describedby="RecoverEmail-email-error"
+                                autofocus
+                            {% endif %}>
+                        </div> 
+                    </div>         
+                    <button type="submit" class="button solid-button button--submit body-font button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+                        {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'customer.login_page.submit' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                    </button>
+                    <a class="button outlined-button button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}" href="#login">
+                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ 'customer.login_page.cancel' | t }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                    </a>
+                    {%- endform -%}
+                </form-state>
+                <div class="customer__have-account body-font {% if settings.uppercase_body %}uppercase{% endif %} flex--row">
+                    <p>{{ 'customer.register.have_account' | t }}</p>
+                    <span class="link-underline">{{ 'customer.register.login' | t | customer_login_link }}</span>
+                </div>
+            </div>
+
+            <div class="template-header" id="login" tabindex="-1">
+                <h1 class="page-title {% if settings.uppercase_page_titles %}uppercase{% endif %}{% if section.settings.center_text %} center{% endif %}">
+                    {{ 'customer.login_page.title' | t }}
+                </h1>
+            </div>
+            <div>
+                {%- if recover_success == true -%}
+                    <h3 class="body-font {% if settings.uppercase_body %}uppercase{% endif %} success-color" tabindex="-1" autofocus>
+                        {{ 'customer.recover_password.success' | t }}
+                    </h3>
+                {%- endif -%}
+                <form-state class="customer__form-state body-font {% if settings.uppercase_body %}uppercase{% endif %}">
+                    {%- form 'customer_login' -%}
+                        {%- if form.errors -%}
+                            <h2 class="error-color" tabindex="-1" autofocus>
+                            {{ form.errors.messages['form'] }}
+                            </h2>
+                        {%- endif -%}
+                        <div class="fields-wrapper">
+                            <div class="field">   
+                                <label class="label" for="CustomerEmail">
+                                    {{ 'customer.login_page.email' | t | append: '*' }}
+                                </label>     
+                                <input
+                                class="input input--text required {% if form.errors contains 'form' %}invalid{% endif %}"
+                                type="email"
+                                dir="ltr"
+                                name="customer[email]"
+                                required="required"
+                                id="CustomerEmail"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                {% if form.errors contains 'form' %}
+                                    aria-invalid="true"
+                                {% endif %}>
+                            </div>
+                            {%- if form.password_needed -%}
+                                <div class="field">   
+                                    <label class="label" for="CustomerPassword">
+                                        {{ 'customer.login_page.password' | t | append: '*' }}
+                                    </label>       
+                                    <input
+                                        class="input input--text required {% if form.errors contains 'form' %}invalid{% endif %}"
+                                        type="password"
+                                        value=""
+                                        required="required"
+                                        name="customer[password]"
+                                        id="CustomerPassword"
+                                        autocomplete="new-password"
+                                        {% if form.errors contains 'form' %}
+                                        aria-invalid="true"
+                                        {% endif %}>
+                                </div>
+                            {%- endif -%}
+                        </div>
+                        {%- if form.password_needed -%}
+                            <a class="cusomer__forgot-password link-underline flex--row {% if settings.uppercase_body %}uppercase{% endif %}" href="#recover">
+                                {{ 'customer.login_page.forgot_password' | t }}
+                            </a>
+                        {%- endif -%}
+                        <button type="submit" class="button solid-button button--submit body-font  button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+                            {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'customer.login_page.sign_in' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                        </button>
+                    {%- endform -%}
+                </form-state>
+                <div class="customer__have-account body-font {% if settings.uppercase_body %}uppercase{% endif %} flex--row">
+                    <p>{{ 'customer.login_page.have_account' | t }}</p>
+                    <a class="link-underline" href="{{ routes.account_register_url }}">
+                        <span>{{ 'customer.login_page.create_account' | t }}</span>
+                    </a>
+                </div>
+
+                {%- if shop.checkout.guest_login -%}
+                    <h2 class="customer__subheading secondary-heading {% if settings.uppercase_secondary_headings %}uppercase{% endif %}">{{ 'customer.login_page.guest_title' | t }}</h2>
+                    {%- form 'guest_login' -%}
+                        <button class="button solid-button body-font  button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}">
+                            {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ 'customer.login_page.guest_continue' | t }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+                        </button>
+                    {%- endform -%}
+                {%- endif -%}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-login.name",
+  "settings": [
+    {
+        "type": "checkbox",
+        "id": "show_bottom_line",
+        "default": false,
+        "label": "t:sections.all.show_bottom_line.label"
+    },
+    {
+        "type": "checkbox",
+        "id": "center_text",
+        "default": false,
+        "label": "t:sections.all.alignment.center_text.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.spacing.header.content"
+    },
+    {
+      "type": "range",
+      "id": "top_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.top_spacing.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bottom_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "x",
+      "label": "t:sections.all.spacing.bottom_spacing.label",
+      "default": 1
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,478 @@
+{% if cart != empty %}
+    {%- liquid
+        if cart_drawer
+            assign card_content_style = 'small'
+        else
+            assign card_content_style = section.settings.card_content_style
+        endif
+    
+        if settings.bolder_product_price and card_content_style == 'regular'
+            assign accent_price = true
+        endif
+    
+        if settings.small_bolder_product_price and card_content_style == 'small'
+            assign accent_price = true
+        endif
+    
+        assign use_accent_color_for_price = false
+        if settings.use_accent_color_for_price and card_content_style == 'regular'
+            assign use_accent_color_for_price = true
+        elsif settings.small_use_accent_color_for_price and card_content_style == 'small'
+            assign use_accent_color_for_price = true
+        endif
+    
+        assign compare_at_price_color = 'sale'
+        if card_content_style == 'regular'
+            assign compare_at_price_color = settings.compare_at_price_color
+        elsif card_content_style == 'small'
+            assign compare_at_price_color = settings.small_compare_at_price_color
+        endif
+    
+        unless section.id contains 'cart' and section.id contains 'drawer'
+            assign disable_max_width = false
+    
+            if cart_recommendations_settings.disable_max_width 
+                assign disable_max_width = true
+            elsif cart_recommendations_settings.grid_style == 'page' and settings.full_width_page_grid
+                assign disable_max_width = true
+            elsif cart_recommendations_settings.grid_style == 'alternative' and settings.full_width_alt_grid
+                assign disable_max_width = true
+            elsif cart_recommendations_settings.grid_style == 'secondary' and settings.full_width_second_grid
+                assign disable_max_width = true
+            endif
+    
+            assign max_width = '100vw'
+            if disable_max_width == false and cart_recommendations_settings.grid_style == 'page'
+                assign max_width = settings.page_width | append: 'px'
+            elsif disable_max_width == false and cart_recommendations_settings.grid_style == 'alternative'
+                assign max_width = settings.alt_grid_width | append: 'px'
+            elsif disable_max_width == false and cart_recommendations_settings.grid_style == 'secondary'
+                assign max_width = settings.second_grid_width | append: 'px'
+            endif
+    
+            assign desktop_item_width = cart_recommendations_settings.desktop_item_width | times: 1
+            assign desktop_item_size = desktop_item_width | floor    
+        endunless
+    
+        if section.id contains 'cart' and section.id contains 'drawer'
+            assign max_width = '480px'
+    
+            assign desktop_item_width = cart_recommendations_settings.item_width | times: 1
+            if desktop_item_width > 160
+                assign desktop_item_size = 1
+            else
+                assign desktop_item_size = 2
+            endif
+        endif
+    
+        assign uppercase_heading = false
+        if cart_recommendations_settings.recommendations_heading_style == 'caption-font' and settings.uppercase_caption
+            assign uppercase_heading = true
+        elsif cart_recommendations_settings.recommendations_heading_style == 'body-font' and settings.uppercase_body
+            assign uppercase_heading = true
+        elsif cart_recommendations_settings.recommendations_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+            assign uppercase_heading = true
+        elsif cart_recommendations_settings.recommendations_heading_style == 'section-heading' and settings.uppercase_section_headings
+            assign uppercase_heading = true
+        elsif cart_recommendations_settings.recommendations_heading_style == 'page-title' and settings.uppercase_page_titles
+            assign uppercase_heading = true
+        endif
+    
+        assign heading_text = cart_recommendations_settings.heading          
+        assign processed_text = ''
+        assign split_text = heading_text | split: '['
+    
+        for part in split_text
+            if part contains ']'
+            assign split_bracket = part | split: ']'
+            assign highlight_text = split_bracket[0]
+            assign after_bracket = split_bracket[1]
+            assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+            else
+            assign processed_text = processed_text | append: part
+            endif
+        endfor
+    
+        assign final_text = ''
+        assign split_text_curly = processed_text | split: '{'
+    
+        for part in split_text_curly
+            if part contains '}'
+            assign split_curly = part | split: '}'
+            assign styled_text = split_curly[0]
+            assign after_curly = split_curly[1]
+            assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+            else
+            assign final_text = final_text | append: part
+            endif
+        endfor
+    
+        assign products_count = recommendations.products_count
+        if info_card_visible and section.settings.info_card_style != 'hide'
+            assign products_count = products_count | plus: 1
+        endif
+    -%}
+        
+    <product-recommendations data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ cart.items.first.product_id }}&limit=10">
+        {% if recommendations.performed and recommendations.products_count > 0 %}
+            {% style %}
+                #Slider-Gallery-{{ section.id }},
+                #ProductGridContainer--{{ section.id }} {
+                    --aspect-ratio: {{ settings.product_media_ratio }};
+                    --focal-point: {{ settings.product_focal_point }};
+                    --variant-swatches-radius: {{ settings.variant_swatches_radius }};
+                    --variant-thumbnail-aspect-ratio: {{ settings.variant_thumbnail_image_ratio }};
+                    --variant-thumbnail-focal-point: {{ settings.variant_thumbnail_focal_point }};
+                    --variant-thumbnail-radius: {{ settings.variant_thumbnail_radius }};
+                }
+            {% endstyle %}
+    
+            {% unless no_heading %}
+                <div class="{% if is_section and full_width %}side-margins{% endif %} {% if cart_drawer and is_cart_drawer_side_panel %}cart-drawer__header{% endif %} js-cart-drawer-header">
+                    {% if cart_recommendations_settings.heading != blank %}
+                        <{{ cart_recommendations_settings.heading_tag | default: 'h2' }} class="custom-heading {{ cart_recommendations_settings.recommendations_heading_style }}
+                        {%- if section.settings.center_text %} center{% endif -%} 
+                        {%- if section.id contains 'cart' and section.id contains 'drawer' %} cart-recommendations__header{% else %} section-header{% endif -%} 
+                        {%- if is_section and full_width %} {{ section.settings.grid_style }}-grid{% if disable_max_width %} disable-max-width{% endif %}{% endif -%}
+                        {%- if uppercase_heading %} uppercase{% endif -%} 
+                        {%- if cart_recommendations_settings.recommendations_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% endif -%}">
+                            {% if cart_recommendations_settings.recommendations_heading_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                                {{ final_text }}
+                            {% if cart_recommendations_settings.recommendations_heading_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                        </{{ cart_recommendations_settings.heading_tag | default: 'h2' }}>
+                    {% endif %}
+                </div>
+            {% endunless %}
+    
+            {% if section.settings.grid_type == 'grid' and is_section == true %}
+                {% liquid
+                    assign products_count = section.settings.products_to_show
+                    if recommendations.products_count < section.settings.products_to_show
+                      assign products_count = recommendations.products_count
+                    endif
+    
+                    if section.settings.desktop_columns == '3'
+                      if products_count > 2
+                        assign columns = section.settings.desktop_columns
+                      else
+                        assign columns = '2'
+                      endif
+                    elsif section.settings.desktop_columns == '4'
+                      if products_count > 3
+                        assign columns = section.settings.desktop_columns
+                      elsif products_count == 3
+                        assign columns = '3'
+                      else 
+                        assign columns = '2'
+                      endif
+                    elsif section.settings.desktop_columns == '5'
+                      if products_count > 4
+                        assign columns = section.settings.desktop_columns
+                      elsif products_count == 4
+                        assign columns = '4'
+                      elsif products_count == 3
+                        assign columns = '3'
+                      else 
+                        assign columns = '2'
+                      endif
+                    else 
+                      assign columns = section.settings.desktop_columns
+                    endif
+                %}
+                
+                {% style %}
+                    #shopify-section-{{ section.id }} {
+                        --grid-columns: {{ columns }};
+                    }
+                
+                    #product-grid--{{ section.id }}.page-grid-gaps {
+                        grid-template-columns: repeat(var(--grid-columns), calc((100% - (var(--page-column-gap) * (var(--grid-columns) - 1))) / var(--grid-columns)));
+                    }
+                    .page-grid #product-grid--{{ section.id }}:not(.page-grid-gaps),
+                    .grid--full-width#product-grid--{{ section.id }}  {
+                        grid-template-columns: repeat(var(--grid-columns), calc(100% / var(--grid-columns)));
+                    }
+                    #product-grid--{{ section.id }}.alternative-grid-gaps {
+                        grid-template-columns: repeat(var(--grid-columns), calc((100% - (var(--alt-column-gap) * (var(--grid-columns) - 1))) / var(--grid-columns)));
+                    }
+                    .alternative-grid #product-grid--{{ section.id }}:not(.alternative-grid-gaps) {
+                        grid-template-columns: repeat(var(--grid-columns), calc(100% / var(--grid-columns)));
+                    }
+                    #product-grid--{{ section.id }}.secondary-grid-gaps {
+                        grid-template-columns: repeat(var(--grid-columns), calc((100% - (var(--second-column-gap) * (var(--grid-columns) - 1))) / var(--grid-columns)));
+                    }
+                    .secondary-grid #product-grid--{{ section.id }}:not(.secondary-grid-gaps) {
+                        grid-template-columns: repeat(var(--grid-columns), calc(100% / var(--grid-columns)));
+                    }
+                    @media screen and (max-width: 1200px) {
+                        #shopify-section-{{ section.id }} {
+                        --grid-columns: {% if columns == '5' %}4{% else %}{{ columns }}{% endif %};
+                        }
+                        }
+                    @media screen and (max-width: 1024px) {
+                        #shopify-section-{{ section.id }} {
+                        --grid-columns: {% if columns == '5' or columns == '4' %}3{% else %}{{ columns }}{% endif %};
+                        }
+                    }
+                    @media screen and (max-width: 768px) {
+                        #shopify-section-{{ section.id }} {
+                            --grid-columns: {{ section.settings.mobile_columns }};
+                        }
+                    }
+                {% endstyle %}
+    
+                <div id="ProductGridContainer--{{ section.id }}" class="product__grid-container">
+                    <div class="collection">
+                      <ul id="product-grid--{{ section.id }}" data-id="{{ section.id }}" class="grid {% if section.settings.disable_grid_gaps and full_width %}grid--full-width{% endif %} {% unless section.settings.disable_grid_gaps %}{{ section.settings.grid_style }}-grid-gaps{% endunless %} {% if section.settings.disable_grid_gaps %}disable-grid-gaps{% endif %} {% unless full_width %}{{ section.settings.grid_style }}-grid{% endunless %}">
+                        {% if section.settings.info_card_position == 'first' and section.settings.info_card_style != 'hide' and info_card_visible %}
+                          <li class="grid-item {% if section.settings.info_card_style == 'show_on_desktop' %} only-on-desktop{% endif %}">
+                            {% render 'information-card', 
+                                location: section, 
+                                parent_color_scheme: cart_recommendations_settings.color_scheme, 
+                                full_width: full_width, 
+                                disable_max_width: disable_max_width, 
+                                max_width: max_width, 
+                                disable_grid_gaps: section.settings.disable_grid_gaps,
+                                desktop_columns: desktop_item_width,
+                                mobile_width: section.settings.mobile_item_min_width,
+                                with_products: true
+                              %}
+                          </li>
+                        {% endif %}
+    
+                        {%- for recommendation in recommendations.products limit: section.settings.products_to_show -%}
+                            <li class="grid-item">
+                                {% render 'card-product',
+                                  card_product: recommendation,
+                                  show_vendor: section.settings.show_vendor,
+                                  show_title: section.settings.show_title,
+                                  hover_behavior: section.settings.hover_behavior,
+                                  quick_buy: section.settings.quick_buy,
+                                  price_position: section.settings.price_position,
+                                  options_position: section.settings.options_position,
+                                  desktop_options: section.settings.desktop_options,
+                                  mobile_options: section.settings.mobile_options,
+                                  max_product_name_characters: section.settings.max_product_name_characters,
+                                  show_short_description: section.settings.show_short_description,
+                                  show_rating: section.settings.show_rating,
+                                  max_width: max_width,
+                                  disable_max_width: disable_max_width,
+                                  accent_price: accent_price,
+                                  desktop_columns: section.settings.desktop_columns,
+                                  mobile_columns: section.settings.mobile_columns,
+                                  autoplay_speed: section.settings.autoplay_speed,
+                                  product_card_color_scheme: section.settings.product_card_color_scheme,
+                                  show_product_card_border: section.settings.show_product_card_border,
+                                  index: forloop.index,
+                                  complementary_block: false,
+                                  card_content_style: section.settings.card_content_style,
+                                  compare_at_price_color: compare_at_price_color, 
+                                  use_accent_color_for_price: use_accent_color_for_price,
+                                  parent_color_scheme: section.settings.color_scheme,
+                                  full_width: full_width,
+                                  selector_container: selector_container,
+                                  show_bullets: section.settings.show_bullets,
+                                  grid_type: section.settings.grid_type,
+                                  disable_grid_gaps: section.settings.disable_grid_gaps,
+                                  show_pickup_availability: section.settings.show_pickup_availability
+                                %}
+                            </li>
+                        {%- endfor -%}
+                        
+                        {% if section.settings.info_card_position == 'last' and section.settings.info_card_style != 'hide' and info_card_visible %}
+                          <li class="grid-item {% if section.settings.info_card_style == 'show_on_desktop' %} only-on-desktop{% endif %}">
+                            {% render 'information-card', 
+                                location: section, 
+                                parent_color_scheme: cart_recommendations_settings.color_scheme, 
+                                full_width: full_width, 
+                                disable_max_width: disable_max_width, 
+                                max_width: max_width, 
+                                disable_grid_gaps: section.settings.disable_grid_gaps,
+                                desktop_columns: desktop_item_width,
+                                mobile_width: section.settings.mobile_item_min_width,
+                                with_products: true
+                              %}
+                          </li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                </div>
+            {% else %}
+                {% style %}
+                    #Slider-Gallery-{{ section.id }} {
+                        --reduce-items: 1;
+                       
+                        {%- unless section.id contains 'cart' and section.id contains 'drawer' -%}
+                            {% if section.settings.grid_style == 'page' %}
+                                --desktop-item-width: calc((100% - ({{ settings.page_column_gap }}px * ({{ desktop_item_size }} - var(--reduce-items)))) / ({{ desktop_item_width }} - (var(--reduce-items) - 1)));
+                            {% elsif section.settings.grid_style == 'alternative' %}
+                                --desktop-item-width: calc((100% - ({{ settings.alt_grid_column_gap }}px * ({{ desktop_item_size }} - var(--reduce-items)))) / ({{ desktop_item_width }} - (var(--reduce-items) - 1)));
+                            {% elsif section.settings.grid_style == 'secondary' %}
+                                --desktop-item-width: calc((100% - ({{ settings.second_grid_column_gap }}px * ({{ desktop_item_size }} - var(--reduce-items)))) / ({{ desktop_item_width }} - (var(--reduce-items) - 1)));
+                            {% endif %}
+                        {%- endunless -%}
+    
+                        {%- if section.id contains 'cart' and section.id contains 'drawer' -%}
+                            --desktop-item-width: {{ section.settings.item_width }}px;
+                        {%- endif -%}
+                    }
+    
+                    @media screen and (max-width: 1300px) {
+                        #shopify-section-{{ section.id }} #Slider-Gallery-{{ section.id }} {
+                        {% if desktop_item_size == 6 %}
+                            --reduce-items: 2;
+                        {% endif %}
+                        }
+                        {% if desktop_item_size == 6 and products_count >= 5 %}
+                            #shopify-section-{{ section.id }} .slider__grid--center {
+                                justify-content: flex-start;
+                            }
+                        {% endif %}
+                    }
+    
+                    @media screen and (max-width: 1100px) {
+                        #shopify-section-{{ section.id }} #Slider-Gallery-{{ section.id }} {
+                        {% if desktop_item_size == 6 %}
+                            --reduce-items: 3;
+                        {% elsif desktop_item_size == 5 %}
+                            --reduce-items: 2;
+                        {% endif %}
+                        }
+                        {% if desktop_item_size == 6 and products_count >= 4 %}
+                            #shopify-section-{{ section.id }} .slider__grid--center {
+                                justify-content: flex-start;
+                            }
+                        {% endif %}
+                        {% if desktop_item_size == 5 and products_count >= 4 %}
+                            #shopify-section-{{ section.id }} .slider__grid--center {
+                                justify-content: flex-start;
+                            }
+                        {% endif %}
+                    }
+    
+                    @media screen and (max-width: 1024px) {
+                        #shopify-section-{{ section.id }} #Slider-Gallery-{{ section.id }} {
+                            --desktop-item-width: {{ section.settings.mobile_item_min_width }}px;
+                            {%- if section.id contains 'cart' and section.id contains 'drawer' -%}
+                                --desktop-item-width: {{ section.settings.item_width }}px;
+                            {% endif %}
+                        }
+                        #shopify-section-{{ section.id }} .slider__grid--center {
+                            justify-content: flex-start;
+                        }
+                    }
+                {% endstyle %}
+    
+                <slider-component id="GalleryViewer-{{ section.id }}" class="slider {{ section.settings.grid_style }}{% if is_section and full_width %} slider--full-width{% endif %}">
+                    <div class="slider__viewport">
+                        <ul id="Slider-Gallery-{{ section.id }}" class="slider__grid
+                            {% if is_section and cart_recommendations_settings.disable_grid_gaps != true %}{{ cart_recommendations_settings.grid_style }}-grid-gaps{% elsif is_section == false %}{{ cart_recommendations_settings.grid_style }}-grid-gaps{% endif %} {% if section.settings.alignment_fewer_items == 'center' and is_section and desktop_item_width > products_count %}slider__grid--center{% endif %} hide-scrollbar" role="list" 
+                            style="--desktop-columns: {{ desktop_item_width }};"
+                            data-count="{{ desktop_item_size }}"
+                            data-mobile-width="{{ section.settings.mobile_item_min_width }}"
+                        >
+                            {% if cart_recommendations_settings.info_card_position == 'first' and cart_recommendations_settings.info_card_style != 'hide' and info_card_visible %}
+                            <li id="Slide-{{ section.id }}" class="slider__grid-item is-active{% if cart_recommendations_settings.info_card_style == 'show_on_desktop' %} only-on-desktop{% endif %}">
+                                {% render 'information-card', 
+                                    location: section, 
+                                    parent_color_scheme: cart_recommendations_settings.color_scheme, 
+                                    full_width: full_width, 
+                                    disable_max_width: disable_max_width, 
+                                    max_width: max_width, 
+                                    disable_grid_gaps: section.settings.disable_grid_gaps,
+                                    desktop_columns: desktop_item_width,
+                                    mobile_width: section.settings.mobile_item_min_width,
+                                    with_products: true
+                                  %}
+                            </li>
+                            {% endif %}
+    
+                            {% for recommendation in recommendations.products %}
+                                <li id="Slide-{{ section.id }}" class="slider__grid-item {% unless cart_recommendations_settings.info_card_position == 'first' and cart_recommendations_settings.info_card_style != 'hide' and info_card_visible %}{% if forloop.first %}is-active{% endif %}{% endunless %}">
+                                    {% liquid 
+                                        assign desktop_width = ''
+                                        assign mobile_width = ''
+                                        if is_section
+                                            assign desktop_width = desktop_item_size
+                                            assign mobile_width = section.settings.mobile_item_min_width
+                                        else
+                                            assign desktop_width = 2
+                                            assign mobile_width = section.settings.item_width
+                                        endif
+                                    %}
+                                    {% render 'card-product',
+                                        card_product: recommendation,
+                                        show_vendor: section.settings.show_vendor,
+                                        show_title: section.settings.show_title,
+                                        hover_behavior: section.settings.hover_behavior,
+                                        mobile_behavior: section.settings.mobile_behavior,
+                                        quick_buy: section.settings.quick_buy,
+                                        price_position: section.settings.price_position,
+                                        options_position: section.settings.options_position,
+                                        desktop_options: section.settings.desktop_options,
+                                        mobile_options: section.settings.mobile_options,
+                                        max_product_name_characters: section.settings.max_product_name_characters,
+                                        show_short_description: section.settings.show_short_description,
+                                        show_rating: section.settings.show_rating,
+                                        lazy_load: lazy_load,
+                                        max_width: max_width,
+                                        disable_max_width: disable_max_width,
+                                        accent_price: accent_price,
+                                        desktop_columns: desktop_width,
+                                        mobile_width: mobile_width,
+                                        autoplay_speed: section.settings.autoplay_speed,
+                                        product_card_color_scheme: cart_recommendations_settings.product_card_color_scheme,
+                                        show_product_card_border: section.settings.show_product_card_border,
+                                        complementary_block: false,
+                                        full_width: full_width,
+                                        card_content_style: card_content_style,
+                                        compare_at_price_color: compare_at_price_color, 
+                                        use_accent_color_for_price: use_accent_color_for_price,
+                                        parent_color_scheme: cart_recommendations_settings.color_scheme,
+                                        selector_container: selector_container,
+                                        show_bullets: cart_recommendations_settings.show_bullets,
+                                        grid_type: 'slider',
+                                        grid_style: section.settings.grid_style,
+                                        disable_grid_gaps: section.settings.disable_grid_gaps,
+                                        show_pickup_availability: section.settings.show_pickup_availability
+                                    %}
+                                </li>
+                            {% endfor %}
+    
+                            {% if cart_recommendations_settings.info_card_position == 'last' and cart_recommendations_settings.info_card_style != 'hide' and info_card_visible %}
+                                <li id="Slide-{{ section.id }}" class="slider__grid-item{% if cart_recommendations_settings.info_card_style == 'show_on_desktop' %} only-on-desktop{% endif %}">
+                                    {% render 'information-card', 
+                                        location: section, 
+                                        parent_color_scheme: cart_recommendations_settings.color_scheme, 
+                                        full_width: full_width, 
+                                        disable_max_width: disable_max_width, 
+                                        max_width: max_width, 
+                                        disable_grid_gaps: section.settings.disable_grid_gaps,
+                                        desktop_columns: desktop_item_width,
+                                        mobile_width: section.settings.mobile_item_min_width,
+                                        with_products: true
+                                      %}
+                                </li>
+                            {% endif %}
+                        </ul>
+                        <button type="button" class="slider-button slider-button--prev{% if cart_recommendations_settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">
+                            <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span>
+                        </button>
+                        <button type="button" class="slider-button slider-button--next{% if cart_recommendations_settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">
+                            <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span>
+                        </button>
+                        {% if cart_recommendations_settings.show_scrollbar %}
+                            {% if is_section and full_width %}<div class="side-margins">{% endif %}
+                            <div role="scrollbar" tabindex="0" aria-orientation="horizontal" aria-valuemax="100" aria-valuemin="0" aria-valuenow="39" class="slider-scrollbar visually-hidden">
+                            <span class="slider-scrollbar__track">
+                                <span class="slider-scrollbar__thumb"></span>
+                            </span>
+                            </div>
+                            {% if is_section and full_width %}</div>{% endif %}
+                        {% endif %}
+                    </div>
+                </slider-component>
+            {% endif %}
+        {% endif %}
+    </product-recommendations>
+{% endif %}

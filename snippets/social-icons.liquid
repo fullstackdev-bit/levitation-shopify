@@ -1,0 +1,121 @@
+<ul class="social-media align-center flex--row">        
+    {%- if settings.instagram_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.instagram_link }}" target="_blank" aria-label="{{ 'general.social_media.instagram' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'instagram' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.tiktok_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.tiktok_link }}" target="_blank" aria-label="{{ 'general.social_media.tiktok' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'tiktok' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.snapchat_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.snapchat_link }}" target="_blank" aria-label="{{ 'general.social_media.snapchat' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'snapchat' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.pinterest_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.pinterest_link }}" target="_blank" aria-label="{{ 'general.social_media.pinterest' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'pinterest' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.tumblr_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.tumblr_link }}" target="_blank" aria-label="{{ 'general.social_media.tumblr' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'tumblr' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.facebook_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.facebook_link }}" target="_blank" aria-label="{{ 'general.social_media.facebook' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'facebook' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.youtube_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.youtube_link }}" target="_blank" aria-label="{{ 'general.social_media.youtube' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'youtube' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.vimeo_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.vimeo_link }}" target="_blank" aria-label="{{ 'general.social_media.vimeo' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'vimeo' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.reddit_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.reddit_link }}" target="_blank" aria-label="{{ 'general.social_media.reddit' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'reddit' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.trustpilot_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.trustpilot_link }}" target="_blank" aria-label="{{ 'general.social_media.trustpilot' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'trustpilot' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.tripadvisor_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.tripadvisor_link }}" target="_blank" aria-label="{{ 'general.social_media.tripadvisor' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'tripadvisor' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.telegram_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.telegram_link }}" target="_blank" aria-label="{{ 'general.social_media.telegram' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'telegram' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.whatsapp_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.whatsapp_link }}" target="_blank" aria-label="{{ 'general.social_media.whatsapp' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'whatsapp' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.linkedin_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.linkedin_link }}" target="_blank" aria-label="{{ 'general.social_media.linkedin' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'linkedIn' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.fb_messenger_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.fb_messenger_link }}" target="_blank" aria-label="{{ 'general.social_media.fb_messenger' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'facebook-messenger' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.discord_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.discord_link }}" target="_blank" aria-label="{{ 'general.social_media.discord' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'discord' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+    {%- if settings.x_link != blank -%}
+        <li class="social-media__item">
+            <a class="social-media__link" href="{{ settings.x_link }}" target="_blank" aria-label="{{ 'general.social_media.x' | t }}">
+                <span class="social-media__icon">{%- render 'icons-social-media', icon: 'x' -%}</span>
+            </a>
+        </li>
+    {%- endif -%}
+</ul>

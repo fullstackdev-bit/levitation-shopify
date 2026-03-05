@@ -1,0 +1,168 @@
+<article class="article-card__container flex--row{% if show_more %} show-more-element{% endif %}" aria-labelledby="Article-{{ article.id }}">
+    <a href="{{ article.url }}" class="article-card {% if full_width %}article-card--full-width{% endif %} {% if horizontal %}article-card--horizontal{% endif %} {% if content_alignment %}{{ content_alignment }}{% endif %}{% if show_post_border %} with-border{% endif %} color-{{ post_color_scheme }}{% if post_color_scheme != section.settings.color_scheme %} with-color{% endif %}">
+        {%- if article.image and show_image -%}
+            <div class="article-card__image aspect-ratio" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}>
+                {%- liquid
+                    assign widths = '300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200'
+                -%}
+                {%- capture sizes -%}
+                    {% if parent_section == 'blog_template' or parent_section == 'featured_blog' %}
+                        {% if disable_max_width or full_width %}
+                            (max-width: 768px) calc(100vw / {{ mobile_columns }}), {{ max_width | divided_by: desktop_columns }}vw
+                        {% else %}
+                            (max-width: 768px) calc(100vw / {{ mobile_columns }}), (max-width: {{ max_width }}) {{ max_width | divided_by: desktop_columns }}px, {{ max_width | divided_by: desktop_columns }}px
+                        {% endif %}
+                    {% elsif parent_section == 'blog_with_banner' %}
+                        {% if disable_max_width or full_width %}
+                            (max-width: 768px) calc(100vw / 3), calc(({{ max_width }} * (1 - {{ media_width }})) / 3)
+                        {% else %}
+                            (max-width: 768px) calc(100vw / 3), (max-width: {{ max_width }}) calc(({{ max_width }} * (1 - {{ media_width }})) / 3), calc(({{ max_width }} * (1 - {{ media_width }})) / 3)
+                        {% endif %}
+                    {% endif %}
+                {%- endcapture -%}
+                {% if settings.images_loading != 'disable' %}
+                    <figure class="lazy-image lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ article.image.aspect_ratio }};">
+                {% endif %}
+                {{
+                    article.image
+                    | image_url: width: 3200
+                    | image_tag:
+                    sizes: sizes,
+                    widths: widths,
+                    alt: article.image.alt,
+                    draggable: false,
+                    loading: loading_images,
+                    onload: onload_script
+                }}
+                {% if settings.images_loading != 'disable' %}
+                    {% if settings.images_loading != 'fade_scale' %}
+                    <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+                      <img 
+                      alt="{{ article.image.alt | escape }}" 
+                      src="{{ article.image | image_url: width: 10 }}"
+                      draggable="false"
+                      width="10" 
+                      height="10">
+                    </div>
+                    {% endif %}
+                </figure>
+                {% endif %}
+            </div>
+        {%- endif -%}
+        <div class="article-card__info">
+            {%- for block in section.blocks -%}
+            {%- case block.type -%}
+                {%- when 'title'-%}
+                    {%- liquid
+                        assign uppercase_subheading = false
+                        if block.settings.title_style == 'section-heading' and settings.uppercase_section_headings
+                          assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                          assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_subheading = true
+                        elsif block.settings.title_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_subheading = true
+                        endif
+                      -%}
+                    <h3 class="article-card__info-child article-card__title {% if block.settings.use_accent_color %}article-card__title--accent{% endif %} {{ block.settings.title_style }}{% if uppercase_subheading %} uppercase{% endif %}
+                        {% if block.settings.title_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}" id="Article-{{ article.id }}" {{ block.shopify_attributes }}>
+                        {% if block.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                        {{ article.title | escape }}
+                        {% if block.settings.title_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                    </h3>
+                {%- when 'info' -%}
+                    {%- liquid
+                        assign uppercase_text = false
+                        if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_text = true
+                        endif
+                      -%}
+                    {%- if block.settings.show_date or block.settings.show_author or block.settings.show_number_of_comments and article.comments_count > 0 and blog.comments_enabled? -%}
+                    <div class="article-card__info-child article__info flex--row {{ block.settings.text_style }}
+                    {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if uppercase_text %} uppercase{% endif %}"{{ block.shopify_attributes }}>
+                        {%- if block.settings.show_date -%}
+                            <span class="article__info-date">
+                                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{- article.published_at | date: format: 'abbreviated_date' -}}{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                            </span>
+                        {%- endif -%}
+                        {%- if block.settings.show_author -%}
+                            <span class="article__info-author">
+                                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ article.author }}{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                            </span>
+                        {%- endif -%}
+                        {%- if block.settings.show_number_of_comments and article.comments_count > 0 and blog.comments_enabled? -%}
+                            <span class="article__info-comments-count">
+                                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                                {% if article.comments_count == 1 %}{{ 'blogs.article.comments.one' | t: count: article.comments_count }}{% else %}{{ 'blogs.article.comments.other' | t: count: article.comments_count }}{% endif %}
+                                {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                            </span>
+                        {%- endif -%}
+                    </div>
+                {%- endif -%}
+                {%- when 'excerpt'-%}
+                {%- if article.excerpt.size > 0 or article.content.size > 0 -%}
+                    {%- liquid
+                        assign uppercase_text = false
+                        if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                          assign uppercase_text = true
+                        elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                            assign uppercase_text = true
+                        elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                            assign uppercase_text = true
+                        endif
+                      -%}
+                    <div class="article-card__info-child article-card__excerpt-wrapper {{ block.settings.text_style }}
+                    {% if block.settings.text_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if uppercase_text %} uppercase{% endif %}">
+                        {% style %}
+                            #shopify-section-{{ section.id }} .article-card__excerpt-wrapper {
+                                --line-clamp: {{ block.settings.excerpt_line_limit }};
+                            }
+                        {% endstyle %}
+                        <p class="article-card__excerpt {% if article.excerpt == blank %}line-clamp{% endif %}" {{ block.shopify_attributes }}>
+                            {% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}{{ article.excerpt_or_content | strip_html }}{% if block.settings.text_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                        </p>
+                    </div>
+                {%- endif -%}
+                {%- when 'read_more'-%}
+                {%- if block.settings.button_label != blank or block.settings.button_icon != blank -%}
+                    <div class="article-card__info-child article-card__button{% if block.settings.button_label != blank and block.settings.button_icon != blank %} button-block--small-padding{% endif %}" {{ block.shopify_attributes }}>
+                        <object>
+                            <a class="article-card__link button {{ block.settings.button_style }}-button body-font button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}" href="{{ article.url }}" aria-label="{{ block.settings.button_label }}">
+                                {% if block.settings.button_icon != blank %}
+                                    {%- liquid
+                                    assign icon_name = block.settings.button_icon | split: '/'
+                                    if icon_name.size == 3
+                                        assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                                    elsif icon_name.size == 2
+                                        assign file_name = icon_name.first
+                                    endif
+                                    assign icon = icon_name.last
+                                    -%}
+                                    <span class="icon-accordion flex--row icon--small">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+                                {% endif %}
+                                {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ block.settings.button_label }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                            </a>
+                        </object>
+                    </div>
+                {%- endif -%}
+            {%- endcase -%}
+            {%- endfor -%}
+        </div>
+    </a>
+</article>
+  

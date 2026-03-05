@@ -1,0 +1,246 @@
+{% liquid
+  assign current_store = cart.attributes['store']
+%}
+
+<store-selector-drawer class="store-selector-drawer drawer drawer--right drawer-without-padding hide-scrollbar {% if settings.modal_enable_shadow %}modal--shadow{% endif %} {% if settings.modal_border %}modal--border{% endif %} modal color-{{ settings.drawer_color_scheme }}">
+  <div class="button-wrapper">
+    <button type="button" class="button-close close-popup icon--large" data-modal-toggle-store-selector-drawer>
+      {%- render 'glyphs_interface', icon: 'close' -%}
+    </button>
+  </div>
+  <div class="scroll-area hide-scrollbar">
+    <div class="store-selector-drawer__main">
+      <header class="store-selector-drawer__header">
+        <h2 class="subheading-font{% if settings.uppercase_subheadings %} uppercase{% else %} none-uppercase{% endif %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+          {{ section.settings.heading }}
+        </h2>
+      </header>
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {% when 'store' %}
+            {% if block.settings.name != blank %}
+              {% liquid
+                assign uppercase_heading = false
+                if section.settings.store_name_style == 'caption-font' and settings.uppercase_caption
+                    assign uppercase_heading = true
+                elsif section.settings.store_name_style == 'body-font' and settings.uppercase_body
+                    assign uppercase_heading = true
+                elsif section.settings.store_name_style == 'subheading-font' and settings.uppercase_subheadings
+                    assign uppercase_heading = true
+                elsif section.settings.store_name_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                    assign uppercase_heading = true
+                elsif section.settings.store_name_style == 'section-heading' and settings.uppercase_section_headings
+                    assign uppercase_heading = true
+                elsif section.settings.store_name_style == 'page-title' and settings.uppercase_page_titles
+                    assign uppercase_heading = true
+                endif
+              %}
+
+              <article class="store-accordion accordion" {{ block.shopify_attributes }}>
+                <accordion-toggle>
+                  <div class="accordion-toggle">
+                    <div tabindex="0" class="accordion__summary">
+                      <div class="summary__title">
+                        <div class="store-accordion__toggle-area summary__title-name custom-heading">
+                          <input-checkbox>
+                            <input class="store-accordion__checkbox" type="checkbox" name="store" value="{{ block.settings.name }}" {% if block.settings.name == current_store %}checked{% endif %}>
+                          </input-checkbox>
+                          <div class="accordion__title store-accordion__title">
+                            {% if block.settings.image %}
+                              {{
+                                block.settings.image
+                                | image_url: width: 240
+                                | image_tag:
+                                class: 'store-accordion__image',
+                                alt: block.settings.name
+                              }}
+                            {% endif %}
+                            <div class="store-accordion__title-info">
+                              <h3 class="store-accordion__heading {{ section.settings.store_name_style }} 
+                                {%- if section.settings.store_name_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font {% endif -%} 
+                                {%- if uppercase_heading %} uppercase {% endif -%}"
+                              >
+                                {% if section.settings.store_name_style == 'subheading-font' and settings.bolder_subheadings_font %}<b>{% endif %}
+                                  {{ block.settings.name }}
+                                {% if section.settings.store_name_style == 'subheading-font' and settings.bolder_subheadings_font %}</b>{% endif %}
+                              </h3>
+
+                              {% if block.settings.address != blank %}
+                                <address class="store-accordion__address body-font {% if settings.uppercase_body %} uppercase{% endif %}">{{ block.settings.address }}</address>
+                              {% endif %}
+                              
+                              <div class="accordion__panel hide-scrollbar">
+                                {% if block.settings.details != blank %}
+                                  <div class="accordion__content body-font{% if settings.uppercase_body %} uppercase{% endif %}">
+                                    {%- liquid
+                                      assign text_style = 'body-font'
+                                      assign uppercase_text = false
+                                      if text_style == 'section-heading' and settings.uppercase_section_headings
+                                        assign uppercase_text = true
+                                      elsif text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                        assign uppercase_text = true
+                                      elsif text_style == 'subheading-font' and settings.uppercase_subheadings
+                                          assign uppercase_text = true
+                                      elsif text_style == 'body-font' and settings.uppercase_body
+                                          assign uppercase_text = true
+                                      elsif text_style == 'caption-font' and settings.uppercase_caption
+                                          assign uppercase_text = true
+                                      endif
+                                      assign richtext_heading_style = 'body-font'
+                                      assign uppercase_headings = false
+                                      if richtext_heading_style == 'body-font' and settings.uppercase_body
+                                        assign uppercase_headings = true
+                                      elsif richtext_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                                        assign uppercase_headings = true
+                                      elsif richtext_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                                        assign uppercase_headings = true
+                                      elsif richtext_heading_style == 'section-heading' and settings.uppercase_section_headings
+                                          assign uppercase_headings = true
+                                      elsif richtext_heading_style == 'page-title' and settings.uppercase_page_titles
+                                          assign uppercase_headings = true
+                                      endif
+                                    -%}
+                                    <div class="store-accordion__details accordion__text richtext heading-style-{{ richtext_heading_style }} {% if richtext_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                                        rte link-underline{% if uppercase_headings %} headings-uppercase{% endif %} {{ text_style }}{% if uppercase_text %} uppercase{% endif %} 
+                                      {% if text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                                        {{ block.settings.details }}
+                                    </div>
+                                  </div>
+                                {% endif %}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <span class="icon-accordion icon-accordion--close icon--large">
+                          {%- render 'glyphs_interface', icon: 'plus' -%}
+                        </span>
+                        <span class="icon-accordion icon-accordion--open icon--large">
+                          {%- render 'glyphs_interface', icon: 'minus' -%}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </accordion-toggle> 
+              </article>
+            {% endif %}
+        {%- endcase -%}
+      {% endfor %}
+    </div>
+  </div>
+    <footer class="store-selector-drawer__footer modal--shadow">
+      <button
+        class="change-store-button button solid-button body-font button--main 
+          {%- if settings.use_heading_font_main_buttons %} heading-font-style {% endif -%}
+          {%- if settings.uppercase_main_buttons %} uppercase {% endif -%}
+        "
+      >
+        <div class="change-store-button__loader hidden">
+          <svg class="spinner" width="24px" height="24px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+            <circle class="path" fill="none" stroke-width="5" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+          </svg>
+        </div>
+
+        <span class="change-store-button__text">
+          {% if settings.bolder_main_buttons_font %}<b>{% endif %}
+            {{ 'blocks.store_selector.change_my_store' | t }}
+          {% if settings.bolder_main_buttons_font %}</b>{% endif %}
+        </span>
+      </button>
+    </footer>
+</store-selector-drawer>
+
+
+{% schema %}
+{
+  "name": "t:sections.store_selector_drawer.name",
+  "tag": "section",
+  "limit": 1,
+  "class": "section-store-selector-drawer",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.store_selector_drawer.settings.info"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.store_selector_drawer.settings.learn_more"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Select pickup location",
+      "label": "t:sections.all.settings_titles.heading.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "store_name_style",
+      "options": [
+        {
+          "value": "caption-font",
+          "label": "t:sections.all.headings_style.options__6.label"
+        },
+        {
+          "value": "body-font",
+          "label": "t:sections.all.headings_style.options__1.label"
+        },
+        {
+          "value": "subheading-font",
+          "label": "t:sections.all.headings_style.options__2.label"
+        },
+        {
+          "value": "secondary-heading",
+          "label": "t:sections.all.headings_style.options__3.label"
+        },
+        {
+          "value": "section-heading",
+          "label": "t:sections.all.headings_style.options__4.label"
+        }
+      ],
+      "default": "secondary-heading",
+      "label": "t:sections.store_selector_drawer.settings.store_name_style.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "store",
+      "name": "t:blocks.store.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "t:blocks.store.settings.store_name.label",
+          "info": "t:blocks.store.settings.store_name.info"
+        },
+        {
+          "type": "text",
+          "id": "address",
+          "label": "t:blocks.store.settings.address.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:blocks.store.settings.image.label"
+        },
+        {
+          "type": "richtext",
+          "id": "details",
+          "label": "t:blocks.store.settings.details.label"
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": ["custom.overlay"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.store_selector_drawer.name",
+      "blocks": [
+        {
+          "type": "store"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

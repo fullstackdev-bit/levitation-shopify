@@ -1,0 +1,112 @@
+.shopify-policy__container {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--template-header-padding);
+    color: rgb(var(--layout-text-color));
+    background-color: rgb(var(--layout-bg-color));
+    padding-inline-start: var(--side-margin);
+    padding-inline-end: var(--side-margin);
+    padding-top: calc(var(--section-padding));
+    padding-bottom: calc(var(--section-padding));
+}
+
+.shopify-policy__title {
+    text-align: start;
+}
+
+.font-page-titles--main .shopify-policy__title h1 {
+    font: var(--font-heading-main-style) var(--font-heading-main-weight) var(--page-title-font-size)/var(--page-title-line-height) var(--font-heading-main-family);
+    letter-spacing: var(--page-title-letter-spacing);
+}
+
+.font-page-titles--secondary .shopify-policy__title h1 {
+    font: var(--font-heading-second-style) var(--font-heading-second-weight) var(--page-title-font-size)/var(--page-title-line-height) var(--font-heading-second-family);
+    letter-spacing: var(--page-title-letter-spacing);
+}
+
+.shopify-policy__body {
+    font: var(--font-body-style) var(--font-body-weight) var(--body-font-size)/var(--body-line-height) var(--font-body-family);
+    letter-spacing: var(--body-letter-spacing);
+}
+
+.shopify-policy__body .rte h1, 
+.shopify-policy__body .rte h2, 
+.shopify-policy__body .rte h3, 
+.shopify-policy__body .rte h4, 
+.shopify-policy__body .rte h5, 
+.shopify-policy__body .rte h6 {
+    line-height: var(--section-headings-line-height);
+    letter-spacing: var(--section-headings-letter-spacing);
+    text-transform: none;
+}
+
+.font-section-headings--main .shopify-policy__body .rte h1, 
+.font-section-headings--main .shopify-policy__body .rte h2, 
+.font-section-headings--main .shopify-policy__body .rte h3, 
+.font-section-headings--main .shopify-policy__body .rte h4, 
+.font-section-headings--main .shopify-policy__body .rte h5, 
+.font-section-headings--main .shopify-policy__body .rte h6 {
+    font-style: var(--font-heading-main-style);
+    font-weight: var(--font-heading-main-weight);
+    font-family: var(--font-heading-main-family);
+}
+
+.font-section-headings--secondary .shopify-policy__body .rte h1, 
+.font-section-headings--secondary .shopify-policy__body .rte h2, 
+.font-section-headings--secondary .shopify-policy__body .rte h3, 
+.font-section-headings--secondary .shopify-policy__body .rte h4, 
+.font-section-headings--secondary .shopify-policy__body .rte h5, 
+.font-section-headings--secondary .shopify-policy__body .rte h6 {
+    font-style: var(--font-heading-second-style);
+    font-weight: var(--font-heading-second-weight);
+    font-family: var(--font-heading-second-family);
+}
+
+.shopify-policy__body .rte h1 {
+    font-size: max(var(--body-font-size), var(--section-headings-font-size));
+}
+
+.shopify-policy__body .rte h2 {
+    font-size: max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient)));
+}
+
+.shopify-policy__body .rte h3 {
+    font-size: max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient)));
+}
+
+.shopify-policy__body .rte h4 {
+    font-size: max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient)));
+}
+
+.shopify-policy__body .rte h5 {
+    font-size: max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient)));
+}
+
+.shopify-policy__body .rte h6 {
+    font-size: max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient)));
+}
+
+.shopify-policy__body .rte h1:not(:first-child) {
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), var(--section-headings-font-size)));
+}
+
+.shopify-policy__body .rte h2:not(:first-child) {
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient))));
+}
+
+.shopify-policy__body .rte h3:not(:first-child) {
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient))));
+}
+
+.shopify-policy__body .rte h4:not(:first-child) {
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient))));
+}
+
+.shopify-policy__body .rte h5:not(:first-child) {
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient))));
+}
+
+.shopify-policy__body .rte h6:not(:first-child){
+    margin-top: calc(var(--section-headings-line-height) * max(var(--body-font-size), calc(var(--section-headings-font-size) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient) * var(--coefficient))));
+}

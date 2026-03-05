@@ -1,0 +1,126 @@
+<product-recommendations class="complementary-products complementary-products--{{ block.id }}" style="--spacing: {{ block.settings.top_spacing }};--mobile-spacing: {{ block.settings.mobile_top_spacing }};"
+  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit=10&intent=complementary" {{ block.shopify_attributes }}
+  data-is-complementary-products="true">  
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    {% style %}
+        .complementary__grid {
+          --desktop-item-width: 100%;
+          --variant-swatches-radius: {{ settings.variant_swatches_radius }};
+          --variant-thumbnail-aspect-ratio: {{ settings.variant_thumbnail_image_ratio }};
+          --variant-thumbnail-focal-point: {{ settings.variant_thumbnail_focal_point }};
+          --variant-thumbnail-radius: {{ settings.variant_thumbnail_radius }};
+        }
+    {% endstyle %}
+
+    {% liquid 
+      assign accent_price = false
+      if settings.bolder_product_price and block.settings.card_content_style == 'regular'
+        assign accent_price = true
+      endif
+      if settings.small_bolder_product_price and block.settings.card_content_style == 'small'
+        assign accent_price = true
+      endif
+      assign use_accent_color_for_price = false
+      if settings.use_accent_color_for_price and block.settings.card_content_style == 'regular'
+        assign use_accent_color_for_price = true
+      elsif settings.small_use_accent_color_for_price and block.settings.card_content_style == 'sale'
+        assign use_accent_color_for_price = true
+      endif
+      assign compare_at_price_color = 'sale'
+      if section.settings.card_content_style == 'regular'
+        assign compare_at_price_color = settings.compare_at_price_color
+      elsif section.settings.card_content_style == 'small'
+        assign compare_at_price_color = settings.small_compare_at_price_color
+      endif
+    %}
+
+      <slider-component id="GalleryViewer-{{ section.id }}" class="slider" data-slider-type="full-width">
+        {% if block.settings.heading != blank %}
+                {% liquid
+                  assign heading_text = block.settings.heading
+                  assign processed_text = ''
+                  assign split_text = heading_text | split: '['
+
+                  for part in split_text
+                    if part contains ']'
+                      assign split_bracket = part | split: ']'
+                      assign highlight_text = split_bracket[0]
+                      assign after_bracket = split_bracket[1]
+                      assign processed_text = processed_text | append: '<span class="highlight visible"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                    else
+                      assign processed_text = processed_text | append: part
+                    endif
+                  endfor
+
+                  
+                  assign final_text = ''
+                  assign split_text_curly = processed_text | split: '{'
+
+                  for part in split_text_curly
+                    if part contains '}'
+                      assign split_curly = part | split: '}'
+                      assign styled_text = split_curly[0]
+                      assign after_curly = split_curly[1]
+                      assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                    else
+                      assign final_text = final_text | append: part
+                    endif
+                  endfor
+                %}
+          <div class="slider__header {% if settings.center_text %}slider__header--center{% endif %}">     
+            <h3 class="custom-heading {{ block.settings.heading_style }}{% if block.settings.uppercase %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+              {% if block.settings.bolder_font %}<b>{% endif %}{{ final_text }}{% if block.settings.bolder_font %}</b>{% endif %}
+            </h3>         
+          </div>
+        {% endif %}
+
+        <div class="slider__viewport">      
+          <ul id="Slider-Gallery-{{ section.id }}" class="slider__grid complementary__grid hide-scrollbar" role="list" data-count="1" data-column-gap="{{ block_padding | divided_by: 4 | at_least: 4 }}">
+              {% for recommendation in recommendations.products %}
+                  <li id="Slide-{{ section.id }}" class="slider__grid-item {% if forloop.index == 1 %}is-active{% endif %}">
+                      {% render 'card-product',
+                          card_product: recommendation,
+                          show_vendor: block.settings.show_vendor,
+                          show_title: block.settings.show_title,
+                          hover_behavior: block.settings.hover_behavior,
+                          quick_buy: block.settings.quick_buy,
+                          price_position: block.settings.price_position,
+                          max_product_name_characters: block.settings.max_product_name_characters,
+                          show_short_description: block.settings.show_short_description,
+                          show_rating: block.settings.show_rating,
+                          desktop_options: 'disable',
+                          mobile_options: 'disable',
+                          accent_price: accent_price,
+                          disable_max_width: true,
+                          max_width: '100vw',
+                          desktop_columns: 6,
+                          mobile_width: '200',
+                          product_card_color_scheme: section.settings.color_scheme,
+                          complementary_block: true,
+                          card_content_style: block.settings.card_content_style,
+                          compare_at_price_color: compare_at_price_color, 
+                          use_accent_color_for_price: use_accent_color_for_price,
+                          parent_color_scheme: section.settings.color_scheme,
+                          selector_container: selector_container
+                          grid_type: 'slider',
+                          disable_grid_gaps: false,
+                          show_pickup_availability: block.settings.show_pickup_availability
+                      %}
+                  </li>
+              {% endfor %}
+          </ul> 
+          
+          {% if recommendations.products_count > 1 %}
+            <div class="complementary-products__buttons flex--row">
+              <button type="button" class="slider-button slider-button--prev{% if section.settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">
+                <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-left' -%}</span>
+              </button>
+              <button type="button" class="slider-button slider-button--next{% if section.settings.show_arrows %} slider-button-hover{% endif %} visually-hidden" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">
+                <span class="icon icon--small">{%- render 'glyphs_arrows', icon: 'arrow-right' -%}</span>
+              </button>
+            </div>
+          {% endif %}        
+        </div>  
+      </slider-component>
+  {%- endif -%}
+</product-recommendations>

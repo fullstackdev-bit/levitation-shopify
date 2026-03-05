@@ -1,0 +1,28 @@
+{%- if block.settings.button_label != blank or block.settings.button_icon != blank -%}
+<div class="button-block block__button{% if block.settings.button_style == 'link' %} block__button--link{% endif %} {% if block.settings.use_main_button %}button-block--main{% endif %} section-block{% if block.settings.button_label != blank and block.settings.button_icon != blank %} button-block--small-padding{% endif %}" {{ block.shopify_attributes }}>
+    {%- if block.settings.button_link != blank -%}{%- if inside_link -%}<object>{%- endif -%}
+        <a href="{{ block.settings.button_link }}"{% if block.settings.target_blank %} target="_blank"{% endif %} class="button {{ block.settings.button_style }}-button body-font {% if block.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}">
+    {%- else -%}
+        <span disabled class="button {{ block.settings.button_style }}-button body-font{% if block.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}">
+    {%- endif -%}
+        {% if block.settings.button_icon != blank %}
+            {%- liquid
+            assign icon_name = block.settings.button_icon | split: '/'
+            if icon_name.size == 3
+                assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+            elsif icon_name.size == 2
+                assign file_name = icon_name.first
+            endif
+            assign icon = icon_name.last
+            -%}
+            <span class="icon-accordion flex--row {% if block.settings.use_main_button %}icon--large{% else %}icon--small{% endif %}">{% render 'catalog-icons', file_name: file_name, icon: icon %}</span>
+        {% endif %}
+        {% if block.settings.use_main_button %}
+            {% if settings.bolder_main_buttons_font %}<b>{% endif %}{{ block.settings.button_label }}{% if settings.bolder_main_buttons_font %}</b>{% endif %}
+        {% else %}
+            {% if settings.bolder_secondary_buttons_font %}<b>{% endif %}{{ block.settings.button_label }}{% if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+        {% endif %}
+    {%- if block.settings.button_link != blank -%}</a>{%- if inside_link -%}</object>{%- endif -%}{%- else -%}</span>{%- endif -%}
+</div>
+<br class="button-wrap">
+{%- endif -%}

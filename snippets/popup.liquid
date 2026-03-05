@@ -1,0 +1,530 @@
+{%- liquid
+  assign max_width = '720px'
+
+  if section.settings.delay != blank
+    assign delay = value
+  else
+    assign delay = '0'
+  endif
+-%}
+
+{% style %}
+  {% if settings.images_loading != 'disable' and section.settings.media_ratio == 'auto' %}
+    #shopify-section-{{ section.id }} .popup-image .lazy-image {
+      aspect-ratio: var(--asp-rat);
+    }
+  {% endif %}
+{% endstyle %}
+
+<promo-popup
+  data-section-id="{{ section.id }}"
+  data-delay-type="{{ delay_type }}"
+  data-delay="{{ delay }}"
+  data-frequency="{{ section.settings.frequency }}"
+>
+  <div class="promo-popup  color-{{ section.settings.color_scheme }}">
+    <div
+      class="popup modal popup--popup hide-scrollbar regular color-{{ section.settings.color_scheme }} {% if settings.modal_enable_shadow %} modal--shadow{% endif %}"
+      data-position="popup"
+    >
+      <div class="scroll-area hide-scrollbar">
+      <div class="button-wrapper">
+        <button
+          type="button"
+          class="button button-close button--small close-popup icon--large"
+          data-popup-toggle
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+          {%- render 'glyphs_interface', icon: 'close' -%}
+        </button>
+      </div>
+      {% if section.settings.image != blank %}
+        {% if section.settings.image_link != blank -%}
+          <a
+            href="{{ section.settings.image_link }}"
+            {% if section.settings.target_blank %}
+              target="_blank"
+            {% endif %}
+            class="popup-image aspect-ratio {% if section.settings.show_image_on_mobile or section.blocks.size == 0 %}visible-mobile{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+          >
+        {% else %}
+          <div
+            class="popup-image aspect-ratio {% if section.settings.show_image_on_mobile or section.blocks.size == 0 %}visible-mobile{% endif %}" {% if settings.disable_right_click %}oncontextmenu="return false"{% endif %}
+          >
+        {% endif %}
+        {% if settings.images_loading != 'disable' %}
+          <figure class="lazy-image  lazy-image--{{ settings.images_loading }}" style="--asp-rat: {{ section.settings.image.aspect_ratio }};">
+        {% endif %}
+        {% comment %} theme-check-disable ImgLazyLoading {% endcomment %}
+        <img
+          srcset="
+            {%- if section.settings.image.width >= 165 -%}{{ section.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+            {%- if section.settings.image.width >= 375 -%}{{ section.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
+            {%- if section.settings.image.width >= 550 -%}{{ section.settings.image | image_url: width: 550 }} 550w,{%- endif -%}
+            {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+            {%- if section.settings.image.width >= 1100 -%}{{ section.settings.image | image_url: width: 1100 }} 1100w,{%- endif -%}
+            {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+          "
+          src="{{ section.settings.image | image_url: width: 1200 }}"
+          sizes="(max-width: 768px) 100vw, calc(720px * 1)"
+          alt="{{ section.settings.image.alt | escape }}"
+          src="{{ section.settings.image | image_url: width: 1200 }}"
+          {% if settings.images_loading != 'disable' %}
+            loading="lazy"
+            onload="this.parentNode.classList.add('lazyloaded');"
+          {% else %}
+            {% if delay != '0' %}loading="lazy"{% endif %}
+          {% endif %}
+          draggable="false"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
+          class="popup-image__image"
+          style="object-position: {{ section.settings.image.presentation.focal_point }};"
+        >
+        {% comment %} theme-check-enable ImgLazyLoading {% endcomment %}
+        {% if settings.images_loading != 'disable' %}
+          {% if settings.images_loading != 'fade_scale' %}
+          <div class="lazy-image__preloader lazy-image__preloader-{{ settings.images_loading }}" aria-hidden="true">
+            <img 
+            alt="{{ section.settings.image.alt | escape }}" 
+            src="{{ section.settings.image | image_url: width: 10 }}"
+            draggable="false"
+            width="10" 
+            height="10">
+          </div>
+          {% endif %}
+        </figure>
+        {% endif %}
+        {% if section.settings.image_link != blank %}</a>{% else %}</div>{% endif %}
+      {% endif %}
+      {% if section.blocks.size > 0 %}
+        <div class="popup-content {% if section.settings.center_text %}center{% endif %}">
+          {% for block in section.blocks %}
+            {%- case block.type -%}
+              {%- when 'heading' -%}
+                {%- if block.settings.heading != blank -%}
+                  {%- liquid
+                    assign uppercase_heading = false
+                    if block.settings.heading_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_heading = true
+                    elsif block.settings.heading_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_heading = true
+                    elsif block.settings.heading_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_heading = true
+                    elsif block.settings.heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_heading = true
+                    elsif block.settings.heading_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_heading = true
+                    elsif block.settings.heading_style == 'page-title' and settings.uppercase_page_titles
+                      assign uppercase_heading = true
+                    endif
+
+                    assign heading_text = block.settings.heading
+                    assign processed_text = ''
+                    assign split_text = heading_text | split: '['
+
+                    for part in split_text
+                      if part contains ']'
+                        assign split_bracket = part | split: ']'
+                        assign highlight_text = split_bracket[0]
+                        assign after_bracket = split_bracket[1]
+                        assign processed_text = processed_text | append: '<span class="highlight"><span>' | append: highlight_text | append: '</span></span>' | append: after_bracket
+                      else
+                        assign processed_text = processed_text | append: part
+                      endif
+                    endfor
+
+                    assign final_text = ''
+                    assign split_text_curly = processed_text | split: '{'
+
+                    for part in split_text_curly
+                      if part contains '}'
+                        assign split_curly = part | split: '}'
+                        assign styled_text = split_curly[0]
+                        assign after_curly = split_curly[1]
+                        assign final_text = final_text | append: '<span class="styled">' | append: styled_text | append: '</span>' | append: after_curly
+                      else
+                        assign final_text = final_text | append: part
+                      endif
+                    endfor
+                  -%}
+                  <h2
+                    class="section-block custom-heading heading-block {{ block.settings.heading_style }}{% if uppercase_heading %} uppercase{% endif %}{% if block.settings.heading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}"
+                    {{ block.shopify_attributes }}
+                  >
+                    {% if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                      <b>
+                    {%- endif -%}
+                    {{- final_text -}}
+                    {%- if block.settings.heading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                      </b>
+                    {%- endif %}
+                  </h2>
+                {%- endif -%}
+              {%- when 'subheading' -%}
+                {%- if block.settings.subheading != blank -%}
+                  {%- liquid
+                    assign uppercase_subheading = false
+                    if block.settings.subheading_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_subheading = true
+                    endif
+                  -%}
+                  <h3
+                    class="section-block subheading-block {{ block.settings.subheading_style }}{% if uppercase_subheading %} uppercase{% endif %}{% if block.settings.subheading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}"
+                    {{ block.shopify_attributes }}
+                  >
+                    {% if block.settings.subheading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                      <b>
+                    {%- endif -%}
+                    {{- block.settings.subheading -}}
+                    {%- if block.settings.subheading_style == 'subheading-font' and settings.bolder_subheadings_font -%}
+                      </b>
+                    {%- endif %}
+                  </h3>
+                {%- endif -%}
+              {%- when 'text' -%}
+                {%- if block.settings.text != blank -%}
+                  {%- liquid
+                    assign uppercase_text = false
+                    if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_text = true
+                    endif
+                    assign uppercase_headings = false
+                    if block.settings.richtext_heading_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_headings = true
+                    elsif block.settings.richtext_heading_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_headings = true
+                    elsif block.settings.richtext_heading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_headings = true
+                    elsif block.settings.richtext_heading_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_headings = true
+                    elsif block.settings.richtext_heading_style == 'page-title' and settings.uppercase_page_titles
+                      assign uppercase_headings = true
+                    endif
+                  -%}
+                  <div
+                    class="
+                      section-block richtext heading-style-{{ block.settings.richtext_heading_style }} {% if block.settings.richtext_heading_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} heading-style-subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} heading-style-bold{% endif %}{% endif %}
+                      rte link-underline{% if uppercase_headings %} headings-uppercase{% endif %} {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+                      {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}
+                    "
+                    {{ block.shopify_attributes }}
+                  >
+                    {{ block.settings.text }}
+                  </div>
+                {%- endif -%}
+              {%- when 'button' -%}
+                {%- liquid
+                  render 'button', block: block
+                -%}
+              {%- when 'icon' -%}
+                {%- liquid
+                  render 'block-icon', block: block
+                -%}
+              {%- when 'context_image' -%}
+                {%- liquid
+                  render 'context-image', location: block, block_shopify_attributes: true, section_block: true
+                -%}
+              {%- when 'block_image' -%}
+                {%- liquid
+                  render 'block-image', block: block, max_width: max_width, max_block_width: max_width
+                -%}
+              {%- when 'empty_space' -%}
+                {%- render 'empty-space', block: block -%}
+              {%- when 'line' -%}
+                {%- render 'line', block: block -%}
+              {%- when 'custom_liquid' -%}
+                {%- if block.settings.custom_liquid != blank -%}
+                  {%- liquid
+                    assign uppercase_text = false
+                    if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_text = true
+                    endif
+                  -%}
+                  <div
+                    class="
+                      custom-liquid {{ block.settings.text_style }}{% if uppercase_text %} uppercase{% endif %}
+                      {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}
+                    "
+                    {{ block.shopify_attributes }}
+                  >
+                    {{ block.settings.custom_liquid }}
+                  </div>
+                {%- endif -%}
+              {%- when 'social_media' -%}
+                {% liquid
+                  assign is_follow_on_shop_visible = false
+                  if block.settings.follow_on_shop and shop.features.follow_on_shop?
+                    assign is_follow_on_shop_visible = true
+                  endif
+                %}
+                {% if settings.instagram_link != blank
+                  or settings.x_link != blank
+                  or settings.tiktok_link != blank
+                  or settings.snapchat_link != blank
+                  or settings.pinterest_link != blank
+                  or settings.tumblr_link != blank
+                  or settings.youtube_link != blank
+                  or settings.vimeo_link != blank
+                  or settings.reddit_link != blank
+                  or settings.trustpilot_link != blank
+                  or settings.tripadvisor_link != blank
+                  or settings.telegram_link != blank
+                  or settings.whatsapp_link != blank
+                  or settings.linkedin_link != blank
+                  or settings.fb_messenger_link != blank
+                  or settings.discord_link != blank
+                  or settings.x_link != blank
+                  or is_follow_on_shop_visible
+                %}
+                  {%- liquid
+                    assign uppercase_subheading = false
+                    if block.settings.subheading_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_subheading = true
+                    elsif block.settings.subheading_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_subheading = true
+                    endif
+                  -%}
+                  <div class="section-block" {{ block.shopify_attributes }}>
+                    {% if block.settings.subheading != blank %}
+                      <p class="{{ block.settings.subheading_style }}{% if uppercase_subheading %} uppercase{% endif %}{% if block.settings.subheading_style == 'subheading-font' and settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}">
+                        {% if block.settings.subheading_style == 'subheading-font'
+                          and settings.bolder_subheadings_font
+                        -%}
+                          <b>
+                        {%- endif -%}
+                        {{- block.settings.subheading -}}
+                        {%- if block.settings.subheading_style == 'subheading-font'
+                          and settings.bolder_subheadings_font
+                        -%}
+                          </b>
+                        {%- endif %}
+                      </p>
+                    {% endif %}
+                    {% render 'social-icons' %}
+                    {%- if is_follow_on_shop_visible -%}
+                      <div class="follow-on-shop">
+                        <div class="footer__follow-on-shop body-font">
+                          {% comment %} TODO: enable theme-check once `login_button` is accepted as valid filter {% endcomment %}
+                          {% # theme-check-disable %}
+                          {{ shop | login_button: action: 'follow' }}
+                          {% # theme-check-enable %}
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                {% endif %}
+              {%- when 'contacts' -%}
+                {%- render 'contacts', block: block -%}
+              {%- when 'newsletter_form' -%}
+                <form-state
+                  class="
+                    section-block section-newsletter__form {{ block.settings.text_style }}
+                    {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.uppercase_subheadings %} uppercase{% endif %}
+                    {% else %}{% if settings.uppercase_body %} uppercase{% endif %}{% endif %}
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  {% form 'customer', class: 'section-newsletter-form' %}
+                    <input type="hidden" name="contact[tags]" value="newsletter">
+                    {%- if form.posted_successfully? -%}
+                      <h4
+                        class="section-newsletter__subheading success-color"
+                        id="Newsletter-success--{{ section.id }}"
+                        tabindex="-1"
+                        autofocus
+                      >
+                        {{ 'newsletter.success' | t }}
+                      </h4>
+                    {%- endif -%}
+                    {%- if form.errors -%}
+                      <h3
+                        class="section-newsletter__subheading error-color"
+                        tabindex="-1"
+                        autofocus
+                        id="Newsletter-error--{{ section.id }}"
+                      >
+                        {{ form.errors.translated_fields.email | capitalize }}
+                        {{ form.errors.messages.email }}
+                      </h3>
+                    {%- endif -%}
+                    <h3
+                      class="email-no-valid body-font{% if settings.uppercase_body %} uppercase{% endif %} error-color visually-hidden"
+                      tabindex="-1"
+                    >
+                      {{ 'newsletter.invalid_email' | t }}
+                    </h3>
+                    <div class="fields-wrapper">
+                      <div class="field">
+                        {%- if block.settings.label != blank -%}
+                          <label class="label" for="NewsletterForm--{{ section.id }}" style="text-align: start;">
+                            {% if block.settings.text_style == 'subheading-font'
+                              and settings.bolder_subheadings_font
+                            -%}
+                              <b>
+                            {%- endif -%}
+                            {{- block.settings.label | append: '*' -}}
+                            {%- if block.settings.text_style == 'subheading-font'
+                              and settings.bolder_subheadings_font
+                            -%}
+                              </b>
+                            {%- endif %}
+                          </label>
+                        {%- endif -%}
+                        <div class="field__wrapper flex--row align-center">
+                          <input
+                            id="NewsletterForm--{{ section.id }}"
+                            type="email"
+                            name="contact[email]"
+                            class="newsletter__field input required input--text input-style--big{% if form.errors %} invalid{% endif %}"
+                            value="{{ form.email }}"
+                            aria-required="true"
+                            required="required"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            autocomplete="email"
+                            {% if form.errors %}
+                              autofocus
+                              aria-invalid="true"
+                              aria-describedby="Newsletter-error--{{ section.id }}"
+                            {% elsif form.posted_successfully? %}
+                              aria-describedby="Newsletter-success--{{ section.id }}"
+                            {% endif %}
+                            placeholder="{{ block.settings.placeholder }}"
+                          >
+                          <button
+                            type="submit"
+                            class="newsletter__field-button body-font{% if settings.uppercase_body %} uppercase{% endif %}"
+                            name="commit"
+                            id="Subscribe"
+                            aria-label="{{ 'newsletter.button_label' | t }}"
+                          >
+                            <b>{{ 'newsletter.button_text' | t }}</b>
+                          </button>
+                        </div>
+                      </div>
+                      {%- if block.settings.enable_checkbox and block.settings.checkbox_label != blank -%}
+                        <label
+                          class="field field--checkbox flex--row align-center"
+                          for="Newsletter-checkbox--{{ section.id }}"
+                          style="text-align: start;"
+                        >
+                          <input-checkbox>
+                            <input
+                              type="checkbox"
+                              id="Newsletter-checkbox--{{ section.id }}"
+                              name="contact[{{ 'templates.contact.form.checkbox' | t }}]"
+                              {% if block.settings.make_required %}
+                                required
+                              {% endif %}
+                            >
+                          </input-checkbox>
+                          <span class="label richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} body-font {% if settings.uppercase_body %} uppercase{% endif %}">
+                            {{ block.settings.checkbox_label }}
+                          </span>
+                        </label>
+                      {%- endif -%}
+                    </div>
+                  {% endform %}
+                </form-state>
+                {%- if block.settings.caption != blank -%}
+                  {%- liquid
+                    assign uppercase_text = false
+                    if block.settings.text_style == 'section-heading' and settings.uppercase_section_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'secondary-heading' and settings.uppercase_secondary_headings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'subheading-font' and settings.uppercase_subheadings
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'body-font' and settings.uppercase_body
+                      assign uppercase_text = true
+                    elsif block.settings.text_style == 'caption-font' and settings.uppercase_caption
+                      assign uppercase_text = true
+                    endif
+                  -%}
+                  <div class="section-newsletter__caption {{ block.settings.text_style }} {% if uppercase_text %} uppercase{% endif %} richtext rte link-underline{% if settings.uppercase_section_headings %} headings-uppercase{% endif %} {% if block.settings.text_style == 'subheading-font' %}{% if settings.use_heading_font_subheadings %} subheading-heading-font{% endif %}{% if settings.bolder_subheadings_font %} bold{% endif %}{% endif %}">
+                    {{ block.settings.caption }}
+                  </div>
+                {%- endif -%}
+              {%- when 'promo_code' -%}
+                {%- render 'promo-code', block: block, promo_code: block.settings.promo_code -%}
+              {%- when 'countdown_timer' -%}
+                {{ 'component-countdown-timer.css' | asset_url | stylesheet_tag }}
+                {%- render 'countdown-timer', block: block, section_id: section.id -%}
+              {%- when 'close_button' -%}
+                {%- if block.settings.button_label != blank or block.settings.button_icon != blank -%}
+                  <div
+                    {{ block.shopify_attributes }}
+                    class="close-button button-block block__button{% if block.settings.button_style == 'link' %} block__button--link{% endif %} {% if block.settings.use_main_button %}button-block--main{% endif %} section-block{% if block.settings.button_label != blank and block.settings.button_icon != blank %} button-block--small-padding{% endif %}"
+                  >
+                    <button
+                      type="button"
+                      class="close-popup button {{ block.settings.button_style }}-button body-font{% if block.settings.use_main_button %} button--main{% if settings.use_heading_font_main_buttons %} heading-font-style{% endif %}{% if settings.uppercase_main_buttons %} uppercase{% endif %}{% else %} button--secondary{% if settings.use_heading_font_secondary_buttons %} heading-font-style{% endif %}{% if settings.uppercase_secondary_buttons %} uppercase{% endif %}{% endif %}{% if block.settings.button_icon != blank %} button-with-icon{% if block.settings.swap_button_icon %} icon--swap{% endif %}{% endif %}"
+                      data-popup-toggle
+                      aria-label="{{ 'accessibility.close' | t }}"
+                    >
+                      {% if block.settings.button_icon != blank %}
+                        {%- liquid
+                          assign icon_name = block.settings.button_icon | split: '/'
+                          if icon_name.size == 3
+                            assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                          elsif icon_name.size == 2
+                            assign file_name = icon_name.first
+                          endif
+                          assign icon = icon_name.last
+                        -%}
+                        <span class="icon-accordion flex--row {% if block.settings.use_main_button %}icon--large{% else %}icon--small{% endif %}">
+                          {%- render 'catalog-icons', file_name: file_name, icon: icon -%}
+                        </span>
+                      {% endif %}
+                      {% if block.settings.use_main_button %}
+                        {% if settings.bolder_main_buttons_font %}<b>{% endif -%}
+                        {{- block.settings.button_label -}}
+                        {%- if settings.bolder_main_buttons_font %}</b>{% endif %}
+                      {% else %}
+                        {% if settings.bolder_secondary_buttons_font %}<b>{% endif -%}
+                        {{- block.settings.button_label -}}
+                        {%- if settings.bolder_secondary_buttons_font %}</b>{% endif %}
+                      {% endif %}
+                    </button>
+                  </div>
+                {%- endif -%}
+            {%- endcase -%}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    </div>
+  </div>
+</promo-popup>

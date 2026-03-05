@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-order",
+      "settings": {
+        "top_spacing": 1,
+        "bottom_spacing": 1
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,37 @@
+{% comment %}
+The icons used in this theme are licensed and belong to Icons8: https://icons8.com/. The icons cannot be modified or used outside the Volume theme. For more details, please refer to the licensing agreement: https://icons8.com/vue-static/landings/pricing/icons8-license.pdf
+{% endcomment %}
+{% case icon %}
+    {%- when 'arrow-up' -%}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.6719 9.47887L17.625 10.557L12.75 5.79918L12.75 20.9714L11.25 20.9714L11.25 5.79918L6.375 10.557L5.32812 9.47887L12 2.97105L18.6719 9.47887Z"/>
+        </svg>            
+    {%- when 'arrow-down' -%}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.6719 14.4636L17.625 13.3855L12.75 18.1433L12.75 2.97107L11.25 2.97107L11.25 18.1433L6.375 13.3855L5.32812 14.4636L12 20.9714L18.6719 14.4636Z"/>
+        </svg>            
+    {%- when 'arrow-right' -%}
+        <svg class="rtl-flip" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.4925 5.29938L13.4144 6.34625L18.1722 11.2213L3 11.2212V12.7212L18.1722 12.7213L13.4144 17.5963L14.4925 18.6431L21.0003 11.9713L14.4925 5.29938Z"/>
+        </svg>            
+    {%- when 'arrow-left' -%}
+        <svg class="rtl-flip" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.50749 5.29938L10.5856 6.34625L5.82781 11.2213L21 11.2212V12.7212L5.82781 12.7213L10.5856 17.5963L9.50749 18.6431L2.99968 11.9713L9.50749 5.29938Z"/>
+        </svg>            
+    {%- when 'chevron-down' -%}  
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.9494 10L18 11.1459L12.0234 17L6 11.1459L7.0428 10L12.0234 14.7746L16.9494 10Z"/>
+        </svg>            
+    {%- when 'chevron-up' -%}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.9494 17L18 15.8541L12.0234 10L6 15.8541L7.0428 17L12.0234 12.2254L16.9494 17Z"/>
+        </svg>            
+    {%- when 'chevron-right' -%}
+        <svg class="rtl-flip" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 16.9494L10.1459 18L16 12.0234L10.1459 6L9 7.0428L13.7746 12.0234L9 16.9494Z"/>
+        </svg>            
+    {%- when 'chevron-left' -%}
+        <svg class="rtl-flip" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 16.9494L13.8541 18L8 12.0234L13.8541 6L15 7.0428L10.2254 12.0234L15 16.9494Z"/>
+        </svg>            
+{% endcase %}

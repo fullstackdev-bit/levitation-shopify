@@ -1,0 +1,43 @@
+{%- if block.settings.icon != blank or request.design_mode -%}
+    {%- if block.settings.link != blank -%}
+        {%- if inside_link -%}
+        <object class="section-block block-icon block-icon--{{ block.id }}" aria-label="{{ 'general.links.link_to_button_label' | t: label: block.settings.link }}">
+        {%- endif -%}
+        <a href="{{ block.settings.link }}"{% if block.settings.target_blank %} target="_blank"{% endif %} class="{%- unless inside_link -%}section-block block-icon block-icon--{{ block.id }}{%- endunless -%}{% unless block.settings.icon != blank %} block-icon--placeholder{% endunless %}"{{ block.shopify_attributes }}{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+    {%- else -%}
+        <div class="section-block block-icon block-icon--{{ block.id }}{% unless block.settings.icon != blank %} block-icon--placeholder{% endunless %}" {{ block.shopify_attributes }}{% if settings.disable_right_click %} oncontextmenu="return false"{% endif %}>
+    {%- endif -%}
+        {% assign color_rgb = block.settings.color | color_to_rgb | strip %}
+        {% assign mobile_color_rgb = block.settings.mobile_color | color_to_rgb | strip %}
+            {% style %}
+                .block-icon--{{ block.id }} {
+                    --icon-size: {{ block.settings.icon_size }}px;
+                    --color: {{ color_rgb }};
+                    --mobile-color: {{ mobile_color_rgb }};
+                }
+                @media screen and (max-width: 768px) {
+                    .block-icon--{{ block.id }} {
+                        --icon-size: {{ block.settings.mobile_icon_size }}px;
+                    }
+                }
+            {% endstyle %}
+            {%- if block.settings.icon != blank -%}
+                {%- liquid
+                    assign icon_name = block.settings.icon | split: '/'
+                    if icon_name.size == 3
+                      assign file_name = icon_name.first | append: '_' | append: icon_name[1]
+                    elsif icon_name.size == 2
+                      assign file_name = icon_name.first
+                    endif
+                    assign icon = icon_name.last
+                -%}
+                {% render 'catalog-icons', file_name: file_name, icon: icon %}
+            {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+    {%- if block.settings.link != blank -%}
+        </a>{%- if inside_link -%}</object>{%- endif -%}  
+    {%- else -%}
+        </div>
+    {%- endif -%}
+{%- endif -%}
